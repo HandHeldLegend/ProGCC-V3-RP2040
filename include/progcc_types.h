@@ -67,10 +67,10 @@ typedef struct
             uint8_t dpad_left       : 1;
             uint8_t dpad_right      : 1;
             // Buttons
-            uint8_t button_up       : 1;
-            uint8_t button_down     : 1;
-            uint8_t button_left     : 1;
-            uint8_t button_right    : 1;
+            uint8_t button_a       : 1;
+            uint8_t button_b     : 1;
+            uint8_t button_x     : 1;
+            uint8_t button_y    : 1;
             // Triggers
             uint8_t trigger_l       : 1;
             uint8_t trigger_zl      : 1;
@@ -100,5 +100,13 @@ typedef struct
         uint8_t buttons_system;
     };
 } __attribute__ ((packed)) progcc_button_data_s;
+
+typedef struct
+{
+    uint16_t left_stick_x;
+    uint16_t left_stick_y;
+    uint16_t right_stick_x;
+    uint16_t right_stick_y;
+} __attribute__ ((packed)) progcc_analog_data_s;
 
 #endif

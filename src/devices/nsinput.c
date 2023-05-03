@@ -102,7 +102,7 @@ const uint8_t ns_configuration_descriptor_performance[] = {
 /**--------------------------**/
 /**--------------------------**/
 
-void nsinput_hid_report(progcc_button_data_s *data)
+void nsinput_hid_report(progcc_button_data_s *button_data, progcc_analog_data_s *analog_data)
 {
 
 }

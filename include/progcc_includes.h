@@ -7,9 +7,16 @@
 #include <stdbool.h>
 
 #include "pico/stdlib.h"
-#include "hardware/pio.h"
+#include "pico/bootrom.h"
+#include "pico/multicore.h"
+
+//#include "hardware/pio.h"
+#include "hardware/gpio.h"
 #include "hardware/clocks.h"
 #include "hardware/dma.h"
+#include "hardware/pwm.h"
+#include "hardware/spi.h"
+#include "hardware/timer.h"
 
 #include "bsp/board.h"
 #include "tusb.h"
@@ -21,6 +28,7 @@
 #include "progcc_types.h"
 #include "progcc_defines.h"
 #include "progcc_settings.h"
+#include "progcc_utils.h"
 
 #include "nsinput.h"
 #include "gcinput.h"

@@ -115,7 +115,7 @@ const uint8_t gc_configuration_descriptor_performance[] = {
 /**--------------------------**/
 /**--------------------------**/
 
-void gcinput_hid_report(progcc_button_data_s *data)
+void gcinput_hid_report(progcc_button_data_s *button_data, progcc_analog_data_s *analog_data)
 {
 
 }

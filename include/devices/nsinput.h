@@ -52,6 +52,6 @@ typedef struct
 
 } __attribute__ ((packed)) ns_input_s;
 
-void nsinput_hid_report(progcc_button_data_s *data);
+void nsinput_hid_report(progcc_button_data_s *button_data, progcc_analog_data_s *analog_data);
 
 #endif

@@ -151,14 +151,11 @@ uint16_t xinputd_open(uint8_t rhport, tusb_desc_interface_t const * desc_itf, ui
         p_desc = tu_desc_next(p_desc);
     }
 
-    ESP_LOGI(TAG, "%d endpoints found.", total_endpoints);
-
     return drv_len;
 }
 
 bool xinputd_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t const * request)
 {
-    ESP_LOGI("ctrl transfer: ", "TYPE: %X", request->bmRequestType_bit.type);
     return true;
 }
 

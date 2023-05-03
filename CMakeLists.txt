@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
 src/main.c
 src/progcc_settings.c
 src/progcc_defines.c
+src/progcc_utils.c
 src/devices/dinput.c
 src/devices/gcinput.c
 src/devices/nsinput.c
@@ -25,12 +26,31 @@ src/usb/progcc_usb.c
 src/usb/xinput_device.c
 )
 
+target_compile_definitions(${PROJECT_NAME}
+	PRIVATE
+	PICO_XOSC_STARTUP_DELAY_MULTIPLIER=64
+	#PICO_DEFAULT_BOOT_STAGE2=boot2_generic_03h
+	#PICO_FLASH_SPI_CLKDIV=8
+	)
+
 #pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio/joybus.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
 target_link_libraries(${PROJECT_NAME}
 pico_stdlib
+pico_bootrom
+pico_multicore
+pico_platform
+
+hardware_gpio
+hardware_adc
+hardware_flash
 hardware_pio
 hardware_dma
+hardware_pwm
+hardware_spi
+hardware_sync
+hardware_timer
+
 tinyusb_device
 tinyusb_board
 )

@@ -12,7 +12,7 @@ progcc_usb_mode_t _progcc_usb_mode    = PUSB_MODE_XI;
 progcc_usb_status_t _progcc_usb_status  = PUSB_STATUS_IDLE;
 bool _progcc_usb_performance_mode = false;
 
-typedef void (*usb_cb_t)(progcc_button_data_s *);
+typedef void (*usb_cb_t)(progcc_button_data_s *, progcc_analog_data_s *);
 
 usb_cb_t _usb_hid_cb = NULL;
 
@@ -75,6 +75,15 @@ bool progcc_usb_start(void)
 
   board_init();
   return tusb_init();
+}
+
+void progcc_usb_task(progcc_button_data_s *button_data, progcc_analog_data_s *analog_data)
+{
+    // Call the registered function
+    if (_usb_hid_cb != NULL)
+    {
+        _usb_hid_cb(button_data, analog_data);
+    }
 }
 
 /********* TinyUSB HID callbacks ***************/
@@ -268,6 +277,44 @@ usbd_class_driver_t const *usbd_app_driver_get_cb(uint8_t *driver_count)
 {
     *driver_count += 1;
     return &tud_xinput_driver;
+}
+
+static uint16_t _desc_str[32];
+
+// Invoked when received GET STRING DESCRIPTOR request
+// Application return pointer to descriptor, whose contents must exist long enough for transfer to complete
+uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
+{
+  (void) langid;
+
+  uint8_t chr_count;
+
+  if ( index == 0)
+  {
+    memcpy(&_desc_str[1], global_string_descriptor[0], 2);
+    chr_count = 1;
+  }else
+  {
+    // Note: the 0xEE index string is a Microsoft OS 1.0 Descriptors.
+    // https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/microsoft-defined-usb-descriptors
+
+    const char* str = global_string_descriptor[index];
+
+    // Cap at max char
+    chr_count = strlen(str);
+    if ( chr_count > 31 ) chr_count = 31;
+
+    // Convert ASCII string into UTF-16
+    for(uint8_t i=0; i<chr_count; i++)
+    {
+      _desc_str[1+i] = str[i];
+    }
+  }
+
+  // first byte is length (including header), second byte is string type
+  _desc_str[0] = (TUSB_DESC_STRING << 8 ) | (2*chr_count + 2);
+
+  return _desc_str;
 }
 
 /********* USB Data Handling Utilities ***************/
