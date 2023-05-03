@@ -1,0 +1,15 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program joybus
+
+; First lets focus on counting pulses
+start:
+  wait 0 gpio 10
+  set x, 1
+  mov osr, x
+  wait 1 gpio 10
+  jmp start
