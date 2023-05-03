@@ -16,6 +16,7 @@ include_directories(
 add_executable(${PROJECT_NAME}
 src/main.c
 src/progcc_settings.c
+src/progcc_defines.c
 src/devices/dinput.c
 src/devices/gcinput.c
 src/devices/nsinput.c
