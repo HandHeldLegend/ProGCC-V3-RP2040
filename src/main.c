@@ -67,6 +67,7 @@ int main() {
     {
         progcc_usb_task(&button_data, &analog_data_scaled);
         tud_task();
+        printf("Test");
         sleep_ms(1);
     }
 

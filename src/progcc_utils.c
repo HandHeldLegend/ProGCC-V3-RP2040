@@ -2,7 +2,7 @@
 
 #define X_AXIS_CONFIG 0xD0
 #define Y_AXIS_CONFIG 0xF0
-#define BUFFER_TO_UINT16(buffer) (uint16_t)(((buffer[0] & 0b00000111) << 9) | buffer[1] << 1 | buffer[2] >> 7)
+#define BUFFER_TO_UINT16(buffer) (uint16_t)(((buffer[0] & 0x07) << 9) | buffer[1] << 1 | buffer[2] >> 7)
 
 void progcc_utils_setup_gpio_button(uint8_t gpio)
 {
@@ -153,14 +153,36 @@ void progcc_utils_set_rumble(progcc_rumble_t rumble)
   }
 }
 
+
+// ----------------------------- //
+// ---- STICK SCALING STUFF ---- //
+
+uint16_t min_val(uint16_t val_new, uint16_t old)
+{
+  if (val_new < old)
+  {
+    return val_new;
+  }
+  else return old;
+}
+
+uint16_t max_val(uint16_t val_new, uint16_t old)
+{
+  if (val_new > old)
+  {
+    return val_new;
+  }
+  else return old;
+}
+
 #define ADC_CENTER_VAL_U8 128
 
-uint8_t progcc_utils_scale_stick(uint16_t val, uint16_t center, float scaler_low, float scaler_high)
+uint16_t progcc_utils_scale_stick(uint16_t val, uint16_t center, float scaler_low, float scaler_high)
 {
-  float f_val = val;
-  float f_center = center;
-  float dist = 0;
-  uint8_t dist_8 = 0;
+  float f_val     = (float) val;
+  float f_center  = (float) center;
+  float dist      = 0.0f;
+  uint16_t udist = 0x0000;
 
   if (val > center)
   {
@@ -169,16 +191,15 @@ uint8_t progcc_utils_scale_stick(uint16_t val, uint16_t center, float scaler_low
 
     // Scale the input
     dist *= scaler_high;
+    udist = (uint16_t) dist;
 
-    dist_8 = dist;
-
-    if (dist_8 > 127)
+    if (udist > 127)
     {
       return 255;
     }
     else
     {
-      return (ADC_CENTER_VAL_U8 + dist_8);
+      return (ADC_CENTER_VAL_U8 + udist);
     }
   }
   else if (val < center)
@@ -187,17 +208,17 @@ uint8_t progcc_utils_scale_stick(uint16_t val, uint16_t center, float scaler_low
     dist = f_center - f_val;
 
     // Scale the input
-    dist *= scaler_high;
+    dist *= scaler_low;
 
-    dist_8 = dist;
+    udist = (uint16_t) dist;
 
-    if (dist_8 > 128)
+    if (udist > 128)
     {
       return 0;
     }
     else
     {
-      return (ADC_CENTER_VAL_U8 - dist_8);
+      return (ADC_CENTER_VAL_U8 - udist);
     }
   }
   else return ADC_CENTER_VAL_U8;
@@ -208,30 +229,34 @@ void progcc_utils_scale_sticks(progcc_analog_data_s *data_in,
                                 progcc_analog_calibration_data_s *calibration_data,
                                 progcc_analog_scaler_data_s *scaler_data)
 {
-  uint8_t lx_scaled = progcc_utils_scale_stick(data_in->left_stick_x, calibration_data->ls_x_center,
+  uint16_t lx_scaled = progcc_utils_scale_stick(data_in->left_stick_x, calibration_data->ls_x_center,
                                               scaler_data->ls_x_low_scaler, scaler_data->ls_x_high_scaler);
 
-  uint8_t ly_scaled = progcc_utils_scale_stick(data_in->left_stick_y, calibration_data->ls_y_center,
+  uint16_t ly_scaled = progcc_utils_scale_stick(data_in->left_stick_y, calibration_data->ls_y_center,
                                               scaler_data->ls_y_low_scaler, scaler_data->ls_y_high_scaler);
 
-  uint8_t rx_scaled = progcc_utils_scale_stick(data_in->right_stick_x, calibration_data->rs_x_center,
+  uint16_t rx_scaled = progcc_utils_scale_stick(data_in->right_stick_x, calibration_data->rs_x_center,
                                               scaler_data->rs_x_low_scaler, scaler_data->rs_x_high_scaler);
 
-  uint8_t ry_scaled = progcc_utils_scale_stick(data_in->right_stick_y, calibration_data->rs_y_center,
+  uint16_t ry_scaled = progcc_utils_scale_stick(data_in->right_stick_y, calibration_data->rs_y_center,
                                               scaler_data->rs_y_low_scaler, scaler_data->rs_y_high_scaler);
 
-  data_out->left_stick_x  = lx_scaled;
-  data_out->left_stick_y  = lx_scaled;
-  data_out->right_stick_x = rx_scaled;
-  data_out->right_stick_y = ry_scaled;
+  data_out->left_stick_x  = min_val(lx_scaled, 255);
+  data_out->left_stick_y  = min_val(ly_scaled, 255);
+  data_out->right_stick_x = min_val(rx_scaled, 255);
+  data_out->right_stick_y = min_val(ry_scaled, 255);
 }
 
 float subtract_return_as_float(uint16_t high_val, uint16_t low_val)
 {
-  float v1 = high_val;
-  float v2 = low_val;
+  float v1 = (float) high_val;
+  float v2 = (float) low_val;
 
   float out = v1 - v2;
+  if (out <= 0)
+  {
+    out = 0.001;
+  }
   return out;
 }
 
@@ -239,37 +264,20 @@ float subtract_return_as_float(uint16_t high_val, uint16_t low_val)
 void progcc_utils_calculate_scalers(progcc_analog_calibration_data_s *calibration_data, progcc_analog_scaler_data_s *scaler_data)
 {
   // Set up const for scaling
-  float scaling_val = 127.0f;
+  float scaling_val_hi = 127.0f;
+  float scaling_val_lo = 128.0f;
 
-  scaler_data->ls_x_high_scaler = scaling_val / subtract_return_as_float(calibration_data->ls_x_high, calibration_data->ls_x_center);
-  scaler_data->ls_x_low_scaler = scaling_val / subtract_return_as_float(calibration_data->ls_x_center, calibration_data->ls_x_low);
+  scaler_data->ls_x_high_scaler = scaling_val_hi / subtract_return_as_float(calibration_data->ls_x_high, calibration_data->ls_x_center);
+  scaler_data->ls_x_low_scaler  = scaling_val_lo / subtract_return_as_float(calibration_data->ls_x_center, calibration_data->ls_x_low);
 
-  scaler_data->ls_y_high_scaler = scaling_val / subtract_return_as_float(calibration_data->ls_y_high, calibration_data->ls_y_center);
-  scaler_data->ls_y_low_scaler = scaling_val / subtract_return_as_float(calibration_data->ls_y_center, calibration_data->ls_y_low);
+  scaler_data->ls_y_high_scaler = scaling_val_hi / subtract_return_as_float(calibration_data->ls_y_high, calibration_data->ls_y_center);
+  scaler_data->ls_y_low_scaler  = scaling_val_lo / subtract_return_as_float(calibration_data->ls_y_center, calibration_data->ls_y_low);
 
-  scaler_data->rs_x_high_scaler = scaling_val / subtract_return_as_float(calibration_data->rs_x_high, calibration_data->rs_x_center);
-  scaler_data->rs_x_low_scaler = scaling_val / subtract_return_as_float(calibration_data->rs_x_center, calibration_data->rs_x_low);
+  scaler_data->rs_x_high_scaler = scaling_val_hi / subtract_return_as_float(calibration_data->rs_x_high, calibration_data->rs_x_center);
+  scaler_data->rs_x_low_scaler  = scaling_val_lo / subtract_return_as_float(calibration_data->rs_x_center, calibration_data->rs_x_low);
 
-  scaler_data->rs_y_high_scaler = scaling_val / subtract_return_as_float(calibration_data->rs_y_high, calibration_data->rs_y_center);
-  scaler_data->rs_y_low_scaler = scaling_val / subtract_return_as_float(calibration_data->rs_y_center, calibration_data->rs_y_low);
-}
-
-uint16_t min_val(uint16_t new, uint16_t old)
-{
-  if (new < old)
-  {
-    return new;
-  }
-  else return old;
-}
-
-uint16_t max_val(uint16_t new, uint16_t old)
-{
-  if (new > old)
-  {
-    return new;
-  }
-  else return old;
+  scaler_data->rs_y_high_scaler = scaling_val_hi / subtract_return_as_float(calibration_data->rs_y_high, calibration_data->rs_y_center);
+  scaler_data->rs_y_low_scaler  = scaling_val_lo / subtract_return_as_float(calibration_data->rs_y_center, calibration_data->rs_y_low);
 }
 
 bool started = false;
@@ -279,20 +287,20 @@ void progcc_utils_calibration_capture(progcc_analog_data_s *data, progcc_analog_
   if (!started)
   {
     calibration_data->ls_x_center = data->left_stick_x;
-    calibration_data->ls_x_high = data->left_stick_x;
-    calibration_data->ls_x_low = data->left_stick_x;
+    calibration_data->ls_x_high   = data->left_stick_x;
+    calibration_data->ls_x_low    = data->left_stick_x;
 
     calibration_data->ls_y_center = data->left_stick_y;
-    calibration_data->ls_y_high = data->left_stick_y;
-    calibration_data->ls_y_low = data->left_stick_y;
+    calibration_data->ls_y_high   = data->left_stick_y;
+    calibration_data->ls_y_low    = data->left_stick_y;
 
     calibration_data->rs_x_center = data->right_stick_x;
-    calibration_data->rs_x_high = data->right_stick_x;
-    calibration_data->rs_x_low = data->right_stick_x;
+    calibration_data->rs_x_high   = data->right_stick_x;
+    calibration_data->rs_x_low    = data->right_stick_x;
 
     calibration_data->rs_y_center = data->right_stick_y;
-    calibration_data->rs_y_high = data->right_stick_y;
-    calibration_data->rs_y_low = data->right_stick_y;
+    calibration_data->rs_y_high   = data->right_stick_y;
+    calibration_data->rs_y_low    = data->right_stick_y;
 
     started = true;
   }

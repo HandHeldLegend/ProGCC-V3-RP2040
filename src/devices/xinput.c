@@ -1,10 +1,9 @@
 #include "xinput.h"
 
-short sign_axis(int input)
+short sign_axis(uint8_t input_axis)
 {
-    //uint8_t scaled = scale_axis(input);
 
-    int start = (int) input - 127;
+    int start = (int) input_axis - 127;
     if ((start * 256) > 32765)
     {
         start = 32765;
@@ -25,10 +24,10 @@ void xinput_hid_report(progcc_button_data_s *button_data, progcc_analog_data_s *
   if (!tud_xinput_ready()) return;
 
   static xid_input_s data = {0};
-  data.stick_left_x = sign_axis((int) (analog_data->left_stick_x>>4));
-  data.stick_left_y = -sign_axis((int) (analog_data->left_stick_y>>4));
-  data.stick_right_x = sign_axis((int) (analog_data->right_stick_x>>4));
-  data.stick_right_y = sign_axis((int) (analog_data->right_stick_y>>4));
+  data.stick_left_x = sign_axis((int) (analog_data->left_stick_x));
+  data.stick_left_y = -sign_axis((int) (analog_data->left_stick_y));
+  data.stick_right_x = sign_axis((int) (analog_data->right_stick_x));
+  data.stick_right_y = sign_axis((int) (analog_data->right_stick_y));
 
   data.dpad_up = button_data->dpad_up;
   data.dpad_down = button_data->dpad_down;
