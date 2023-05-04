@@ -11,6 +11,7 @@
 progcc_usb_mode_t _progcc_usb_mode    = PUSB_MODE_XI;
 progcc_usb_status_t _progcc_usb_status  = PUSB_STATUS_IDLE;
 bool _progcc_usb_performance_mode = false;
+bool _progcc_usb_busy = false;
 
 typedef void (*usb_cb_t)(progcc_button_data_s *, progcc_analog_data_s *);
 
@@ -72,13 +73,13 @@ void progcc_usb_set_mode(progcc_usb_mode_t mode, bool performance_mode)
 bool progcc_usb_start(void)
 {
   if (_progcc_usb_status != PUSB_STATUS_INITIALIZED) return false;
-
-  board_init();
   return tusb_init();
 }
 
 void progcc_usb_task(progcc_button_data_s *button_data, progcc_analog_data_s *analog_data)
 {
+    if (_progcc_usb_busy) return;
+
     // Call the registered function
     if (_usb_hid_cb != NULL)
     {
@@ -235,14 +236,16 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
             {
                 if ((buffer[0] == 0x00) && (buffer[1] == 0x08))
                 {
+                    _progcc_usb_busy = true;
                     if ((buffer[3] > 0) || (buffer[4] > 0))
                     {
-                        //rx_vibrate = 1;
+                        progcc_utils_set_rumble(PROGCC_RUMBLE_ON);
                     }
                     else
                     {
-                        //rx_vibrate = 0;
+                        progcc_utils_set_rumble(PROGCC_RUMBLE_OFF);
                     }
+                    _progcc_usb_busy = false;
                 }
             }
             break;

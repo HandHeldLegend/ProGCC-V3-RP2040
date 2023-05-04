@@ -26,5 +26,6 @@ bool tud_xinput_ready(void);
 extern const usbd_class_driver_t tud_xinput_driver;
 uint8_t const *xinput_descriptor_device_cb(void);
 uint8_t const *xinput_descriptor_configuration_cb(uint8_t index);
+void tud_xinput_getout(void);
 
 #endif

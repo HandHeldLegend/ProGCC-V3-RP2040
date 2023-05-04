@@ -20,6 +20,13 @@ typedef enum
 
 typedef enum
 {
+  PROGCC_RUMBLE_OFF,
+  PROGCC_RUMBLE_BRAKE,
+  PROGCC_RUMBLE_ON,
+} progcc_rumble_t;
+
+typedef enum
+{
   NS_HAT_TOP          = 0x00,
   NS_HAT_TOP_RIGHT    = 0x01,
   NS_HAT_RIGHT        = 0x02,
@@ -108,5 +115,39 @@ typedef struct
     uint16_t right_stick_x;
     uint16_t right_stick_y;
 } __attribute__ ((packed)) progcc_analog_data_s;
+
+typedef struct
+{
+    uint16_t ls_x_low;
+    uint16_t ls_x_center;
+    uint16_t ls_x_high;
+
+    uint16_t ls_y_low;
+    uint16_t ls_y_center;
+    uint16_t ls_y_high;
+
+    uint16_t rs_x_low;
+    uint16_t rs_x_center;
+    uint16_t rs_x_high;
+
+    uint16_t rs_y_low;
+    uint16_t rs_y_center;
+    uint16_t rs_y_high;
+} __attribute__ ((packed)) progcc_analog_calibration_data_s;
+
+typedef struct
+{
+    float ls_x_low_scaler;
+    float ls_x_high_scaler;
+
+    float ls_y_low_scaler;
+    float ls_y_high_scaler;
+
+    float rs_x_low_scaler;
+    float rs_x_high_scaler;
+
+    float rs_y_low_scaler;
+    float rs_y_high_scaler;
+} __attribute__ ((packed)) progcc_analog_scaler_data_s;
 
 #endif

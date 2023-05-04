@@ -74,7 +74,7 @@ const uint8_t xid_configuration_descriptor[48] = {
     0x02,       // bEndpointAddress (OUT/H2D)
     0x03,       // bmAttributes (Interrupt)
     0x20, 0x00, // wMaxPacketSize 32
-    0x08,       // bInterval 8 (unit depends on device speed)
+    0x01,       // bInterval 8 (unit depends on device speed)
 };
 
 // string descriptor table
@@ -185,7 +185,7 @@ bool xinputd_xfer_cb(uint8_t rhport, uint8_t ep_addr, xfer_result_t result, uint
 
 void tud_xinput_getout(void)
 {
-    if ( tud_ready() && (!usbd_edpt_busy(0, _xinputd_itf.ep_out)) )
+    if (tud_ready() && (!usbd_edpt_busy(0, _xinputd_itf.ep_out)) )
     {
         usbd_edpt_claim(0, _xinputd_itf.ep_out);
         usbd_edpt_xfer(0, _xinputd_itf.ep_out, _xinputd_itf.epout_buf, sizeof(_xinputd_itf.epout_buf));
@@ -214,7 +214,6 @@ bool tud_xinput_report(void const * report, uint16_t len)
     usbd_edpt_release(0, _xinputd_itf.ep_in);
 
     tud_xinput_getout();
-    return out;
 }
 
 bool tud_xinput_ready(void)
