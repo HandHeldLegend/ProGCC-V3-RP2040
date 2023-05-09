@@ -13,7 +13,7 @@ progcc_usb_status_t _progcc_usb_status  = PUSB_STATUS_IDLE;
 bool _progcc_usb_performance_mode = false;
 bool _progcc_usb_busy = false;
 
-typedef void (*usb_cb_t)(progcc_button_data_s *, progcc_analog_data_s *);
+typedef void (*usb_cb_t)(progcc_button_data_s *, a_data_s *);
 
 usb_cb_t _usb_hid_cb = NULL;
 
@@ -76,7 +76,7 @@ bool progcc_usb_start(void)
   return tusb_init();
 }
 
-void progcc_usb_task(progcc_button_data_s *button_data, progcc_analog_data_s *analog_data)
+void progcc_usb_task(progcc_button_data_s *button_data, a_data_s *analog_data)
 {
     if (_progcc_usb_busy) return;
 

@@ -11,19 +11,24 @@ pico_sdk_init()
 
 include_directories(
 	include include/devices include/usb
+	include/analog
 	)
 
 add_executable(${PROJECT_NAME}
 src/main.c
+
 src/progcc_settings.c
 src/progcc_defines.c
 src/progcc_utils.c
+
 src/devices/dinput.c
 src/devices/gcinput.c
 src/devices/nsinput.c
 src/devices/xinput.c
 src/usb/progcc_usb.c
 src/usb/xinput_device.c
+
+src/analog/stick_scaling.c
 )
 
 target_compile_definitions(${PROJECT_NAME}

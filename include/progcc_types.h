@@ -110,44 +110,18 @@ typedef struct
 
 typedef struct
 {
-    uint16_t left_stick_x;
-    uint16_t left_stick_y;
-    uint16_t right_stick_x;
-    uint16_t right_stick_y;
-} __attribute__ ((packed)) progcc_analog_data_s;
+    int lx_center;
+    int ly_center;
+    int rx_center;
+    int ry_center;
+} __attribute__ ((packed)) a_calibration_s;
 
 typedef struct
 {
-    uint16_t ls_x_low;
-    uint16_t ls_x_center;
-    uint16_t ls_x_high;
-
-    uint16_t ls_y_low;
-    uint16_t ls_y_center;
-    uint16_t ls_y_high;
-
-    uint16_t rs_x_low;
-    uint16_t rs_x_center;
-    uint16_t rs_x_high;
-
-    uint16_t rs_y_low;
-    uint16_t rs_y_center;
-    uint16_t rs_y_high;
-} __attribute__ ((packed)) progcc_analog_calibration_data_s;
-
-typedef struct
-{
-    float ls_x_low_scaler;
-    float ls_x_high_scaler;
-
-    float ls_y_low_scaler;
-    float ls_y_high_scaler;
-
-    float rs_x_low_scaler;
-    float rs_x_high_scaler;
-
-    float rs_y_low_scaler;
-    float rs_y_high_scaler;
-} __attribute__ ((packed)) progcc_analog_scaler_data_s;
+    int lx;
+    int ly;
+    int rx;
+    int ry;
+} __attribute__ ((packed)) a_data_s;
 
 #endif

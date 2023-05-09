@@ -2,12 +2,11 @@
 
 // Set up local input vars
 progcc_button_data_s button_data = {0};
-progcc_analog_data_s analog_data = {0};
-progcc_analog_data_s analog_data_scaled = {0};
-progcc_analog_calibration_data_s calibration_data = {0};
-progcc_analog_scaler_data_s scaler_data = {0};
+a_data_s analog_data = {0};
+a_data_s scaled_analog_data = {0};
 
 bool calibrate = true;
+bool centered = false;
 
 void main_two()
 {
@@ -18,11 +17,18 @@ void main_two()
 
         if(calibrate)
         {
-            progcc_utils_calibration_capture(&analog_data, &calibration_data);
+            if (!centered)
+            {
+                stick_scaling_capture_center(&analog_data);
+                centered = true;
+                stick_scaling_print_centers();
+            }
+
+            stick_scaling_create_scalers(&analog_data);
+
             if (!gpio_get(PGPIO_BUTTON_A))
             {
                 calibrate = false;
-                progcc_utils_calculate_scalers(&calibration_data, &scaler_data);
                 progcc_utils_set_rumble(PROGCC_RUMBLE_ON);
                 sleep_ms(200);
                 progcc_utils_set_rumble(PROGCC_RUMBLE_OFF);
@@ -30,8 +36,7 @@ void main_two()
         }
         else
         {
-            progcc_utils_scale_sticks(&analog_data, &analog_data_scaled,
-                                        &calibration_data, &scaler_data);
+            stick_scaling_process_data(&analog_data, &scaled_analog_data);
         }
     }
 }
@@ -65,9 +70,9 @@ int main() {
     //printf("Testing");
     for(;;)
     {
-        progcc_usb_task(&button_data, &analog_data_scaled);
+        progcc_usb_task(&button_data, &scaled_analog_data);
         tud_task();
-        printf("Test");
+        //printf("Test");
         sleep_ms(1);
     }
 

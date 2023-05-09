@@ -19,15 +19,15 @@ short sign_axis(uint8_t input_axis)
     return (short) start;
 }
 
-void xinput_hid_report(progcc_button_data_s *button_data, progcc_analog_data_s *analog_data)
+void xinput_hid_report(progcc_button_data_s *button_data, a_data_s *analog_data)
 {
   if (!tud_xinput_ready()) return;
 
   static xid_input_s data = {0};
-  data.stick_left_x = sign_axis((int) (analog_data->left_stick_x));
-  data.stick_left_y = -sign_axis((int) (analog_data->left_stick_y));
-  data.stick_right_x = sign_axis((int) (analog_data->right_stick_x));
-  data.stick_right_y = sign_axis((int) (analog_data->right_stick_y));
+  data.stick_left_x     =  sign_axis((int) (analog_data->lx));
+  data.stick_left_y     = -sign_axis((int) (analog_data->ly));
+  data.stick_right_x    =  sign_axis((int) (analog_data->rx));
+  data.stick_right_y    =  sign_axis((int) (analog_data->ry));
 
   data.dpad_up = button_data->dpad_up;
   data.dpad_down = button_data->dpad_down;

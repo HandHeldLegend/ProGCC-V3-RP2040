@@ -10,6 +10,11 @@
 #include "pico/bootrom.h"
 #include "pico/multicore.h"
 
+#include "progcc_types.h"
+#include "progcc_defines.h"
+
+#include "stick_scaling.h"
+
 //#include "hardware/pio.h"
 #include "hardware/gpio.h"
 #include "hardware/clocks.h"
@@ -25,8 +30,6 @@
 
 #include "board_config.h"
 
-#include "progcc_types.h"
-#include "progcc_defines.h"
 #include "progcc_settings.h"
 #include "progcc_utils.h"
 
