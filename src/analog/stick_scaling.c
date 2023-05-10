@@ -52,10 +52,10 @@ float r_angle_scalers[8] = {0};
 
 // Diagonal cardinal dividers
 // IE where the crossover point is for the 45 degree mark
-float l_angles[4] = {45.0f, 45.0f, 45.0f, 30.0f};
+float l_angles[4] = {45.0f, 45.0f, 45.0f, 75.0f};
 float r_angles[4] = {45.0f, 45.0f, 45.0f, 45.0f};
 
-int angles[8] = {0, 45, 90, 135, 180, 225, 270, 315};
+int angles[4] = {0, 90, 180, 270};
 
 // INTERNAL PROCESSING
 
@@ -97,9 +97,9 @@ void calculate_angle_scalers(float *angles_in, float *scalers_out)
   {
     // Calculate percentage of first scaler
     // based on the set modified angle
-    float s1 = angles_in[i]/45.0f;
+    float s1 = 45.0f/angles_in[i];
     // Get second scaler from first
-    float s2 = 2.0f - s1;
+    float s2 = 45.0f/(90.0f-angles_in[i]);
 
     scalers_out[t]    = s1;
     scalers_out[t+1]  = s2;
@@ -127,7 +127,7 @@ void calculate_xy_scalers()
 // diagonal angle we are adjusting
 int get_angle_adjust_index(float a)
 {
-    int o = (int) a/45 ;
+    int o = (int) a/90 ;
     return o;
 }
 
@@ -182,24 +182,27 @@ void stick_scaling_process_data(a_data_s *in, a_data_s *out)
 
     // Generate modified angles SECTION
     // First we get the index based on
-    // our angle (0-7)
+    // our angle (0-3)
     int la_idx = get_angle_adjust_index(la);
+    int ls_idx = la_idx*2;
+
     float la_new = 0;
     float la_mod = 0;
     float l_diff = 0;
 
     // Get our base angle to modify
-    la_mod = fmod(la, 45);
+    la_mod = fmod(la, 90);
 
     // Now we check if we are in the first or second segment
     // so we know which scaler we should use
     if (la_mod > l_angles[la_idx])
     {
       // Get our remaining angle travel
-      l_diff = 90.0f - l_angles[la_idx];
+      l_diff = la_mod - l_angles[la_idx];
+
       // Increase index to next
       ls_idx += 1;
-      la_new = angles[la_idx] + l_angles[la_idx] + (l_diff * l_angle_scalers[ls_idx]);
+      la_new = angles[la_idx] + 45.0f + (l_diff * l_angle_scalers[ls_idx]);
     }
     else
     {
