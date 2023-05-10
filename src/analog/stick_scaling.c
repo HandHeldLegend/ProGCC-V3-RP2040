@@ -2,241 +2,300 @@
 #include <math.h>
 
 #define SCALER_V (float) 128.0f
+#define SCALER_10_BIT (float) 510.0f
+#define SCALE_10_TO_8 (float) 0.25f
+#define STICK_INTERNAL_CENTER 512
+#define STICK_OUT_CENTER 128
+#define DEAD_ZONE 20
+
 #define ANGLE_TOLERANCE 1
-#define DEAD_ZONE 25
+
 #define CLAMP_0_255(value) ((value) < 0 ? 0 : ((value) > 255 ? 255 : (value)))
 
-a_calibration_s c = {
+// Stores internal
+// calibration data
+a_calib_center_s c = {
     .lx_center = 128,
     .ly_center = 128,
     .rx_center = 128,
     .ly_center = 128,
 };
 
+// Stores processed XY Scaled
+// as a high precision float before
+// processing angular modifications
+af_data_s pa = {0};
+
+// Temporary data to store high/low values
+a_calib_hilo_s chl = {0};
+
+// XY Scalers
+float ls_x_scaler_lo = 0;
+float ls_x_scaler_hi = 0;
+
+float rs_x_scaler_lo = 0;
+float rs_x_scaler_hi = 0;
+
+float ls_y_scaler_lo = 0;
+float ls_y_scaler_hi = 0;
+
+float rs_y_scaler_lo = 0;
+float rs_y_scaler_hi = 0;
+
 // Init scalers
+// Pairs 0/1, 2/3, 4/5, 6/7
 float l_scalers[8] = {0};
 float r_scalers[8] = {0};
-int angles[8] = {0, 45, 90, 135, 180, 225, 270, 315};
-float dl[8] = {0};
-float dr[8] = {0};
 
-// Returns a float angle given the XY coordinate pair and the
+float l_angle_scalers[8] = {0};
+float r_angle_scalers[8] = {0};
+
+// Diagonal cardinal dividers
+// IE where the crossover point is for the 45 degree mark
+float l_angles[4] = {45.0f, 45.0f, 45.0f, 30.0f};
+float r_angles[4] = {45.0f, 45.0f, 45.0f, 45.0f};
+
+int angles[8] = {0, 45, 90, 135, 180, 225, 270, 315};
+
+// INTERNAL PROCESSING
+
+// Function to scale an input by value according
+// to float scalers
+float scale_by_hilo(int input, int center, float s_high, float s_low)
+{
+  float out = STICK_INTERNAL_CENTER;
+  if (input > center)
+  {
+    float newx = ((float) input - (float) center) * s_high;
+    out += newx;
+  }
+  else if (input < center)
+  {
+    float newy = ((float) center - (float) input) * s_low;
+    out -= newy;
+  }
+
+  return out;
+}
+
+// Processes incoming data and stores it in our temporary
+// buffer
+void process_xy_scale(a_data_s *in)
+{
+  pa.lx = scale_by_hilo(in->lx, c.lx_center, ls_x_scaler_hi, ls_x_scaler_lo);
+  pa.ly = scale_by_hilo(in->ly, c.ly_center, ls_y_scaler_hi, ls_y_scaler_lo);
+
+  pa.rx = scale_by_hilo(in->rx, c.rx_center, rs_x_scaler_hi, rs_x_scaler_lo);
+  pa.ry = scale_by_hilo(in->ry, c.ry_center, rs_y_scaler_hi, rs_y_scaler_lo);
+}
+
+// Takes in 4 diagonal angles, outputs 8 appropriate scalers
+void calculate_angle_scalers(float *angles_in, float *scalers_out)
+{
+  uint8_t t = 0;
+  for(uint8_t i = 0; i < 4; i++)
+  {
+    // Calculate percentage of first scaler
+    // based on the set modified angle
+    float s1 = angles_in[i]/45.0f;
+    // Get second scaler from first
+    float s2 = 2.0f - s1;
+
+    scalers_out[t]    = s1;
+    scalers_out[t+1]  = s2;
+    t+=2;
+  }
+}
+
+// Setup function to calculate our XY Scalers
+void calculate_xy_scalers()
+{
+  ls_x_scaler_hi = SCALER_10_BIT / ( (float) chl.lx_hi - (float) c.lx_center );
+  ls_x_scaler_lo = SCALER_10_BIT / ( (float) c.lx_center - (float) chl.lx_lo );
+
+  rs_x_scaler_hi = SCALER_10_BIT / ( (float) chl.ry_hi - (float) c.ry_center );
+  rs_x_scaler_lo = SCALER_10_BIT / ( (float)c.ry_center - (float) chl.ry_lo );
+
+  ls_y_scaler_hi = SCALER_10_BIT / ( (float) chl.ly_hi - (float) c.ly_center );
+  ls_y_scaler_lo = SCALER_10_BIT / ( (float) c.ly_center - (float) chl.ly_lo );
+
+  rs_y_scaler_hi = SCALER_10_BIT / ( (float) chl.ry_hi - (float) c.ry_center );
+  rs_y_scaler_lo = SCALER_10_BIT / ( (float) c.ry_center - (float) chl.ry_lo );
+}
+
+// Returns the octant to let us know which
+// diagonal angle we are adjusting
+int get_angle_adjust_index(float a)
+{
+    int o = (int) a/45 ;
+    return o;
+}
+
+// Produces a normalized vector at a given angle
+void normalized_vector(float angle, float *x, float *y)
+{
+  float rad = angle * (M_PI / 180.0);
+  *x = cos(rad);
+  *y = sin(rad);
+}
+
+// Returns the float angle given the XY coordinate pair and the
 // calibrated center point
-float get_angle(int x, int y, int center_x, int center_y) {
-    float angle = atan2f((float) (y - center_y), (float) (x - center_x)) * 180.0f / M_PI;
+float get_angle(float x, float y) {
+    float angle = atan2f( (y - SCALER_10_BIT), (x - SCALER_10_BIT) ) * 180.0f / M_PI;
     if (angle < 0) {
         angle += 360.0f;
     }
     return angle;
 }
 
-// Returns float distance between two int coordinate pairs
-float get_distance(int x, int y, int center_x, int center_y) {
-    float dx = (float) (x - center_x);
-    float dy = (float) (y - center_y);
+// Returns float distance between float coordinate pair
+// and 512,512 coordinate center point
+float get_distance(float x, float y) {
+    float dx = x - SCALER_10_BIT;
+    float dy = y - SCALER_10_BIT;
     return sqrtf(dx * dx + dy * dy);
 }
 
-// Takes in XY Coordinate, XY calibrated center, scaling factor, and outputs an adjusted XY coordinate
-void adjust_coordinates(a_data_s *in, a_calibration_s *c, float l_scaling_factor, float r_scaling_factor, a_data_s *out) {
-    float ldx = (float) (in->lx - c->lx_center);
-    float ldy = (float) (in->ly - c->ly_center);
-
-    float rdx = (float) (in->rx - c->rx_center);
-    float rdy = (float) (in->ry - c->ry_center);
-
-    float ldistance = sqrtf(ldx * ldx + ldy * ldy);
-    float rdistance = sqrtf(rdx * rdx + rdy * rdy);
-
-    if (ldistance >= DEAD_ZONE)
-    {
-      ldistance-=DEAD_ZONE;
-      float nlx = ldx / ldistance;
-      float nly = ldy / ldistance;
-
-      float ladj = (ldistance * l_scaling_factor);
-
-      nlx *= ladj;
-      nly *= ladj;
-
-      if(nlx > 300) return;
-      if(nly > 300) return;
-
-      out->lx = CLAMP_0_255((int) roundf(nlx + 128));
-      out->ly = CLAMP_0_255((int) roundf(nly + 128));
-
-
-    }
-    else
-    {
-      out->lx = 128;
-      out->ly = 128;
-    }
-
-    if (rdistance >= DEAD_ZONE)
-    {
-      rdistance-=DEAD_ZONE;
-      float nrx = rdx / rdistance;
-      float nry = rdy / rdistance;
-
-      float radj = (rdistance * r_scaling_factor);
-
-      nrx *= radj;
-      nry *= radj;
-
-      if(nrx > 300) return;
-      if(nry > 300) return;
-
-      out->rx = CLAMP_0_255((int) roundf(nrx + 128));
-      out->ry = CLAMP_0_255((int) roundf(nry + 128));
-    }
-    else
-    {
-      out->rx = 128;
-      out->ry = 128;
-    }
-
-}
-
-// Returns an index based on the angle
-int get_angle_index(float a)
-{
-  // Add half of 45 degree increment.
-  float s = a+22.5f;
-  // As an example, we want to ensure that we increment
-  // up to index 1 when we are at 22.5 degrees since
-  // we are chopping each area in half.
-
-  // Process the angle when it's above 337.5f (upper range of idx 7),
-    if (a > 337.5f)
-    {
-      return 0;
-    }
-
-    int o = (int) s/45 ;
-    return o;
-}
-
-// Return a float scaler based on the angle
-float get_scaler(float a, float *s)
-{
-    int i_a = get_angle_index(a-22.5f);
-
-    int i_b = i_a+1;
-
-    if (i_a >= 7)
-    {
-        i_a = 7;
-        i_b = 0;
-    }
-
-    // Determine angle we can
-    // comp against 45 degrees
-    // This gives us a ratio to apply
-    // the scalers
-    float o = (a-angles[i_a])/45.0f;
-    float o2 = 1.0f-o;
-
-    float out = (o2*s[i_a]) + (o*s[i_b]);
-    return out;
-}
+// -- END PRIVATE -- //
 
 // PUBLIC FUNCTIONS
-
-// Takes in analog data and constantly updates
-// the analog scalers appropriately
-void stick_scaling_create_scalers(a_data_s *analog_input)
-{
-  // Calculate angles
-  float la = get_angle(analog_input->lx, analog_input->ly, c.lx_center, c.ly_center);
-  float ra = get_angle(analog_input->rx, analog_input->ry, c.rx_center, c.ry_center);
-
-  if (!((int) la % 45))
-  {
-    // First, let's calculate the distance and angle index
-    float ld = get_distance(analog_input->lx, analog_input->ly, c.lx_center, c.ly_center);
-
-    // Get angle index for left and right sticks
-    int li = get_angle_index(la);
-
-    // Calculate the scaler
-    float ls = SCALER_V/(ld-DEAD_ZONE);
-
-    // If the distance is further than what we have so far
-    // store the scaler and distance
-    if (ld > dl[li])
-    {
-      dl[li] = ld;
-      l_scalers[li] = ls;
-    }
-  }
-
-  if (!((int) ra % 45))
-  {
-    float rd = get_distance(analog_input->rx, analog_input->ry, c.rx_center, c.ry_center);
-    // Get angle index for left and right sticks
-    int ri = get_angle_index(get_angle(analog_input->rx, analog_input->ry, c.rx_center, c.ry_center));
-
-    // Calculate the scaler
-    float rs = SCALER_V/(rd-DEAD_ZONE);
-
-    // If the distance is further than what we have so far
-    // store the scaler and distance
-    if (rd > dr[ri])
-    {
-      dr[ri] = rd;
-      r_scalers[ri] = rs;
-    }
-  }
-}
-
-void stick_scaling_print_scalers()
-{
-  printf("\n\nL STICK SCALERS:\n\n");
-  printf("S0: %f\n", l_scalers[0]);
-  printf("S1: %f\n", l_scalers[1]);
-  printf("S2: %f\n", l_scalers[2]);
-  printf("S3: %f\n", l_scalers[3]);
-  printf("S4: %f\n", l_scalers[4]);
-  printf("S5: %f\n", l_scalers[5]);
-  printf("S6: %f\n", l_scalers[6]);
-  printf("S7: %f\n", l_scalers[7]);
-
-  printf("\n\nR STICK SCALERS:\n\n");
-  printf("S0: %f\n", r_scalers[0]);
-  printf("S1: %f\n", r_scalers[1]);
-  printf("S2: %f\n", r_scalers[2]);
-  printf("S3: %f\n", r_scalers[3]);
-  printf("S4: %f\n", r_scalers[4]);
-  printf("S5: %f\n", r_scalers[5]);
-  printf("S6: %f\n", r_scalers[6]);
-  printf("S7: %f\n", r_scalers[7]);
-}
-
-void stick_scaling_print_centers()
-{
-  printf("\n\nSTICK CENTERS:\n\n");
-  printf("LX C: %i\n", c.lx_center);
-  printf("LY C: %i\n", c.ly_center);
-  printf("RX C: %i\n", c.rx_center);
-  printf("RY C: %i\n", c.ry_center);
-}
 
 // Process analog data according to scaler
 void stick_scaling_process_data(a_data_s *in, a_data_s *out)
 {
-  float ls = get_scaler(get_angle(in->lx, in->ly, c.lx_center, c.ly_center), l_scalers);
-  float rs = get_scaler(get_angle(in->rx, in->ry, c.rx_center, c.ry_center), r_scalers);
+  // Scale our raw values to 10 bit
+  process_xy_scale(in);
 
-  adjust_coordinates(in, &c, ls, rs, out);
+  // Calculate the distance of the stick
+  float ld = get_distance(pa.lx, pa.ly);
+  float rd = get_distance(pa.rx, pa.ry);
+
+  // Process LEFT stick
+  if (ld >= DEAD_ZONE)
+  {
+    // Scale our distance to 8 bit range
+    ld *= SCALE_10_TO_8;
+
+    // Capture our angles from 10 bit vals
+    float la = get_angle(pa.lx, pa.ly);
+
+    // Generate modified angles SECTION
+    // First we get the index based on
+    // our angle (0-7)
+    int la_idx = get_angle_adjust_index(la);
+    float la_new = 0;
+    float la_mod = 0;
+    float l_diff = 0;
+
+    // Get our base angle to modify
+    la_mod = fmod(la, 45);
+
+    // Now we check if we are in the first or second segment
+    // so we know which scaler we should use
+    if (la_mod > l_angles[la_idx])
+    {
+      // Get our remaining angle travel
+      l_diff = 90.0f - l_angles[la_idx];
+      // Increase index to next
+      ls_idx += 1;
+      la_new = angles[la_idx] + l_angles[la_idx] + (l_diff * l_angle_scalers[ls_idx]);
+    }
+    else
+    {
+      la_new = angles[la_idx] + (la_mod * l_angle_scalers[ls_idx]);
+    }
+
+    // Generate normalized vector data
+    // based on our new adjusted angles
+    float nlx = 0;
+    float nly = 0;
+    normalized_vector(la_new, &nlx, &nly);
+
+    // Finally, scale our values up accordingly
+    nlx *= ld;
+    nly *= ld;
+
+    out->lx = CLAMP_0_255((int) roundf(nlx + 128));
+    out->ly = CLAMP_0_255((int) roundf(nly + 128));
+  }
+  else
+  {
+    out->lx = STICK_OUT_CENTER;
+  }
 }
 
 // Captures the center point or sets it with input data
-void stick_scaling_capture_center(a_data_s *analog_input)
+void stick_scaling_capture_center(a_data_s *input)
 {
-  c.lx_center = analog_input->lx;
-  c.ly_center = analog_input->ly;
+  c.lx_center = input->lx;
+  c.ly_center = input->ly;
 
-  c.rx_center = analog_input->rx;
-  c.ry_center = analog_input->ry;
+  c.rx_center = input->rx;
+  c.ry_center = input->ry;
+
+  // Reset hi/lo vals
+  chl.lx_lo = input->lx;
+  chl.lx_hi = input->lx;
+  chl.ly_lo = input->ly;
+  chl.ly_hi = input->ly;
+  chl.rx_lo = input->rx;
+  chl.rx_hi = input->rx;
+  chl.ry_lo = input->ry;
+  chl.ry_hi = input->ry;
+}
+
+// Captures the high and low values and sets accordingly
+void stick_scaling_capture_hilo(a_data_s *input)
+{
+  // Left X
+  if (input->lx < chl.lx_lo)
+  {
+    chl.lx_lo = input->lx;
+  }
+  else if (input->lx > chl.lx_hi)
+  {
+    chl.lx_hi = input->lx;
+  }
+
+  // Left Y
+  if (input->ly < chl.ly_lo)
+  {
+    chl.ly_lo = input->ly;
+  }
+  else if (input->ly > chl.ly_hi)
+  {
+    chl.ly_hi = input->ly;
+  }
+
+  // Right X
+  if (input->rx < chl.rx_lo)
+  {
+    chl.rx_lo = input->rx;
+  }
+  else if (input->rx > chl.rx_hi)
+  {
+    chl.rx_hi = input->rx;
+  }
+
+  // Right Y
+  if (input->ry < chl.ry_lo)
+  {
+    chl.ry_lo = input->ry;
+  }
+  else if (input->ry > chl.ry_hi)
+  {
+    chl.ry_hi = input->ry;
+  }
+}
+
+void stick_scaling_init()
+{
+  calculate_angle_scalers(l_angles, l_angle_scalers);
+  calculate_angle_scalers(r_angles, r_angle_scalers);
+}
+
+void stick_scaling_finalize()
+{
+  calculate_xy_scalers();
 }

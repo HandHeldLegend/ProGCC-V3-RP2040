@@ -21,13 +21,13 @@ void main_two()
             {
                 stick_scaling_capture_center(&analog_data);
                 centered = true;
-                stick_scaling_print_centers();
             }
 
-            stick_scaling_create_scalers(&analog_data);
+            stick_scaling_capture_hilo(&analog_data);
 
             if (!gpio_get(PGPIO_BUTTON_A))
             {
+                stick_scaling_finalize();
                 calibrate = false;
                 progcc_utils_set_rumble(PROGCC_RUMBLE_ON);
                 sleep_ms(200);
@@ -44,6 +44,8 @@ void main_two()
 int main() {
     stdio_init_all();
     board_init();
+
+    stick_scaling_init();
 
     sleep_ms(200);
 
