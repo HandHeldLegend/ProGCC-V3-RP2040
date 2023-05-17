@@ -23,7 +23,7 @@ void main_two()
                 centered = true;
             }
 
-            stick_scaling_capture_hilo(&analog_data);
+            stick_scaling_capture_distances(&analog_data);
 
             if (!gpio_get(PGPIO_BUTTON_A))
             {
@@ -37,6 +37,11 @@ void main_two()
         else
         {
             stick_scaling_process_data(&analog_data, &scaled_analog_data);
+        }
+
+        if(button_data.trigger_r)
+        {
+            reset_usb_boot(0, 0);
         }
     }
 }
