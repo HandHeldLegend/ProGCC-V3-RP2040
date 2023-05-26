@@ -4,6 +4,22 @@
 #define Y_AXIS_CONFIG 0xF0
 #define BUFFER_TO_UINT16(buffer) (uint16_t)(((buffer[0] & 0x07) << 9) | buffer[1] << 1 | buffer[2] >> 7)
 
+void progcc_utils_setup_gpio_scan(uint8_t gpio)
+{
+  gpio_init(gpio);
+  gpio_pull_up(gpio);
+  gpio_set_dir(gpio, GPIO_OUT);
+  gpio_put(gpio, true);
+}
+
+void progcc_utils_setup_gpio_push(uint8_t gpio)
+{
+  gpio_init(gpio);
+  gpio_pull_up(gpio);
+  gpio_set_dir(gpio, GPIO_IN);
+  //printf("Set up GPIO: %d", (uint8_t) gpio);
+}
+
 void progcc_utils_setup_gpio_button(uint8_t gpio)
 {
   gpio_init(gpio);
@@ -19,6 +35,19 @@ void progcc_utils_hardware_setup(void)
 {
   // Set up GPIO Inputs
   #if PROGCC_USE_KEYPAD
+    progcc_utils_setup_gpio_button(PGPIO_BUTTON_RS);
+    progcc_utils_setup_gpio_button(PGPIO_BUTTON_LS);
+    progcc_utils_setup_gpio_button(PGPIO_BUTTON_MODE);
+
+    progcc_utils_setup_gpio_push(PGPIO_PUSH_A);
+    progcc_utils_setup_gpio_push(PGPIO_PUSH_B);
+    progcc_utils_setup_gpio_push(PGPIO_PUSH_C);
+    progcc_utils_setup_gpio_push(PGPIO_PUSH_D);
+
+    progcc_utils_setup_gpio_scan(PGPIO_SCAN_A);
+    progcc_utils_setup_gpio_scan(PGPIO_SCAN_B);
+    progcc_utils_setup_gpio_scan(PGPIO_SCAN_C);
+    progcc_utils_setup_gpio_scan(PGPIO_SCAN_D);
   #else
     // Iterate through the const array and initialize buttons gpio
     for(uint8_t i = 0; i < 12; i++)
@@ -77,6 +106,40 @@ void progcc_utils_hardware_setup(void)
 
 void progcc_utils_read_buttons(progcc_button_data_s *data)
 {
+  // Keypad version
+  gpio_put(PGPIO_SCAN_A, false);
+  sleep_us(100);
+  data->button_a    = !gpio_get(PGPIO_PUSH_C);
+  data->button_b    = !gpio_get(PGPIO_PUSH_D);
+  data->button_x    = !gpio_get(PGPIO_PUSH_A);
+  data->button_y    = !gpio_get(PGPIO_PUSH_B);
+  gpio_put(PGPIO_SCAN_A, true);
+
+  gpio_put(PGPIO_SCAN_B, false);
+  sleep_us(100);
+  data->dpad_left   = !gpio_get(PGPIO_PUSH_D);
+  data->dpad_right  = !gpio_get(PGPIO_PUSH_C);
+  data->dpad_down   = !gpio_get(PGPIO_PUSH_B);
+  data->dpad_up     = !gpio_get(PGPIO_PUSH_A);
+  gpio_put(PGPIO_SCAN_B, true);
+
+  gpio_put(PGPIO_SCAN_C, false);
+  sleep_us(100);
+  data->button_plus     = !gpio_get(PGPIO_PUSH_B);
+  data->button_home     = !gpio_get(PGPIO_PUSH_A);
+  data->button_capture  = !gpio_get(PGPIO_PUSH_D);
+  data->button_minus    = !gpio_get(PGPIO_PUSH_C);
+  gpio_put(PGPIO_SCAN_C, true);
+
+  gpio_put(PGPIO_SCAN_D, false);
+  sleep_us(100);
+  data->trigger_r   = !gpio_get(PGPIO_PUSH_B);
+  data->trigger_l   = !gpio_get(PGPIO_PUSH_D);
+  data->trigger_zl  = !gpio_get(PGPIO_PUSH_A);
+  data->trigger_zr  = !gpio_get(PGPIO_PUSH_C);
+  gpio_put(PGPIO_SCAN_D, true);
+
+  /*
   data->button_a  = !gpio_get(PGPIO_BUTTON_A);
   data->button_b  = !gpio_get(PGPIO_BUTTON_B);
   data->button_x  = !gpio_get(PGPIO_BUTTON_X);
@@ -90,7 +153,7 @@ void progcc_utils_read_buttons(progcc_button_data_s *data)
   data->trigger_zl  = !gpio_get(PGPIO_BUTTON_L);
   data->trigger_zr  = !gpio_get(PGPIO_BUTTON_R);
   data->trigger_r   = !gpio_get(PGPIO_BUTTON_Z);
-  data->button_plus = !gpio_get(PGPIO_BUTTON_START);
+  data->button_plus = !gpio_get(PGPIO_BUTTON_START);*/
 }
 
 void progcc_utils_read_sticks(a_data_s *data)

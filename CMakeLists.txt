@@ -29,6 +29,8 @@ src/usb/progcc_usb.c
 src/usb/xinput_device.c
 
 src/analog/stick_scaling.c
+
+src/rgb.c
 )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -38,6 +40,8 @@ target_compile_definitions(${PROJECT_NAME}
 	#PICO_FLASH_SPI_CLKDIV=8
 	)
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/generated)
+pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 #pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio/joybus.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
 target_link_libraries(${PROJECT_NAME}

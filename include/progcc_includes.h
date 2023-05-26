@@ -15,7 +15,7 @@
 
 #include "stick_scaling.h"
 
-//#include "hardware/pio.h"
+#include "hardware/pio.h"
 #include "hardware/gpio.h"
 #include "hardware/clocks.h"
 #include "hardware/dma.h"
@@ -23,12 +23,17 @@
 #include "hardware/spi.h"
 #include "hardware/timer.h"
 
+#include "ws2812.pio.h"
+#include "rgb.h"
+
 #include "bsp/board.h"
 #include "tusb.h"
 // XInput TinyUSB Driver
 #include "xinput_device.h"
 
 #include "board_config.h"
+
+
 
 #include "progcc_settings.h"
 #include "progcc_utils.h"

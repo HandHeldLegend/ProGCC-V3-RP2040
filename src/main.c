@@ -25,7 +25,7 @@ void main_two()
 
             stick_scaling_capture_distances(&analog_data);
 
-            if (!gpio_get(PGPIO_BUTTON_A))
+            if (!gpio_get(PGPIO_BUTTON_MODE))
             {
                 stick_scaling_finalize();
                 calibrate = false;
@@ -39,7 +39,7 @@ void main_two()
             stick_scaling_process_data(&analog_data, &scaled_analog_data);
         }
 
-        if(button_data.trigger_r)
+        if(!gpio_get(PGPIO_BUTTON_LS))
         {
             reset_usb_boot(0, 0);
         }
@@ -50,6 +50,36 @@ int main() {
     stdio_init_all();
     board_init();
 
+    PIO pio = pio0;
+    int sm = 0;
+    uint offset = pio_add_program(pio, &ws2812_program);
+    ws2812_program_init(pio, sm, offset, WS2812_PIN, 1100000, IS_RGBW);
+
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+    put_pixel(0xFF00AA00);
+
+
     stick_scaling_init();
 
     sleep_ms(200);
@@ -57,17 +87,18 @@ int main() {
     // Perform GPIO setup
     progcc_utils_hardware_setup();
 
+    /*
     if (!gpio_get(PGPIO_BUTTON_START))
     {
-        reset_usb_boot(0, 0);
-    }
+        //reset_usb_boot(0, 0);
+    }*/
 
     progcc_usb_set_mode(PUSB_MODE_XI, true);
 
     if (!progcc_usb_start())
     {
         // Fall back to bootloader if we fail to start.
-        reset_usb_boot(0, 0);
+        //reset_usb_boot(0, 0);
     }
 
     sleep_ms(200);
