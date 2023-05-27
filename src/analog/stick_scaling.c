@@ -2,7 +2,7 @@
 #include <math.h>
 
 #define STICK_INTERNAL_CENTER 128
-#define STICK_DEAD_ZONE 2
+#define STICK_DEAD_ZONE 4
 #define STICK_SCALE_DISTANCE STICK_INTERNAL_CENTER + STICK_DEAD_ZONE
 
 
@@ -220,19 +220,29 @@ float get_scaled_angle(float angle, float *angles, float *angle_scalers)
 
 // -- END PRIVATE -- //
 
-
+float last_l_angle;
+float last_r_angle;
 
 // PUBLIC FUNCTIONS
+void stick_scaling_get_last_angles(float *la_out, float *ra_out)
+{
+  *la_out = last_l_angle;
+  *ra_out = last_r_angle;
+}
 
 // Process analog data according to scaler
 void stick_scaling_process_data(a_data_s *in, a_data_s *out)
 {
   // Get angles of input
   float la = get_angle(in->lx, in->ly, c.lx_center, c.ly_center);
+  float ra = get_angle(in->rx, in->ry, c.rx_center, c.ry_center);
+  last_l_angle = la;
+  last_r_angle = ra;
 
   // Calculate the distance of the stick
   // upcoming operations
   float ld = get_scaled_distance(la, in->lx, in->ly, c.lx_center, c.ly_center, l_distance_scalers);
+  float rd = get_scaled_distance(ra, in->rx, in->ry, c.rx_center, c.ry_center, r_distance_scalers);
 
   // Process LEFT stick
   if (ld >= STICK_DEAD_ZONE)
@@ -259,6 +269,32 @@ void stick_scaling_process_data(a_data_s *in, a_data_s *out)
   {
     out->lx = STICK_INTERNAL_CENTER;
   }
+
+  // Process RIGHT stick
+  if (rd >= STICK_DEAD_ZONE)
+  {
+    // Subtract deadzone area
+    rd -= STICK_DEAD_ZONE;
+
+    float ra_new = get_scaled_angle(ra, r_angles, r_angle_scalers);
+
+    // Generate normalized vector data
+    // based on our new adjusted angles
+    float nrx = 0;
+    float nry = 0;
+    normalized_vector(ra_new, &nrx, &nry);
+
+    // Finally, scale our values up accordingly
+    nrx *= rd;
+    nry *= rd;
+
+    out->rx = CLAMP_0_255((int) roundf(nrx + 128));
+    out->ry = CLAMP_0_255((int) roundf(nry + 128));
+  }
+  else
+  {
+    out->rx = STICK_INTERNAL_CENTER;
+  }
 }
 
 // Captures stick distance for 8 angles on a loop
@@ -279,6 +315,24 @@ void stick_scaling_capture_distances(a_data_s *input)
     if (l_d > l_angle_distances[idx])
     {
       l_angle_distances[idx] = l_d;
+    }
+  }
+
+  // Get angle for right stick
+  float r_a = get_angle(input->rx, input->ry, c.rx_center, c.ry_center);
+  float r_a_d = fmod(r_a, 45);
+  // If we're close to a direct 45 degree angle
+  if ((r_a_d < 1) || (r_a_d > 44))
+  {
+    // Get index
+    int idx = get_distance_adjust_index(r_a);
+
+    // Get distance for right stick
+    float r_d = get_distance(input->rx, input->ry, c.rx_center, c.ry_center);
+
+    if (r_d > r_angle_distances[idx])
+    {
+      r_angle_distances[idx] = r_d;
     }
   }
 }

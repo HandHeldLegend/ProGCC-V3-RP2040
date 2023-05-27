@@ -8,6 +8,15 @@ a_data_s scaled_analog_data = {0};
 bool calibrate = true;
 bool centered = false;
 
+void write_color(uint32_t col)
+{
+    uint32_t n = col | 0xFF000000;
+    for (uint8_t i = 0; i < NUM_PIXELS; i++)
+    {
+        put_pixel(n);
+    }
+}
+
 void main_two()
 {
     for(;;)
@@ -37,6 +46,14 @@ void main_two()
         else
         {
             stick_scaling_process_data(&analog_data, &scaled_analog_data);
+            static float la;
+            static float ra;
+
+            stick_scaling_get_last_angles(&la, &ra);
+
+            la *= 46603.0f;
+            uint32_t c = (uint32_t) la;
+            write_color(c);
         }
 
         if(!gpio_get(PGPIO_BUTTON_LS))
@@ -55,29 +72,7 @@ int main() {
     uint offset = pio_add_program(pio, &ws2812_program);
     ws2812_program_init(pio, sm, offset, WS2812_PIN, 1100000, IS_RGBW);
 
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
 
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
-    put_pixel(0xFF00AA00);
 
 
     stick_scaling_init();

@@ -2,7 +2,7 @@
 #define BOARD_CONFIG_H
 
 #define IS_RGBW false
-#define NUM_PIXELS 8
+#define NUM_PIXELS 20
 
 #define WS2812_PIN 15
 
