@@ -25,6 +25,8 @@ src/devices/dinput.c
 src/devices/gcinput.c
 src/devices/nsinput.c
 src/devices/xinput.c
+src/devices/swpro.c
+
 src/usb/progcc_usb.c
 src/usb/xinput_device.c
 
@@ -36,6 +38,8 @@ src/rgb.c
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE
 	PICO_XOSC_STARTUP_DELAY_MULTIPLIER=64
+	PICO_DEFAULT_UART_TX_PIN=12
+	PICO_DEFAULT_UART_RX_PIN=13
 	#PICO_DEFAULT_BOOT_STAGE2=boot2_generic_03h
 	#PICO_FLASH_SPI_CLKDIV=8
 	)
@@ -65,6 +69,6 @@ tinyusb_board
 )
 
 pico_enable_stdio_usb(${PROJECT_NAME} 0)
-pico_enable_stdio_uart(${PROJECT_NAME} 0)
+pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
 pico_add_extra_outputs(${PROJECT_NAME})

@@ -22,6 +22,7 @@
 #include "hardware/pwm.h"
 #include "hardware/spi.h"
 #include "hardware/timer.h"
+#include "hardware/uart.h"
 
 #include "ws2812.pio.h"
 #include "rgb.h"
@@ -33,8 +34,6 @@
 
 #include "board_config.h"
 
-
-
 #include "progcc_settings.h"
 #include "progcc_utils.h"
 
@@ -42,6 +41,7 @@
 #include "gcinput.h"
 #include "xinput.h"
 #include "dinput.h"
+#include "swpro.h"
 
 #include "progcc_usb.h"
 

@@ -49,6 +49,14 @@ void progcc_usb_set_mode(progcc_usb_mode_t mode, bool performance_mode)
   {
     case PUSB_MODE_MAX:
     default:
+    case PUSB_MODE_DI:
+      _usb_hid_cb = dinput_hid_report;
+      break;
+
+    case PUSB_MODE_SW:
+      _usb_hid_cb = swpro_hid_report;
+      break;
+
     case PUSB_MODE_NS:
       _usb_hid_cb = nsinput_hid_report;
       break;
@@ -61,9 +69,7 @@ void progcc_usb_set_mode(progcc_usb_mode_t mode, bool performance_mode)
       _usb_hid_cb = xinput_hid_report;
       break;
 
-    case PUSB_MODE_DI:
-      _usb_hid_cb = dinput_hid_report;
-      break;
+
   }
 
   _progcc_usb_mode = mode;
@@ -96,6 +102,14 @@ uint8_t const* tud_descriptor_device_cb(void) {
   {
     case PUSB_MODE_MAX:
     default:
+    case PUSB_MODE_DI:
+      return (uint8_t const*) &di_device_descriptor;
+      break;
+
+    case PUSB_MODE_SW:
+      return (uint8_t const*) &swpro_device_descriptor;
+      break;
+
     case PUSB_MODE_NS:
       return (uint8_t const*) &ns_device_descriptor;
       break;
@@ -106,10 +120,6 @@ uint8_t const* tud_descriptor_device_cb(void) {
 
     case PUSB_MODE_XI:
       return (uint8_t const*) &xid_device_descriptor;
-      break;
-
-    case PUSB_MODE_DI:
-      return (uint8_t const*) &di_device_descriptor;
       break;
   }
 }
@@ -123,6 +133,14 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
   {
     case PUSB_MODE_MAX:
     default:
+    case PUSB_MODE_DI:
+      return (uint8_t const*) &di_configuration_descriptor;
+      break;
+
+    case PUSB_MODE_SW:
+      return (uint8_t const*) &swpro_configuration_descriptor;
+      break;
+
     case PUSB_MODE_NS:
       if (_progcc_usb_performance_mode)
       {
@@ -143,9 +161,7 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
       return (uint8_t const*) &xid_configuration_descriptor;
       break;
 
-    case PUSB_MODE_DI:
-      return (uint8_t const*) &di_configuration_descriptor;
-      break;
+
   }
 }
 
@@ -261,15 +277,19 @@ uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
     {
         case PUSB_MODE_MAX:
         default:
+        case PUSB_MODE_DI:
+            return di_hid_report_descriptor;
+            break;
+        case PUSB_MODE_SW:
+            return swpro_hid_report_descriptor;
+            break;
         case PUSB_MODE_NS:
             return ns_hid_report_descriptor;
             break;
         case PUSB_MODE_GC:
             return gc_hid_report_descriptor;
             break;
-        case PUSB_MODE_DI:
-            return di_hid_report_descriptor;
-            break;
+
     }
     return NULL;
 }

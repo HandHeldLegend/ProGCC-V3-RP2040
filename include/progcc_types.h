@@ -9,6 +9,7 @@ typedef enum
     PUSB_MODE_GC,
     PUSB_MODE_XI,
     PUSB_MODE_DI,
+    PUSB_MODE_SW,
     PUSB_MODE_MAX,
 } progcc_usb_mode_t;
 
