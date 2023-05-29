@@ -139,6 +139,9 @@ void progcc_utils_read_buttons(progcc_button_data_s *data)
   data->trigger_zr  = !gpio_get(PGPIO_PUSH_C);
   gpio_put(PGPIO_SCAN_D, true);
 
+  data->button_stick_right = !gpio_get(PGPIO_BUTTON_RS);
+  data->button_stick_left = !gpio_get(PGPIO_BUTTON_LS);
+
   /*
   data->button_a  = !gpio_get(PGPIO_BUTTON_A);
   data->button_b  = !gpio_get(PGPIO_BUTTON_B);

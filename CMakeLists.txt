@@ -56,6 +56,7 @@ pico_stdlib
 pico_bootrom
 pico_multicore
 pico_platform
+pico_rand
 
 hardware_gpio
 hardware_adc

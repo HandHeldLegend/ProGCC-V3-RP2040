@@ -9,6 +9,7 @@
 #include "pico/stdlib.h"
 #include "pico/bootrom.h"
 #include "pico/multicore.h"
+#include "pico/rand.h"
 
 #include "progcc_types.h"
 #include "progcc_defines.h"
@@ -44,6 +45,7 @@
 #include "swpro.h"
 
 // Switch pro includes
+#include "switch_spi.h"
 #include "switch_commands.h"
 
 #include "progcc_usb.h"

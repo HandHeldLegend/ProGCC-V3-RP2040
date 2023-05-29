@@ -237,13 +237,8 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
     case PUSB_MODE_SW:
       if (!report_id && !report_type)
       {
-        switch_commands_report_handle(buffer[0], buffer, bufsize);
+        switch_commands_future_handle(buffer[0], buffer, bufsize);
       }
-      else
-      {
-
-      }
-
     case PUSB_MODE_NS:
       break;
     case PUSB_MODE_GC:
@@ -348,7 +343,6 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 
   // first byte is length (including header), second byte is string type
   _desc_str[0] = (TUSB_DESC_STRING << 8 ) | (2*chr_count + 2);
-  printf("Sent string descriptor.");
   return _desc_str;
 }
 
