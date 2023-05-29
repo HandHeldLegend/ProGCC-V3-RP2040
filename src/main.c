@@ -74,9 +74,10 @@ void main_two()
 
 int main() {
     stdio_init_all();
+    sleep_ms(100);
     board_init();
 
-    printf("test");
+    printf("ProGCC Started.\n");
 
     PIO pio = pio0;
     int sm = 0;
@@ -114,7 +115,7 @@ int main() {
         progcc_usb_task(&button_data, &scaled_analog_data);
         tud_task();
         //printf("Test");
-        sleep_ms(1);
+        sleep_ms(8);
     }
 
 }

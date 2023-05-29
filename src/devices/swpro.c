@@ -21,7 +21,7 @@ const tusb_desc_device_t swpro_device_descriptor = {
     .bcdDevice = 0x0210,
     .iManufacturer = 0x01,
     .iProduct = 0x02,
-    .iSerialNumber = 0x00,
+    .iSerialNumber = 0x03,
     .bNumConfigurations = 0x01
 };
 
@@ -147,10 +147,27 @@ const uint8_t swpro_configuration_descriptor[] = {
 /**--------------------------**/
 /**--------------------------**/
 
+bool mac_sent = false;
+bool blank_sent = false;
+const uint8_t mac_pac[64] = {0x01, 0x00, 0x03, 0x05, 0xCD, 0xB5, 0x5C, 0x41, 0x98, 0x00};
+const uint8_t blank_pac[64] = {0x02, 0x00};
+
 void swpro_hid_report(progcc_button_data_s *button_data, a_data_s *analog_data)
 {
   if (!tud_hid_ready()) return;
 
   uint8_t rep[1] = {0x00};
-  tud_hid_report(0x30, rep, 1);
+
+  if (!mac_sent)
+  {
+    tud_hid_report(0x81, mac_pac, 64);
+    mac_sent = true;
+    //printf("Mac sent\n");
+  }
+  else if (!blank_sent)
+  {
+    tud_hid_report(0x81, blank_pac, 64);
+    blank_sent = true;
+  }
+
 }

@@ -43,6 +43,9 @@
 #include "dinput.h"
 #include "swpro.h"
 
+// Switch pro includes
+#include "switch_commands.h"
+
 #include "progcc_usb.h"
 
 #endif

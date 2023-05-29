@@ -216,56 +216,68 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_
 
 // Invoked when received SET_REPORT control request or
 // received data on OUT endpoint ( Report ID = 0, Type = 0 )
-void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
+void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
+                            hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
 {
-    switch (_progcc_usb_mode)
-    {
-        case PUSB_MODE_MAX:
-        default:
-        case PUSB_MODE_NS:
-            break;
-        case PUSB_MODE_DI:
-            if (!report_id && !report_type)
-            {
-                /*
-                if (buffer[0] == CMD_USB_REPORTID)
-                {
-                    //command_handler(buffer, bufsize);
-                }*/
-            }
-            break;
-        case PUSB_MODE_GC:
-            if (!report_id && !report_type)
-            {
-                if (buffer[0] == 0x11)
-                {
-                    //rx_vibrate = (buffer[1] > 0) ? true : false;
-                }
-                else if (buffer[0] == 0x13)
-                {
-                    //ESP_LOGI("INIT", "Rx");
-                }
-            }
-            break;
-        case PUSB_MODE_XI:
-            if (!report_id && !report_type)
-            {
-                if ((buffer[0] == 0x00) && (buffer[1] == 0x08))
-                {
-                    _progcc_usb_busy = true;
-                    if ((buffer[3] > 0) || (buffer[4] > 0))
-                    {
-                        progcc_utils_set_rumble(PROGCC_RUMBLE_ON);
-                    }
-                    else
-                    {
-                        progcc_utils_set_rumble(PROGCC_RUMBLE_OFF);
-                    }
-                    _progcc_usb_busy = false;
-                }
-            }
-            break;
-    }
+  switch (_progcc_usb_mode)
+  {
+    case PUSB_MODE_MAX:
+    default:
+    case PUSB_MODE_DI:
+      if (!report_id && !report_type)
+      {
+          /*
+          if (buffer[0] == CMD_USB_REPORTID)
+          {
+              //command_handler(buffer, bufsize);
+          }*/
+      }
+      break;
+
+    case PUSB_MODE_SW:
+      if (!report_id && !report_type)
+      {
+        switch_commands_report_handle(buffer[0], buffer, bufsize);
+      }
+      else
+      {
+
+      }
+
+    case PUSB_MODE_NS:
+      break;
+    case PUSB_MODE_GC:
+      if (!report_id && !report_type)
+      {
+        if (buffer[0] == 0x11)
+        {
+            //rx_vibrate = (buffer[1] > 0) ? true : false;
+        }
+        else if (buffer[0] == 0x13)
+        {
+            //ESP_LOGI("INIT", "Rx");
+        }
+      }
+      break;
+    case PUSB_MODE_XI:
+      if (!report_id && !report_type)
+      {
+          if ((buffer[0] == 0x00) && (buffer[1] == 0x08))
+          {
+              _progcc_usb_busy = true;
+              if ((buffer[3] > 0) || (buffer[4] > 0))
+              {
+                  progcc_utils_set_rumble(PROGCC_RUMBLE_ON);
+              }
+              else
+              {
+                  progcc_utils_set_rumble(PROGCC_RUMBLE_OFF);
+              }
+              _progcc_usb_busy = false;
+          }
+      }
+      break;
+  }
 }
 
 // Invoked when received GET HID REPORT DESCRIPTOR request
@@ -302,7 +314,7 @@ usbd_class_driver_t const *usbd_app_driver_get_cb(uint8_t *driver_count)
     return &tud_xinput_driver;
 }
 
-static uint16_t _desc_str[32];
+static uint16_t _desc_str[64];
 
 // Invoked when received GET STRING DESCRIPTOR request
 // Application return pointer to descriptor, whose contents must exist long enough for transfer to complete
@@ -323,7 +335,7 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 
     const char* str = global_string_descriptor[index];
 
-    // Cap at max char
+    // Cap at max char... WHY?
     chr_count = strlen(str);
     if ( chr_count > 31 ) chr_count = 31;
 
@@ -336,7 +348,7 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 
   // first byte is length (including header), second byte is string type
   _desc_str[0] = (TUSB_DESC_STRING << 8 ) | (2*chr_count + 2);
-
+  printf("Sent string descriptor.");
   return _desc_str;
 }
 

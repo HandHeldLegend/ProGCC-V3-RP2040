@@ -11,7 +11,7 @@ pico_sdk_init()
 
 include_directories(
 	include include/devices include/usb
-	include/analog
+	include/analog include/switch
 	)
 
 add_executable(${PROJECT_NAME}
@@ -31,6 +31,9 @@ src/usb/progcc_usb.c
 src/usb/xinput_device.c
 
 src/analog/stick_scaling.c
+
+src/switch/switch_commands.c
+src/switch/switch_spi.c
 
 src/rgb.c
 )
