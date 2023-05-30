@@ -17,11 +17,15 @@
 #define SW_CMD_SET_SHIPMODE     0x08
 #define SW_CMD_GET_SPI          0x10
 #define SW_CMD_SET_SPI          0x11
+#define SW_CMD_SET_NFC          0x21
 #define SW_CMD_ENABLE_IMU       0x40
 #define SW_CMD_SET_IMUSENS      0x41
 #define SW_CMD_ENABLE_VIBRATE   0x48
 #define SW_CMD_SET_PLAYER       0x30
 #define SW_CMD_GET_PLAYER       0x31
+#define SW_CMD_33               0x33
+
+#define SW_REPORT_SIZE 64
 
 // Commands for setting report data
 

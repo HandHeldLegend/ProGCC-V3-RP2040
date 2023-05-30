@@ -96,6 +96,7 @@ const uint8_t swpro_hid_report_descriptor[] = {
     0x75, 0x08,        //   Report Size (8)
     0x95, 0x3F,        //   Report Count (63)
     0x81, 0x03,        //   Input (Const,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+
     0x85, 0x81,        //   Report ID (-127)
     0x09, 0x02,        //   Usage (0x02)
     0x75, 0x08,        //   Report Size (8)
@@ -155,6 +156,21 @@ void swpro_hid_report(progcc_button_data_s *button_data, a_data_s *analog_data)
   if (!tud_hid_ready()) return;
 
   static sw_input_s data = {0};
+
+  data.d_down   = button_data->dpad_down;
+  data.d_right  = button_data->dpad_right;
+  data.d_left   = button_data->dpad_left;
+  data.d_up     = button_data->dpad_up;
+
+  data.b_y      = button_data->button_y;
+  data.b_x      = button_data->button_x;
+  data.b_a      = button_data->button_a;
+  data.b_b      = button_data->button_b;
+
+  data.b_minus  = button_data->button_minus;
+  data.b_plus   = button_data->button_plus;
+  data.b_home   = button_data->button_home;
+  data.b_capture= button_data->button_capture;
 
   data.sb_right = button_data->button_stick_right;
 

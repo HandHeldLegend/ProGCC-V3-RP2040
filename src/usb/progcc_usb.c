@@ -84,7 +84,7 @@ bool progcc_usb_start(void)
 
 void progcc_usb_task(progcc_button_data_s *button_data, a_data_s *analog_data)
 {
-    if (_progcc_usb_busy) return;
+    //if (_progcc_usb_busy) return;
 
     // Call the registered function
     if (_usb_hid_cb != NULL)
@@ -239,6 +239,7 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
       {
         switch_commands_future_handle(buffer[0], buffer, bufsize);
       }
+      break;
     case PUSB_MODE_NS:
       break;
     case PUSB_MODE_GC:
