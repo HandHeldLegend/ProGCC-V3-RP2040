@@ -76,8 +76,8 @@ void set_battconn()
 
 void set_devinfo()
 {
-  _switch_command_buffer[14] = 0x03; // NS Firmware primary
-  _switch_command_buffer[15] = 0x80; // NS Firmware secondary
+  _switch_command_buffer[14] = 0x04; // NS Firmware primary   (4.x)
+  _switch_command_buffer[15] = 0x33; // NS Firmware secondary (x.21)
 
   // Procon   - 0x03, 0x02
   // N64      - 0x0C, 0x11
@@ -85,8 +85,13 @@ void set_devinfo()
   // Famicom  - 0x07, 0x02
   // NES      - 0x09, 0x02
   // Genesis  - 0x0D, 0x02
-  _switch_command_buffer[16] = 0x03; // Controller ID primary
+  _switch_command_buffer[16] = 0x03; // Controller ID primary (Pro Controller)
   _switch_command_buffer[17] = 0x02; // Controller ID secondary
+
+  /*_switch_command_buffer[18-23] = MAC ADDRESS;*/
+
+  _switch_command_buffer[24] = 0x01;
+  _switch_command_buffer[25] = 0x02; // It's 2 now? Ok.
 }
 
 void set_sub_triggertime(uint16_t time_10_ms)

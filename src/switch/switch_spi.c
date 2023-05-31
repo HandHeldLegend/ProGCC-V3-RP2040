@@ -99,18 +99,15 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
         case 0x60:
             switch (address)
             {
+                // STAGE 1 READ
+                // 0x6000 - Serial number stage | Length 16 bytes
                 // Serial number disabled. First byte >= 0x80 means NO serial.
-                case 0x00:
-                    return 0x80;
+                case 0x00 ... 0x0F:
+                    return 0xFF; // Real pro controller... 255 for all this data.
                     break;
 
-                // SERIAL NUMBER READ BEGIN
-
-                case 0x01 ... 0x0F:
-                    return 0;
-                    break;
-
-                // END SERIAL NUMBER READ
+                // END OF STAGE 1 //
+                // --------------------- //
 
                 // Return factory controller type
                 // Set as pro controller
@@ -130,67 +127,333 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
                     break;
 
                 // TO-DO - Implement factory 6-Axis calibration.
-                case 0x20 ... 0x37:
-                    return 0xFF;
+                case 0x20:
+                    return 35;
+                    break;
+
+                case 0x21:
+                    return 0;
+                    break;
+
+                case 0x22:
+                    return 185;
+                    break;
+
+                case 0x23:
+                    return 255;
+                    break;
+
+                case 0x24:
+                    return 26;
+                    break;
+
+                case 0x25:
+                    return 1;
+                    break;
+
+                case 0x26:
+                    return 0;
+                    break;
+
+                case 0x27:
+                    return 64;
+                    break;
+
+                case 0x28:
+                    return 0;
+                    break;
+
+                case 0x29:
+                    return 64;
+                    break;
+
+                case 0x2A:
+                    return 0;
+                    break;
+
+                case 0x2B:
+                    return 64;
+                    break;
+
+                case 0x2C:
+                    return 73;
+                    break;
+
+                case 0x2D:
+                    return 0;
+                    break;
+
+                case 0x2E:
+                    return 248;
+                    break;
+
+                case 0x2F:
+                    return 255;
+                    break;
+
+                case 0x30:
+                    return 217;
+                    break;
+
+                case 0x31:
+                    return 255;
+                    break;
+
+                case 0x32:
+                    return 59;
+                    break;
+
+                case 0x33:
+                    return 52;
+                    break;
+
+                case 0x34:
+                    return 59;
+                    break;
+
+                case 0x35:
+                    return 52;
+                    break;
+
+                case 0x36:
+                    return 59;
+                    break;
+
+                case 0x37:
+                    return 52;
                     break;
 
                 // TO-DO - Implement factory left stick calibration.
-                case 0x3D ... 0x45:
-                    return 0x00; //ns_input_stickcaldata.l_stick_cal[address-0x3B];
+                case 0x3D:
+                case 0x3E:
+                case 0x3F:
+                    return 0x00; // Magic bytes not for factory use?
+                    break;
+
+                case 0x40:
+                    return 236;
+                    break;
+
+                case 0x41:
+                    return 55;
+                    break;
+
+                case 0x42:
+                    return 120;
+                    break;
+
+                case 0x43:
+                    return 24;
+                    break;
+
+                case 0x44:
+                    return 240;
+                    break;
+
+                case 0x45:
+                    return 7;
                     break;
 
                 // TO-DO - Implement factory right stick calibration.
-                case 0x46 ... 0x4E:
-                    return 0x00; //ns_input_stickcaldata.l_stick_cal[address-0x44];
+                case 0x46:
+                case 0x47:
+                case 0x48:
+                    return 0; // Unused magic bytes?
                     break;
 
+                case 0x49:
+                    return 248;
+                    break;
+
+                case 0x4A:
+                    return 22;
+                    break;
+
+                case 0x4B:
+                    return 122;
+                    break;
+
+                case 0x4C:
+                    return 10;
+                    break;
+
+                case 0x4D:
+                    return 49;
+                    break;
+
+                case 0x4E:
+                    return 6; //ns_input_stickcaldata.l_stick_cal[address-0x44];
+                    break;
+
+                case 0x4F:
+                    return 0xFF; // Not sure
+                    break;
+
+                // STAGE 2 READ
+                // 0x6050 | Length 13 bytes
                 // TO-DO - Implement factory body color.
                 case 0x50:
-                    return 0xFF; // Red
+                    return 26; // Red
                     break;
                 case 0x51:
-                    return 0xFF; // Green
+                    return 26; // Green
                     break;
                 case 0x52:
-                    return 0x00; // Blue
+                    return 26; // Blue
                     break;
 
                 // TO-DO - Implement factory buttons color.
                 case 0x53 ... 0x55:
-                    return 0xFF;
+                    return 94; // Default real ProCon
                     break;
 
                 // TO-DO - Implement factory left grip color.
-                case 0x56 ... 0x58:
-                    return 0xFF;
+                case 0x56:
+                    return 255; // R default smash procon
                     break;
 
-                // This is used for SNES controller color options
-                // 0x00 - North America (Super Nintendo Purple)
-                // 0x01 - Japan (Super Famicom)
-                // 0x02 - Europe (Super Nintendo)
-                case 0x5C:
-                    /*
-                    if (_ns_subcore == NS_TYPE_SNES)
-                    {
-                        return 0x02;
-                    }
-                    else
-                    {*/
-                        return 0x00;
-                    //}
+                case 0x57:
+                    return 255; // G
+                    break;
 
+                case 0x58:
+                    return 255; // B
                     break;
 
                 // TO-DO - Implement factory grip (left and right) color.
                 case 0x59 ... 0x5B:
-                    return 0xFF;
+                    return 255; // Default procon
                     break;
 
-                // Other config nonsense.
-                case 0x80 ... 0x97:
-                    return 0xFF;
+                case 0x5C:
+                    return 0x01; // Default smash procon
                     break;
+
+                    // END OF STAGE 2 //
+                    // --------------------- //
+
+                // Stage 3 configuration 0x6080, length 24
+                // Covers factory sensor and stick device params
+
+                // Start 6 axis offsets
+                case 0x80:
+                    return 80;
+                    break;
+
+                case 0x81:
+                    return 253;
+                    break;
+
+                case 0x82:
+                    return 0;
+                    break;
+
+                case 0x83:
+                    return 0;
+                    break;
+
+                case 0x84:
+                    return 198;
+                    break;
+
+                case 0x85:
+                    return 15;
+                    break;
+
+                // Start stick device parameters
+                // STAGE 4 is mirrored. Redundancy?
+                case 0x98:
+                case 0x86:
+                    return 15;
+                    break;
+
+                case 0x99:
+                case 0x87:
+                    return 48;
+                    break;
+
+                case 0x9A:
+                case 0x88:
+                    return 97;
+                    break;
+
+                case 0x9B:
+                case 0x89:
+                    return 174;
+                    break;
+
+                case 0x9C:
+                case 0x8A:
+                    return 144;
+                    break;
+
+                case 0x9D:
+                case 0x8B:
+                    return 217;
+                    break;
+
+                case 0x9E:
+                case 0x8C:
+                    return 212;
+                    break;
+
+                case 0x9F:
+                case 0x8D:
+                    return 20;
+                    break;
+
+                case 0xA0:
+                case 0x8E:
+                    return 84;
+                    break;
+
+                case 0xA1:
+                case 0x8F:
+                    return 65;
+                    break;
+
+                case 0xA2:
+                case 0x90:
+                    return 21;
+                    break;
+
+                case 0xA3:
+                case 0x91:
+                    return 84;
+                    break;
+
+                case 0xA4:
+                case 0x92:
+                    return 199;
+                    break;
+
+                case 0xA5:
+                case 0x93:
+                    return 121;
+                    break;
+
+                case 0xA6:
+                case 0x94:
+                    return 156;
+                    break;
+
+                case 0xA7:
+                case 0x95:
+                    return 51;
+                    break;
+
+                case 0xA8:
+                case 0x96:
+                    return 54;
+                    break;
+
+                case 0xA9:
+                case 0x97:
+                    return 99;
+                    break;
+
+                    // END OF STAGE 3 //
+                    // --------------------- //
 
                 default:
                     return 0x00;
@@ -198,26 +461,102 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
             }
             break;
 
+
         // User calibration values
         case 0x80:
             switch (address)
             {
+                // STAGE 5
+                // Stick user calibration
+                // Magic bytes
+                case 0x26:
+                case 0x10:
+                case 0x1B:
+                    return 0xB2;
+                    break;
+
+                case 0x27:
+                case 0x1C:
+                case 0x11:
+                    return 0xA1;
+                    break;
 
                 // User left stick calibration data
-                case 0x10 ... 0x1A:
-                    return 0x00;
+                case 0x12:
+                    return 242;
                     break;
 
-                // TO-DO - User right stick calibration data
-                case 0x1B ... 0x25:
-                    return 0x00;
+                case 0x13:
+                    return 37;
                     break;
 
-                // TO-DO - User 6-axis calibration data Magic bytes
-                case 0x26:
-                case 0x27:
-                    return 0x00;
+                case 0x14:
+                    return 104;
                     break;
+
+                case 0x15:
+                    return 204;
+                    break;
+
+                case 0x16:
+                    return 119;
+                    break;
+
+                case 0x17:
+                    return 118;
+                    break;
+
+                case 0x18:
+                    return 16;
+                    break;
+
+                case 0x19:
+                    return 198;
+                    break;
+
+                case 0x1A:
+                    return 98;
+                    break;
+
+                //User right stick calibration data
+                case 0x1D:
+                    return 98;
+                    break;
+
+                case 0x1E:
+                    return 98;
+                    break;
+
+                case 0x1F:
+                    return 98;
+                    break;
+
+                case 0x20:
+                    return 98;
+                    break;
+
+                case 0x21:
+                    return 98;
+                    break;
+
+                case 0x22:
+                    return 98;
+                    break;
+
+                case 0x23:
+                    return 98;
+                    break;
+
+                case 0x24:
+                    return 98;
+                    break;
+
+                case 0x25:
+                    return 98;
+                    break;
+
+                // END OF STAGE 5 //
+                // --------------------- //
 
                 // TO-DO - User 6-axis calibration data
                 case 0x28 ... 0x3F:
