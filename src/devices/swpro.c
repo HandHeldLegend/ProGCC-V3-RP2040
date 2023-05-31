@@ -174,5 +174,10 @@ void swpro_hid_report(progcc_button_data_s *button_data, a_data_s *analog_data)
 
   data.sb_right = button_data->button_stick_right;
 
+  data.ls_x = analog_data->lx<<4;
+  data.ls_y = analog_data->ly<<4;
+  data.rs_x = analog_data->rx<<4;
+  data.rs_y = analog_data->ry<<4;
+
   switch_commands_process(&data);
 }

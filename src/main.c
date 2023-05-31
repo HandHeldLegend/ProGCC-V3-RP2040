@@ -55,6 +55,7 @@ void main_two()
         else
         {
             stick_scaling_process_data(&analog_data, &scaled_analog_data);
+            printf("LS: %d\n", scaled_analog_data.lx);
             static float la;
             static float ra;
 
@@ -78,6 +79,8 @@ int main() {
     board_init();
 
     printf("ProGCC Started.\n");
+
+    switch_analog_calibration_init();
 
     PIO pio = pio0;
     int sm = 0;

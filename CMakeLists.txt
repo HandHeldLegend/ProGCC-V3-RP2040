@@ -34,6 +34,7 @@ src/analog/stick_scaling.c
 
 src/switch/switch_commands.c
 src/switch/switch_spi.c
+src/switch/switch_analog.c
 
 src/rgb.c
 )

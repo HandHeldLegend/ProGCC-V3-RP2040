@@ -223,7 +223,16 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
                     return 52;
                     break;
 
-                // TO-DO - Implement factory left stick calibration.
+                case 0x3D ... 0x45:
+                    return switch_analog_calibration_data[address-0x3D];
+                    break;
+
+                case 0x46 ... 0x4E:
+                    return switch_analog_calibration_data[address-0x3D];
+                    break;
+
+                // Default factory calibration
+                /*
                 case 0x3D:
                 case 0x3E:
                 case 0x3F:
@@ -283,7 +292,7 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
 
                 case 0x4E:
                     return 6; //ns_input_stickcaldata.l_stick_cal[address-0x44];
-                    break;
+                    break;*/
 
                 case 0x4F:
                     return 0xFF; // Not sure
@@ -469,90 +478,18 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
                 // STAGE 5
                 // Stick user calibration
                 // Magic bytes
+
+                case 0x10 ... 0x1A:
+                    return 0xFF; // No left stick config
+                    break;
+                case 0x1B ... 0x25:
+                    return 0xFF; // No user config... maybe this helps :,)
+                    break;
+
+                // Gyro magic?
                 case 0x26:
-                case 0x10:
-                case 0x1B:
-                    return 0xB2;
-                    break;
-
                 case 0x27:
-                case 0x1C:
-                case 0x11:
-                    return 0xA1;
-                    break;
-
-                // User left stick calibration data
-                case 0x12:
-                    return 242;
-                    break;
-
-                case 0x13:
-                    return 37;
-                    break;
-
-                case 0x14:
-                    return 104;
-                    break;
-
-                case 0x15:
-                    return 204;
-                    break;
-
-                case 0x16:
-                    return 119;
-                    break;
-
-                case 0x17:
-                    return 118;
-                    break;
-
-                case 0x18:
-                    return 16;
-                    break;
-
-                case 0x19:
-                    return 198;
-                    break;
-
-                case 0x1A:
-                    return 98;
-                    break;
-
-                //User right stick calibration data
-                case 0x1D:
-                    return 98;
-                    break;
-
-                case 0x1E:
-                    return 98;
-                    break;
-
-                case 0x1F:
-                    return 98;
-                    break;
-
-                case 0x20:
-                    return 98;
-                    break;
-
-                case 0x21:
-                    return 98;
-                    break;
-
-                case 0x22:
-                    return 98;
-                    break;
-
-                case 0x23:
-                    return 98;
-                    break;
-
-                case 0x24:
-                    return 98;
-                    break;
-
-                case 0x25:
-                    return 98;
+                    return 0xFF; // same as stick usually...
                     break;
 
                 // END OF STAGE 5 //
@@ -560,19 +497,19 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
 
                 // TO-DO - User 6-axis calibration data
                 case 0x28 ... 0x3F:
-                    return 0x00;
+                    return 0xFF;
                     break;
 
                 default:
-                    return 0x00;
+                    return 0xFF;
                     break;
             }
             break;
 
         default:
-            return 0x00;
+            return 0xFF;
             break;
     }
 
-    return 0x00;
+    return 0xFF;
 }
