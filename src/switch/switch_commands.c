@@ -61,7 +61,7 @@ void set_timer()
   static uint8_t _switch_timer = 0;
   _switch_command_buffer[0] = _switch_timer;
   //printf("Td=%d \n", _switch_timer);
-  if (_switch_timer == 255)
+  if (_switch_timer == 0xFF)
   {
     _switch_timer = 0;
   }
@@ -202,6 +202,11 @@ void command_handler(uint8_t command, const uint8_t *data, uint16_t len)
 
   switch(command)
   {
+    case SW_CMD_SET_NFC:
+      printf("Set NFC MCU:\n");
+      set_ack(0x80);
+      break;
+
     case SW_CMD_ENABLE_IMU:
       printf("Enable IMU: %d\n", data[11]);
       set_ack(0x80);
@@ -282,13 +287,15 @@ void command_handler(uint8_t command, const uint8_t *data, uint16_t len)
       printf("\n");
       break;
   }
+
+  printf("Sent: ");
   for(uint8_t i = 0; i < 32; i++)
   {
     printf("%X, ", _switch_command_buffer[i]);
   }
   printf("\n");
 
-  tud_hid_report(_switch_command_report_id, _switch_command_buffer, 64);
+  tud_hid_report(0x21, _switch_command_buffer, 64);
 }
 
 // Handles an OUT report and responds accordingly.
@@ -302,6 +309,22 @@ void report_handler(uint8_t report_id, const uint8_t *data, uint16_t len)
       break;
 
     case SW_OUT_ID_RUMBLE:
+      printf("R: ");
+      for(uint16_t i = 0; i < len; i++)
+      {
+        printf("%X, ", data[i]);
+      }
+      printf("\n");
+
+      #define RUMBLE_IDX_L  3
+      #define RUMBLE_IDX_R  7
+
+      if (data[RUMBLE_IDX_L] > 1)
+      {
+        progcc_utils_set_rumble(PROGCC_RUMBLE_ON);
+      }
+      else progcc_utils_set_rumble(PROGCC_RUMBLE_OFF);
+
       break;
 
     case SW_OUT_ID_INFO:
@@ -332,20 +355,20 @@ void switch_commands_process(sw_input_s *input_data)
       set_battconn();
 
       // Set input data
-      _switch_command_buffer[1] = input_data->right_buttons;
-      _switch_command_buffer[2] = input_data->shared_buttons;
-      _switch_command_buffer[3] = input_data->left_buttons;
+      _switch_command_buffer[2] = input_data->right_buttons;
+      _switch_command_buffer[3] = input_data->shared_buttons;
+      _switch_command_buffer[4] = input_data->left_buttons;
 
       // Set sticks directly from hoja_analog_data
       // Saves cycles :)
-      _switch_command_buffer[4] = (input_data->ls_x & 0xFF);
-      _switch_command_buffer[5] = (input_data->ls_x & 0xF00) >> 8;
+      _switch_command_buffer[5] = (input_data->ls_x & 0xFF);
+      _switch_command_buffer[6] = (input_data->ls_x & 0xF00) >> 8;
       //ns_input_report[7] |= (g_stick_data.lsy & 0xF) << 4;
-      _switch_command_buffer[6] = (input_data->ls_y & 0xFF0) >> 4;
-      _switch_command_buffer[7] = (input_data->rs_x & 0xFF);
-      _switch_command_buffer[8] = (input_data->rs_x & 0xF00) >> 8;
-      _switch_command_buffer[9] = (input_data->rs_y & 0xFF0) >> 4;
-      _switch_command_buffer[10] = 0x08;
+      _switch_command_buffer[7] = (input_data->ls_y & 0xFF0) >> 4;
+      _switch_command_buffer[8] = (input_data->rs_x & 0xFF);
+      _switch_command_buffer[9] = (input_data->rs_x & 0xF00) >> 8;
+      _switch_command_buffer[10] = (input_data->rs_y & 0xFF0) >> 4;
+      _switch_command_buffer[11] = 0x08;
 
       tud_hid_report(_switch_command_report_id, _switch_command_buffer, 64);
     }

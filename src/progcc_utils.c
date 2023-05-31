@@ -125,8 +125,8 @@ void progcc_utils_read_buttons(progcc_button_data_s *data)
 
   gpio_put(PGPIO_SCAN_C, false);
   sleep_us(100);
-  data->button_plus     = !gpio_get(PGPIO_PUSH_B);
-  data->button_home     = !gpio_get(PGPIO_PUSH_A);
+  data->button_plus     = !gpio_get(PGPIO_PUSH_A);
+  data->button_home     = !gpio_get(PGPIO_PUSH_B);
   data->button_capture  = !gpio_get(PGPIO_PUSH_D);
   data->button_minus    = !gpio_get(PGPIO_PUSH_C);
   gpio_put(PGPIO_SCAN_C, true);
