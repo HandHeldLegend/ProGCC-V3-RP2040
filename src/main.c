@@ -64,11 +64,6 @@ void main_two()
             uint32_t c = (uint32_t) la;
             write_color(c);
         }
-
-        if(!gpio_get(PGPIO_BUTTON_LS))
-        {
-            reset_usb_boot(0, 0);
-        }
     }
 }
 
@@ -93,11 +88,10 @@ int main() {
     // Perform GPIO setup
     progcc_utils_hardware_setup();
 
-    /*
-    if (!gpio_get(PGPIO_BUTTON_START))
+    if(!gpio_get(PGPIO_BUTTON_MODE))
     {
-        //reset_usb_boot(0, 0);
-    }*/
+        reset_usb_boot(0, 0);
+    }
 
     progcc_usb_set_mode(PUSB_MODE_SW, true);
 
