@@ -174,6 +174,11 @@ void swpro_hid_report(progcc_button_data_s *button_data, a_data_s *analog_data)
 
   data.sb_right = button_data->button_stick_right;
 
+  data.t_r = button_data->trigger_r;
+  data.t_l = button_data->trigger_l;
+  data.t_zl = button_data->trigger_zl;
+  data.t_zr = button_data->trigger_zr;
+
   data.ls_x = analog_data->lx<<4;
   data.ls_y = analog_data->ly<<4;
   data.rs_x = analog_data->rx<<4;

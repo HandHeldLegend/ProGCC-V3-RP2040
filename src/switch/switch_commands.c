@@ -120,6 +120,20 @@ void set_shipmode(uint8_t ship_mode)
   // Unhandled.
 }
 
+// Translate and handle rumble
+void rumble_translate(const uint8_t *data)
+{
+    float amp_range_inc    = 100.0f/0x7F;
+
+    // Get High band amplitude
+    uint8_t hba = (data[1] & 0xFE)/2;
+
+    float ha = (float) hba*amp_range_inc;
+    progcc_utils_set_rumble((ha>10.0f)?PROGCC_RUMBLE_ON:PROGCC_RUMBLE_OFF);
+
+    //printf("Amplitude: %.2f\n", ha);
+}
+
 // Sends mac address with 0x81 command (unknown?)
 void info_set_mac()
 {
@@ -310,26 +324,12 @@ void report_handler(uint8_t report_id, const uint8_t *data, uint16_t len)
   {
     // We have command data and possibly rumble
     case SW_OUT_ID_RUMBLE_CMD:
+      rumble_translate(&data[2]);
       command_handler(data[10], data, len);
       break;
 
     case SW_OUT_ID_RUMBLE:
-      printf("R: ");
-      for(uint16_t i = 0; i < len; i++)
-      {
-        printf("%X, ", data[i]);
-      }
-      printf("\n");
-
-      #define RUMBLE_IDX_L  3
-      #define RUMBLE_IDX_R  7
-
-      if (data[RUMBLE_IDX_L] > 1)
-      {
-        progcc_utils_set_rumble(PROGCC_RUMBLE_ON);
-      }
-      else progcc_utils_set_rumble(PROGCC_RUMBLE_OFF);
-
+      rumble_translate(&data[2]);
       break;
 
     case SW_OUT_ID_INFO:

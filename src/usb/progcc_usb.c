@@ -237,7 +237,15 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
     case PUSB_MODE_SW:
       if (!report_id && !report_type)
       {
-        switch_commands_future_handle(buffer[0], buffer, bufsize);
+        if (buffer[0] == SW_OUT_ID_RUMBLE)
+        {
+          rumble_translate(&buffer[2]);
+        }
+        else
+        {
+          switch_commands_future_handle(buffer[0], buffer, bufsize);
+        }
+
       }
       break;
     case PUSB_MODE_NS:

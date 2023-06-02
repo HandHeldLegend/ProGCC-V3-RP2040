@@ -55,7 +55,6 @@ void main_two()
         else
         {
             stick_scaling_process_data(&analog_data, &scaled_analog_data);
-            printf("LS: %d\n", scaled_analog_data.lx);
             static float la;
             static float ra;
 

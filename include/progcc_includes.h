@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "pico/stdlib.h"
 #include "pico/bootrom.h"
