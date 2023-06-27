@@ -3,6 +3,10 @@
 
 #include "progcc_includes.h"
 
-void put_pixel(uint32_t pixel_grb);
+void rgb_set_all(uint32_t color);
+
+void rgb_init();
+
+void rgb_tick();
 
 #endif

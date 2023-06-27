@@ -1,7 +1,48 @@
 #include "rgb.h"
 
-void put_pixel(uint32_t pixel_grb) {
-    pio_sm_put_blocking(pio0, 0, pixel_grb << 8u);
+// 21 steps is about 0.35 seconds
+// Formula is time period us / 16666us (60hz)
+#define RGB_FADE_STEPS 21
+
+uint8_t _rgb_anim_steps = 0;
+bool _rgb_out_dirty = false;
+
+rgb_s _rgb_next[NUM_PIXELS]     = {0};
+rgb_s _rgb_current[NUM_PIXELS]  = {0};
+rgb_s _rgb_last[NUM_PIXELS]     = {0};
+
+// Returns a bool to indicate whether or not
+// an animation frame should occur
+bool _rgb_update_ready()
+{
+    static uint32_t last_time   = 0;
+    static uint32_t this_time   = 0;
+
+    this_time = time_us_32();
+
+    // Clear variable
+    uint32_t diff = 0;
+
+    // Handle edge case where time has
+    // looped around and is now less
+    if (this_time <= last_time)
+    {
+        diff = (0xFFFFFFFF - last_time) + this_time;
+    }
+    else
+    {
+        diff = this_time - last_time;
+    }
+
+    // We want a target LED rate of ~60hz
+    // 16666us
+    if (diff >= 16666)
+    {
+        // Set the last time
+        last_time = this_time;
+        return true;
+    }
+    return false;
 }
 
 static inline uint32_t urgb_u32(uint8_t r, uint8_t g, uint8_t b) {
@@ -11,50 +52,99 @@ static inline uint32_t urgb_u32(uint8_t r, uint8_t g, uint8_t b) {
             (uint32_t) (b);
 }
 
-void pattern_snakes(uint len, uint t) {
-    for (uint i = 0; i < len; ++i) {
-        uint x = (i + (t >> 1)) % 64;
-        if (x < 10)
-            put_pixel(urgb_u32(0xff, 0, 0));
-        else if (x >= 15 && x < 25)
-            put_pixel(urgb_u32(0, 0xff, 0));
-        else if (x >= 30 && x < 40)
-            put_pixel(urgb_u32(0, 0, 0xff));
-        else
-            put_pixel(0);
+void _rgb_update_all()
+{
+    for(uint8_t i = 0; i < NUM_PIXELS; i++)
+    {
+        pio_sm_put_blocking(RGB_PIO, RGB_SM, _rgb_current[i].color);
     }
 }
 
-void pattern_random(uint len, uint t) {
-    if (t % 8)
-        return;
-    for (int i = 0; i < len; ++i)
-        put_pixel(rand());
+uint32_t _rgb_blend(rgb_s *original, rgb_s *new, float blend)
+{
+    float or = (float) original->r;
+    float og = (float) original->g;
+    float ob = (float) original->b;
+    float nr = (float) new->r;
+    float ng = (float) new->g;
+    float nb = (float) new->b;
+    float outr = or + ((nr-or)*blend);
+    float outg = og + ((ng-og)*blend);
+    float outb = ob + ((nb-ob)*blend);
+    rgb_s col = {
+        .r = (uint8_t) outr,
+        .g = (uint8_t) outg,
+        .b = (uint8_t) outb
+    };
+    return col.color;
 }
 
-void pattern_sparkle(uint len, uint t) {
-    if (t % 8)
-        return;
-    for (int i = 0; i < len; ++i)
-        put_pixel(rand() % 16 ? 0 : 0xffffffff);
-}
+void _rgb_animate_step()
+{
+    static uint8_t steps = RGB_FADE_STEPS;
+    const float blend_step = 1.0f/RGB_FADE_STEPS;
+    bool done = true;
 
-void pattern_greys(uint len, uint t) {
-    int max = 100; // let's not draw too much current!
-    t %= max;
-    for (int i = 0; i < len; ++i) {
-        put_pixel(t * 0x10101);
-        if (++t >= max) t = 0;
+    if (_rgb_out_dirty)
+    {
+        memcpy(_rgb_last, _rgb_current, sizeof(_rgb_last));
+        steps = 0;
+        _rgb_out_dirty = false;
+        done = false;
+    }
+
+    if (steps < RGB_FADE_STEPS)
+    {
+        float blender = blend_step * (float) steps;
+        // Blend between old and next colors appropriately
+        for(uint8_t i = 0; i < NUM_PIXELS; i++)
+        {
+            _rgb_current[i].color = _rgb_blend(&_rgb_last[i], &_rgb_next[i], blender);
+        }
+        steps++;
+        _rgb_update_all();
+    }
+    else if (!done)
+    {
+        memcpy(_rgb_current, _rgb_next, sizeof(_rgb_next));
+        _rgb_update_all();
+        done = true;
     }
 }
 
-typedef void (*pattern)(uint len, uint t);
-const struct {
-    pattern pat;
-    const char *name;
-} pattern_table[] = {
-        {pattern_snakes,  "Snakes!"},
-        {pattern_random,  "Random data"},
-        {pattern_sparkle, "Sparkles"},
-        {pattern_greys,   "Greys"},
-};
+// Enable the RGB transition to the next color
+void _rgb_set_dirty()
+{
+    _rgb_out_dirty = true;
+}
+
+// Set all RGBs to one color
+void rgb_set_all(uint32_t color)
+{
+    for(uint8_t i = 0; i < NUM_PIXELS; i++)
+    {
+        _rgb_next[i].color = color;
+    }
+    _rgb_out_dirty = true;
+}
+
+void rgb_set_group(uint8_t group)
+{
+
+}
+
+void rgb_init()
+{
+    uint offset = pio_add_program(RGB_PIO, &ws2812_program);
+    ws2812_program_init(RGB_PIO, RGB_SM, offset, WS2812_PIN, IS_RGBW);
+}
+
+// One tick of RGB logic
+// only performs actions if necessary
+void rgb_tick()
+{
+    if(_rgb_update_ready())
+    {
+        _rgb_animate_step();
+    }
+}

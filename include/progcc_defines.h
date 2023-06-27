@@ -5,4 +5,10 @@
 
 extern const char* global_string_descriptor[];
 
+#define RGB_PIO pio0
+#define RGB_SM 1
+
+#define GAMEPAD_PIO pio0
+#define GAMEPAD_SM 0
+
 #endif

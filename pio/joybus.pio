@@ -1,15 +1,54 @@
 ;
-; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
-;
-; SPDX-License-Identifier: BSD-3-Clause
+; Copyright (c) Hand Held Legend, LLC 2023
 ;
 
 .program joybus
 
 ; First lets focus on counting pulses
 start:
-  wait 0 gpio 10
-  set x, 1
-  mov osr, x
-  wait 1 gpio 10
+  ; Set x scratch register as bit counter to allow 8 loops
+  set x, 7
+  ; Ensure line is idle or high first
+  wait 1 pin, 0
+bitloop:
+  ; Wait until pin goes LOW, then wait duration so we are in the center of
+  ; a given pulse (9*0.125=2.25 + 0.125us)
+  wait 0 pin, 0 [19]
+  ; Get the level and put it into ISR
+  in pins, 1
+  ; Ensure pin goes HIGH
+  wait 1 pin, 0
+  ; Decrement x and jump to bitloop if we aren't at 0 yet
+  jmp x-- bitloop
+
+; When we get here, no more bits to do
+bytecomplete:
+  ; push data to in RX FIFO
+  push
+  ; Set interrupt, do not wait for it to clear
+  irq nowait 0
   jmp start
+
+% c-sdk {
+static inline void joybus_program_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_sm_config c = joybus_program_get_default_config(offset);
+
+    // Map the state machine's OUT pin group to one pin, namely the `pin`
+    // parameter to this function.
+    sm_config_set_out_pins(&c, pin, 1);
+    // Set this pin's GPIO function (connect PIO to the pad)
+    pio_gpio_init(pio, pin);
+    // Set the pin direction to output at the PIO
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+
+    // Frequency must be 8000000hz
+    // Results in each cycle being 0.125us roughly
+    float div = clock_get_hz(clk_sys) / (8000000);
+    sm_config_set_clkdiv(&c, div);
+
+    // Load our configuration, and jump to the start of the program
+    pio_sm_init(pio, sm, offset, &c);
+    // Set the state machine running
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
