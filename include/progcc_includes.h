@@ -45,6 +45,9 @@
 #include "dinput.h"
 #include "swpro.h"
 
+#include "progcc_comms.h"
+#include "progcc.h"
+
 // Switch pro includes
 #include "switch_analog.h"
 #include "switch_spi.h"

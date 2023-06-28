@@ -13,12 +13,12 @@ rgb_s _rgb_last[NUM_PIXELS]     = {0};
 
 // Returns a bool to indicate whether or not
 // an animation frame should occur
-bool _rgb_update_ready()
+bool _rgb_update_ready(uint32_t timestamp)
 {
     static uint32_t last_time   = 0;
     static uint32_t this_time   = 0;
 
-    this_time = time_us_32();
+    this_time = timestamp;
 
     // Clear variable
     uint32_t diff = 0;
@@ -141,9 +141,9 @@ void rgb_init()
 
 // One tick of RGB logic
 // only performs actions if necessary
-void rgb_tick()
+void rgb_tick(uint32_t timestamp)
 {
-    if(_rgb_update_ready())
+    if(_rgb_update_ready(timestamp))
     {
         _rgb_animate_step();
     }

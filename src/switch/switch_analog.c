@@ -2,6 +2,8 @@
 
 uint8_t switch_analog_calibration_data[18];
 
+// Initializes the analog calibration data
+// for pro controller mode
 void switch_analog_calibration_init()
 {
   uint16_t min = 128<<4;

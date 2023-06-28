@@ -3,6 +3,63 @@
 
 #include <inttypes.h>
 
+// Map code is used during remap
+// operations and configuration
+typedef enum
+{
+    MAPCODE_DUP = 0,
+    MAPCODE_DDOWN,
+    MAPCODE_DLEFT,
+    MAPCODE_DRIGHT,
+
+    MAPCODE_B_UP,
+    MAPCODE_B_DOWN,
+    MAPCODE_B_LEFT,
+    MAPCODE_B_RIGHT,
+
+    MAPCODE_T_L,
+    MAPCODE_T_ZL,
+    MAPCODE_T_R,
+    MAPCODE_T_ZR,
+
+    MAPCODE_B_START,
+    MAPCODE_B_SELECT,
+    MAPCODE_B_STICKL,
+    MAPCODE_B_STICKR,
+} mapcode_t;
+
+// Remapping struct used to determine
+// remapping parameters
+typedef struct
+{
+    union
+    {
+        struct
+        {
+            mapcode_t dpad_up     : 4;
+            mapcode_t dpad_down   : 4;
+            mapcode_t dpad_left   : 4;
+            mapcode_t dpad_right  : 4;
+
+            mapcode_t button_up       : 4;
+            mapcode_t button_down     : 4;
+            mapcode_t button_left     : 4;
+            mapcode_t button_right    : 4;
+
+            mapcode_t trigger_l       : 4;
+            mapcode_t trigger_zl      : 4;
+            mapcode_t trigger_r       : 4;
+            mapcode_t trigger_zr      : 4;
+
+            mapcode_t button_start    : 4;
+            mapcode_t button_select   : 4;
+            mapcode_t button_stick_left : 4;
+            mapcode_t button_stick_right : 4;
+        };
+        uint64_t val;
+    };
+} button_remap_s;
+
 typedef struct
 {
     union
@@ -20,26 +77,28 @@ typedef struct
 
 typedef enum
 {
+    COMM_MODE_USB,
+    COMM_MODE_GC,
+    COMM_MODE_N64,
+    COMM_MODE_SNES,
+} comm_mode_t;
+
+typedef enum
+{
     PUSB_MODE_NS,
     PUSB_MODE_GC,
     PUSB_MODE_XI,
     PUSB_MODE_DI,
     PUSB_MODE_SW,
     PUSB_MODE_MAX,
-} progcc_usb_mode_t;
+} usb_mode_t;
 
 typedef enum
 {
-    PUSB_STATUS_IDLE,
-    PUSB_STATUS_INITIALIZED,
-} progcc_usb_status_t;
-
-typedef enum
-{
-  PROGCC_RUMBLE_OFF,
-  PROGCC_RUMBLE_BRAKE,
-  PROGCC_RUMBLE_ON,
-} progcc_rumble_t;
+  RUMBLE_OFF,
+  RUMBLE_BRAKE,
+  RUMBLE_ON,
+} rumble_t;
 
 typedef enum
 {
@@ -122,7 +181,7 @@ typedef struct
         };
         uint8_t buttons_system;
     };
-} __attribute__ ((packed)) progcc_button_data_s;
+} __attribute__ ((packed)) button_data_s;
 
 typedef struct
 {
@@ -158,10 +217,22 @@ typedef struct
 
 typedef struct
 {
+    int lx;
+    int ly;
+    int rx;
+    int ry;
+    int tl;
+    int tr;
+} __attribute__ ((packed)) analog_data_s;
+
+typedef struct
+{
     float lx;
     float ly;
     float rx;
     float ry;
+    float lt;
+    float rt;
 } __attribute__ ((packed)) af_data_s;
 
 typedef struct

@@ -7,6 +7,6 @@ void rgb_set_all(uint32_t color);
 
 void rgb_init();
 
-void rgb_tick();
+void rgb_tick(uint32_t timestamp);
 
 #endif
