@@ -11,33 +11,48 @@ pico_sdk_init()
 
 include_directories(
 	include include/devices include/usb
-	include/analog
+	include/analog include/switch
 	)
 
 add_executable(${PROJECT_NAME}
 src/main.c
 
-src/progcc_settings.c
+src/progcc.c
+
+
 src/progcc_defines.c
-src/progcc_utils.c
+src/progcc_settings.c
 
 src/devices/dinput.c
 src/devices/gcinput.c
 src/devices/nsinput.c
 src/devices/xinput.c
+src/devices/swpro.c
+
 src/usb/progcc_usb.c
 src/usb/xinput_device.c
 
 src/analog/stick_scaling.c
+
+src/switch/switch_commands.c
+src/switch/switch_spi.c
+src/switch/switch_analog.c
+
+src/rgb.c
+src/remap.c
 )
 
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE
 	PICO_XOSC_STARTUP_DELAY_MULTIPLIER=64
+	PICO_DEFAULT_UART_TX_PIN=12
+	PICO_DEFAULT_UART_RX_PIN=13
 	#PICO_DEFAULT_BOOT_STAGE2=boot2_generic_03h
 	#PICO_FLASH_SPI_CLKDIV=8
 	)
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/generated)
+pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 #pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio/joybus.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
 target_link_libraries(${PROJECT_NAME}
@@ -45,6 +60,7 @@ pico_stdlib
 pico_bootrom
 pico_multicore
 pico_platform
+pico_rand
 
 hardware_gpio
 hardware_adc
@@ -61,6 +77,6 @@ tinyusb_board
 )
 
 pico_enable_stdio_usb(${PROJECT_NAME} 0)
-pico_enable_stdio_uart(${PROJECT_NAME} 0)
+pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
 pico_add_extra_outputs(${PROJECT_NAME})

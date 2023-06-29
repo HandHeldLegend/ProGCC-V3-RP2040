@@ -8,47 +8,33 @@
 
 #include "progcc_usb.h"
 
-progcc_usb_mode_t _progcc_usb_mode    = PUSB_MODE_XI;
-progcc_usb_status_t _progcc_usb_status  = PUSB_STATUS_IDLE;
-bool _progcc_usb_performance_mode = false;
-bool _progcc_usb_busy = false;
+usb_mode_t _usb_mode    = PUSB_MODE_XI;
+bool _usb_performance_mode = false;
+bool _usb_busy = false;
 
-typedef void (*usb_cb_t)(progcc_button_data_s *, a_data_s *);
+// Default 8ms (8000us)
+uint32_t _usb_rate = 8 * 1000;
+
+typedef void (*usb_cb_t)(button_data_s *, a_data_s *);
 
 usb_cb_t _usb_hid_cb = NULL;
 
-/* TEMPLATE FOR MODE SWITCH
-switch(_progcc_usb_mode)
+bool pusb_start(usb_mode_t mode, bool performance_mode)
 {
-  case PUSB_MODE_MAX:
-  default:
-  case PUSB_MODE_NS:
-    break;
-
-  case PUSB_MODE_GC:
-    break;
-
-  case PUSB_MODE_XI:
-    break;
-
-  case PUSB_MODE_DI:
-    break;
-}
-*/
-
-void progcc_usb_set_mode(progcc_usb_mode_t mode, bool performance_mode)
-{
-  if (_progcc_usb_status != PUSB_STATUS_IDLE)
-  {
-    return;
-  }
-
-  _progcc_usb_performance_mode = performance_mode;
+  _usb_performance_mode = performance_mode;
 
   switch(mode)
   {
     case PUSB_MODE_MAX:
     default:
+    case PUSB_MODE_DI:
+      _usb_hid_cb = dinput_hid_report;
+      break;
+
+    case PUSB_MODE_SW:
+      _usb_hid_cb = swpro_hid_report;
+      break;
+
     case PUSB_MODE_NS:
       _usb_hid_cb = nsinput_hid_report;
       break;
@@ -60,31 +46,57 @@ void progcc_usb_set_mode(progcc_usb_mode_t mode, bool performance_mode)
     case PUSB_MODE_XI:
       _usb_hid_cb = xinput_hid_report;
       break;
-
-    case PUSB_MODE_DI:
-      _usb_hid_cb = dinput_hid_report;
-      break;
   }
 
-  _progcc_usb_mode = mode;
-  _progcc_usb_status = PUSB_STATUS_INITIALIZED;
-}
-
-bool progcc_usb_start(void)
-{
-  if (_progcc_usb_status != PUSB_STATUS_INITIALIZED) return false;
+  _usb_mode = mode;
   return tusb_init();
 }
 
-void progcc_usb_task(progcc_button_data_s *button_data, a_data_s *analog_data)
+// Returns a bool to indicate whether or not
+// a comms frame should occur
+bool _pusb_poll_ready(uint32_t timestamp)
 {
-    if (_progcc_usb_busy) return;
+    static uint32_t last_time   = 0;
+    static uint32_t this_time   = 0;
 
+    this_time = timestamp;
+
+    // Clear variable
+    uint32_t diff = 0;
+
+    // Handle edge case where time has
+    // looped around and is now less
+    if (this_time < last_time)
+    {
+        diff = (0xFFFFFFFF - last_time) + this_time;
+    }
+    else
+    {
+        diff = this_time - last_time;
+    }
+
+    // We want a target rate according to our variable
+    if (diff >= _usb_rate)
+    {
+        // Set the last time
+        last_time = this_time;
+        return true;
+    }
+    return false;
+}
+
+void pusb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_data)
+{
+  if (true)
+  {
+    //if (_progcc_usb_busy) return;
     // Call the registered function
     if (_usb_hid_cb != NULL)
     {
         _usb_hid_cb(button_data, analog_data);
     }
+  }
+
 }
 
 /********* TinyUSB HID callbacks ***************/
@@ -92,10 +104,18 @@ void progcc_usb_task(progcc_button_data_s *button_data, a_data_s *analog_data)
 // Invoked when received GET DEVICE DESCRIPTOR
 // Application return pointer to descriptor
 uint8_t const* tud_descriptor_device_cb(void) {
-  switch(_progcc_usb_mode)
+  switch(_usb_mode)
   {
     case PUSB_MODE_MAX:
     default:
+    case PUSB_MODE_DI:
+      return (uint8_t const*) &di_device_descriptor;
+      break;
+
+    case PUSB_MODE_SW:
+      return (uint8_t const*) &swpro_device_descriptor;
+      break;
+
     case PUSB_MODE_NS:
       return (uint8_t const*) &ns_device_descriptor;
       break;
@@ -107,10 +127,6 @@ uint8_t const* tud_descriptor_device_cb(void) {
     case PUSB_MODE_XI:
       return (uint8_t const*) &xid_device_descriptor;
       break;
-
-    case PUSB_MODE_DI:
-      return (uint8_t const*) &di_device_descriptor;
-      break;
   }
 }
 
@@ -119,12 +135,20 @@ uint8_t const* tud_descriptor_device_cb(void) {
 // Descriptor contents must exist long enough for transfer to complete
 uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
   (void)index;  // for multiple configurations
-  switch(_progcc_usb_mode)
+  switch(_usb_mode)
   {
     case PUSB_MODE_MAX:
     default:
+    case PUSB_MODE_DI:
+      return (uint8_t const*) &di_configuration_descriptor;
+      break;
+
+    case PUSB_MODE_SW:
+      return (uint8_t const*) &swpro_configuration_descriptor;
+      break;
+
     case PUSB_MODE_NS:
-      if (_progcc_usb_performance_mode)
+      if (_usb_performance_mode)
       {
         return (uint8_t const*) &ns_configuration_descriptor_performance;
       }
@@ -132,7 +156,7 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
       break;
 
     case PUSB_MODE_GC:
-      if (_progcc_usb_performance_mode)
+      if (_usb_performance_mode)
       {
         return (uint8_t const*) &gc_configuration_descriptor_performance;
       }
@@ -143,9 +167,7 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
       return (uint8_t const*) &xid_configuration_descriptor;
       break;
 
-    case PUSB_MODE_DI:
-      return (uint8_t const*) &di_configuration_descriptor;
-      break;
+
   }
 }
 
@@ -164,7 +186,7 @@ uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id, hid_report_t
 // Invoked when report complete
 void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_t len)
 {
-    switch (_progcc_usb_mode)
+    switch (_usb_mode)
     {
         case PUSB_MODE_DI:
             if ((report[0] == 0x01) || (report[0] == 0x02))
@@ -200,56 +222,72 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_
 
 // Invoked when received SET_REPORT control request or
 // received data on OUT endpoint ( Report ID = 0, Type = 0 )
-void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
+void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
+                            hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
 {
-    switch (_progcc_usb_mode)
-    {
-        case PUSB_MODE_MAX:
-        default:
-        case PUSB_MODE_NS:
-            break;
-        case PUSB_MODE_DI:
-            if (!report_id && !report_type)
-            {
-                /*
-                if (buffer[0] == CMD_USB_REPORTID)
-                {
-                    //command_handler(buffer, bufsize);
-                }*/
-            }
-            break;
-        case PUSB_MODE_GC:
-            if (!report_id && !report_type)
-            {
-                if (buffer[0] == 0x11)
-                {
-                    //rx_vibrate = (buffer[1] > 0) ? true : false;
-                }
-                else if (buffer[0] == 0x13)
-                {
-                    //ESP_LOGI("INIT", "Rx");
-                }
-            }
-            break;
-        case PUSB_MODE_XI:
-            if (!report_id && !report_type)
-            {
-                if ((buffer[0] == 0x00) && (buffer[1] == 0x08))
-                {
-                    _progcc_usb_busy = true;
-                    if ((buffer[3] > 0) || (buffer[4] > 0))
-                    {
-                        progcc_utils_set_rumble(PROGCC_RUMBLE_ON);
-                    }
-                    else
-                    {
-                        progcc_utils_set_rumble(PROGCC_RUMBLE_OFF);
-                    }
-                    _progcc_usb_busy = false;
-                }
-            }
-            break;
-    }
+  switch (_usb_mode)
+  {
+    case PUSB_MODE_MAX:
+    default:
+    case PUSB_MODE_DI:
+      if (!report_id && !report_type)
+      {
+          /*
+          if (buffer[0] == CMD_USB_REPORTID)
+          {
+              //command_handler(buffer, bufsize);
+          }*/
+      }
+      break;
+
+    case PUSB_MODE_SW:
+      if (!report_id && !report_type)
+      {
+        if (buffer[0] == SW_OUT_ID_RUMBLE)
+        {
+          rumble_translate(&buffer[2]);
+        }
+        else
+        {
+          switch_commands_future_handle(buffer[0], buffer, bufsize);
+        }
+
+      }
+      break;
+    case PUSB_MODE_NS:
+      break;
+    case PUSB_MODE_GC:
+      if (!report_id && !report_type)
+      {
+        if (buffer[0] == 0x11)
+        {
+            //rx_vibrate = (buffer[1] > 0) ? true : false;
+        }
+        else if (buffer[0] == 0x13)
+        {
+            //ESP_LOGI("INIT", "Rx");
+        }
+      }
+      break;
+    case PUSB_MODE_XI:
+      if (!report_id && !report_type)
+      {
+          if ((buffer[0] == 0x00) && (buffer[1] == 0x08))
+          {
+              _usb_busy = true;
+              if ((buffer[3] > 0) || (buffer[4] > 0))
+              {
+                  cb_progcc_rumble_enable(true);
+              }
+              else
+              {
+                  cb_progcc_rumble_enable(false);
+              }
+              _usb_busy = false;
+          }
+      }
+      break;
+  }
 }
 
 // Invoked when received GET HID REPORT DESCRIPTOR request
@@ -257,19 +295,23 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
 uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
 {
     (void) instance;
-    switch (_progcc_usb_mode)
+    switch (_usb_mode)
     {
         case PUSB_MODE_MAX:
         default:
+        case PUSB_MODE_DI:
+            return di_hid_report_descriptor;
+            break;
+        case PUSB_MODE_SW:
+            return swpro_hid_report_descriptor;
+            break;
         case PUSB_MODE_NS:
             return ns_hid_report_descriptor;
             break;
         case PUSB_MODE_GC:
             return gc_hid_report_descriptor;
             break;
-        case PUSB_MODE_DI:
-            return di_hid_report_descriptor;
-            break;
+
     }
     return NULL;
 }
@@ -282,7 +324,7 @@ usbd_class_driver_t const *usbd_app_driver_get_cb(uint8_t *driver_count)
     return &tud_xinput_driver;
 }
 
-static uint16_t _desc_str[32];
+static uint16_t _desc_str[64];
 
 // Invoked when received GET STRING DESCRIPTOR request
 // Application return pointer to descriptor, whose contents must exist long enough for transfer to complete
@@ -303,7 +345,7 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 
     const char* str = global_string_descriptor[index];
 
-    // Cap at max char
+    // Cap at max char... WHY?
     chr_count = strlen(str);
     if ( chr_count > 31 ) chr_count = 31;
 
@@ -316,7 +358,6 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 
   // first byte is length (including header), second byte is string type
   _desc_str[0] = (TUSB_DESC_STRING << 8 ) | (2*chr_count + 2);
-
   return _desc_str;
 }
 

@@ -1,14 +1,22 @@
 #ifndef BOARD_CONFIG_H
 #define BOARD_CONFIG_H
 
+#define IS_RGBW false
+#define NUM_PIXELS 20
+
+#define WS2812_PIN 15
+
 // GPIO definitions
 
-#define PGPIO_NS_SERIAL     0
-#define PGPIO_NS_CLOCK      0
-#define PGPIO_NS_LATCH      0
+#define PGPIO_NS_SERIAL     7
+#define PGPIO_NS_CLOCK      8
+#define PGPIO_NS_LATCH      9
 
 // Enable if we are using a keypad setup
-#define PROGCC_USE_KEYPAD 0
+#define PROGCC_USE_KEYPAD 1
+
+// Analog input rate in Microseconds (us)
+#define PROGCC_ANALOG_RATE 1000
 
 // Whether or not we should use SPI based ADC for the analog sticks
 // If this is zero, we are using Gulikit's UART solution.
@@ -16,16 +24,20 @@
 
 #define PROGCC_USE_ANALOG_TRIGGERS 0
 
-#if PROGCC_USE_KEYPAD
-  #define PGPIO_SCAN_A    0
-  #define PGPIO_SCAN_B    1
-  #define PGPIO_SCAN_C    2
-  #define PGPIO_SCAN_D    3
+#define PGPIO_BUTTON_RS   10
+#define PGPIO_BUTTON_LS   11
+#define PGPIO_BUTTON_MODE 14
 
-  #define PGPIO_PUSH_A    0
-  #define PGPIO_PUSH_B    0
-  #define PGPIO_PUSH_C    0
-  #define PGPIO_PUSH_D    0
+#if PROGCC_USE_KEYPAD
+  #define PGPIO_SCAN_A    23
+  #define PGPIO_SCAN_B    20
+  #define PGPIO_SCAN_C    17
+  #define PGPIO_SCAN_D    19
+
+  #define PGPIO_PUSH_A    16
+  #define PGPIO_PUSH_B    18
+  #define PGPIO_PUSH_C    21
+  #define PGPIO_PUSH_D    22
 #else
   #define PGPIO_BUTTON_A       17
   #define PGPIO_BUTTON_B       16
@@ -56,20 +68,20 @@
 #define PGPIO_RT 26
 
 #define PGPIO_RUMBLE_MAIN   25
-#define PGPIO_RUMBLE_BRAKE  29
+#define PGPIO_RUMBLE_BRAKE  24
 
 #if PROGCC_USE_SPI_ADC
   // SPI ADC CLK pin
-  #define PGPIO_SPI_CLK 6
+  #define PGPIO_SPI_CLK 2
   // SPI ADC TX pin
-  #define PGPIO_SPI_TX  7
+  #define PGPIO_SPI_TX  3
   // SPI ADC RX pin
-  #define PGPIO_SPI_RX  4
+  #define PGPIO_SPI_RX  0
 
   // Left stick ADC Chip Select
-  #define PGPIO_LS_CS   24
+  #define PGPIO_LS_CS   1
   // Right stick ADC Chip Select
-  #define PGPIO_RS_CS   23
+  #define PGPIO_RS_CS   4
 #endif
 
 #endif
