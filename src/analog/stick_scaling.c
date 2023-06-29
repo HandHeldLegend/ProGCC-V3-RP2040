@@ -297,8 +297,19 @@ void stick_scaling_process_data(a_data_s *in, a_data_s *out)
   }
 }
 
+uint16_t _stick_distances_tracker = 0x00;
+
+void stick_scaling_reset_distances()
+{
+  _stick_distances_tracker = 0x00;
+  memset(l_angle_distances, 0, sizeof(float)*8);
+  memset(r_angle_distances, 0, sizeof(float)*8);
+}
+
 // Captures stick distance for 8 angles on a loop
-void stick_scaling_capture_distances(a_data_s *input)
+// Returns true when all 8 angles are accounted for
+// on both sticks
+bool stick_scaling_capture_distances(a_data_s *input)
 {
   // Get angle for left stick
   float l_a = get_angle(input->lx, input->ly, c.lx_center, c.ly_center);
@@ -315,6 +326,7 @@ void stick_scaling_capture_distances(a_data_s *input)
     if (l_d > l_angle_distances[idx])
     {
       l_angle_distances[idx] = l_d;
+      _stick_distances_tracker |= (1<<idx);
     }
   }
 
@@ -333,8 +345,11 @@ void stick_scaling_capture_distances(a_data_s *input)
     if (r_d > r_angle_distances[idx])
     {
       r_angle_distances[idx] = r_d;
+      _stick_distances_tracker |= (1<<(idx+8));
     }
   }
+
+  return (_stick_distances_tracker == 0xFFFF);
 }
 
 // Captures the center point or sets it with input data
@@ -347,6 +362,14 @@ void stick_scaling_capture_center(a_data_s *input)
   c.ry_center = input->ry;
 }
 
+void stick_scaling_save_all()
+{
+  settings_set_centers(c.lx_center, c.ly_center, c.rx_center, c.ry_center);
+  settings_set_distances(l_angle_distances, r_angle_distances);
+  settings_set_angles(l_angles, r_angles);
+  settings_save();
+}
+
 // Loads settings from memory (Settings need to be loaded first!)
 void stick_scaling_init()
 {
@@ -355,6 +378,11 @@ void stick_scaling_init()
 
   memcpy(l_angle_distances, &global_loaded_settings.l_angle_distances, 8*sizeof(float));
   memcpy(r_angle_distances, &global_loaded_settings.r_angle_distances, 8*sizeof(float));
+
+  c.lx_center = global_loaded_settings.lx_center;
+  c.ly_center = global_loaded_settings.ly_center;
+  c.rx_center = global_loaded_settings.rx_center;
+  c.ry_center = global_loaded_settings.ry_center;
 
   calculate_diagonal_scalers(l_angles, l_angle_scalers);
   calculate_diagonal_scalers(r_angles, r_angle_scalers);

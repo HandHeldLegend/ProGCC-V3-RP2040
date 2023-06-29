@@ -10,20 +10,8 @@ uint8_t _switch_reporting_mode = 0x3F;
 
 uint8_t _switch_command_buffer[64] = {0};
 uint8_t _switch_command_report_id = 0x00;
-uint8_t _switch_mac_address[6] = {0};
+//uint8_t _switch_mac_address[6] = {0};
 uint8_t _switch_ltk[16] = {0};
-
-// Internal functions for command processing
-void generate_mac()
-{
-  printf("Generated MAC: ");
-  for(uint8_t i = 0; i < 6; i++)
-  {
-    _switch_mac_address[i] = get_rand_32() & 0xFF;
-    printf("%X : ", _switch_mac_address[i]);
-  }
-  printf("\n");
-}
 
 void generate_ltk()
 {
@@ -137,11 +125,10 @@ void rumble_translate(const uint8_t *data)
 // Sends mac address with 0x81 command (unknown?)
 void info_set_mac()
 {
-  generate_mac();
   _switch_command_buffer[0] = 0x01;
   _switch_command_buffer[1] = 0x00;
   _switch_command_buffer[2] = 0x03;
-  memcpy(&_switch_command_buffer[3], _switch_mac_address, 6);
+  memcpy(&_switch_command_buffer[3], &global_loaded_settings.switch_mac_address, 6*sizeof(uint8_t));
 }
 
 // A second part to the initialization,
@@ -185,7 +172,7 @@ void pairing_set(uint8_t phase)
     case 1:
       set_ack(0x81);
       _switch_command_buffer[14] = 1;
-      memcpy(&_switch_command_buffer[15], _switch_mac_address, 6);
+      memcpy(&_switch_command_buffer[15], &global_loaded_settings.switch_mac_address, 6);
       memcpy(&_switch_command_buffer[15+6], pro_controller_string, 24);
       break;
     case 2:

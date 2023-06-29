@@ -87,7 +87,7 @@ bool _pusb_poll_ready(uint32_t timestamp)
 
 void pusb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_data)
 {
-  if (_pusb_poll_ready(timestamp))
+  if (true)
   {
     //if (_progcc_usb_busy) return;
     // Call the registered function

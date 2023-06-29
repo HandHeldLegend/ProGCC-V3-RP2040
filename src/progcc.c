@@ -18,8 +18,58 @@ volatile uint32_t _progcc_timestamp = 0;
 
 bool _analog_calibrate  = false;
 bool _analog_centered   = false;
+bool _analog_all_angles_got    = false;
 
 bool _remap_enabled = false;
+
+void _progcc_calibrate_analog_set(calibrate_set_t set)
+{
+  switch(set)
+  {
+    default:
+    case CALIBRATE_START:
+    {
+      rgb_s red = {
+        .r = 225,
+        .g = 0,
+        .b = 0,
+      };
+      rgb_set_all(red.color);
+      // Reset scaling distances
+      stick_scaling_reset_distances();
+      // Capture center value
+      cb_progcc_read_analog();
+      stick_scaling_capture_center(_progcc_analog);
+      _analog_centered  = true;
+      _analog_calibrate = true;
+    }
+    break;
+
+    case CALIBRATE_CANCEL:
+    {
+      _analog_calibrate = false;
+    }
+    break;
+
+    case CALIBRATE_SAVE:
+    {
+      rgb_s green = {
+        .r = 0,
+        .g = 0,
+        .b = 200,
+      };
+      rgb_set_all(green.color);
+      _analog_calibrate = false;
+      stick_scaling_save_all();
+      stick_scaling_finalize();
+      cb_progcc_rumble_enable(true);
+      sleep_ms(200);
+      cb_progcc_rumble_enable(false);
+    }
+    break;
+  }
+}
+
 
 void _progcc_task_0()
 {
@@ -89,15 +139,42 @@ void _progcc_analog_tick(uint32_t timestamp)
   {
     // Read analog sticks
     cb_progcc_read_analog();
-    stick_scaling_process_data(_progcc_analog, &_progcc_analog_scaled);
+    if (_analog_calibrate)
+    {
+      // Capture analog data
+      if (stick_scaling_capture_distances(_progcc_analog) && !_analog_all_angles_got)
+      {
+        _analog_all_angles_got = true;
+        rgb_s red = {
+            .r = 0,
+            .g = 128,
+            .b = 128,
+        };
+        rgb_set_all(red.color);
+      }
+
+      if (_progcc_buttons->button_capture)
+      {
+        _progcc_calibrate_analog_set(CALIBRATE_SAVE);
+      }
+    }
+    else
+    {
+      stick_scaling_process_data(_progcc_analog, &_progcc_analog_scaled);
+    }
   }
 
 }
 
 void _progcc_task_1()
 {
+
   for(;;)
   {
+    // Check if we need to save
+    settings_core0_save_check();
+
+    // Do analog stuff :)
     _progcc_analog_tick(_progcc_timestamp);
   }
 
@@ -106,37 +183,6 @@ void _progcc_task_1()
   // NOT IMPLEMENTED
 }
 
-void progcc_calibrate_analog_set(calibrate_set_t set)
-{
-  switch(set)
-  {
-    default:
-    case CALIBRATE_START:
-    {
-      // Capture center value
-      stick_scaling_capture_center(_progcc_analog);
-      _analog_centered  = true;
-      _analog_calibrate = true;
-    }
-    break;
-
-    case CALIBRATE_CANCEL:
-    {
-      _analog_calibrate = false;
-    }
-    break;
-
-    case CALIBRATE_SAVE:
-    {
-      stick_scaling_finalize();
-      _analog_calibrate = false;
-      cb_progcc_rumble_enable(true);
-      sleep_ms(200);
-      cb_progcc_rumble_enable(false);
-    }
-    break;
-  }
-}
 
 
 void progcc_remapping_enable(bool enable)
@@ -154,28 +200,41 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
 
   // Read buttons
   cb_progcc_read_buttons();
-  uint8_t sub_mode = PUSB_MODE_XI;
-  if (button_memory->button_a)
+  cb_progcc_read_buttons();
+  cb_progcc_read_buttons();
+
+  if (button_memory->button_minus && button_memory->button_plus)
   {
-      sub_mode = PUSB_MODE_SW;
+    settings_reset_to_default();
+    stick_scaling_init();
+    // If we saved a default settings, initiate calibration
+    _progcc_calibrate_analog_set(CALIBRATE_START);
+  }
+  else if (!settings_load() || button_memory->button_home)
+  {
+    sleep_ms(200);
+    stick_scaling_init();
+    // If we saved a default settings, initiate calibration
+    _progcc_calibrate_analog_set(CALIBRATE_START);
+  }
+  else
+  {
+    sleep_ms(200);
+    // Initialize analog stick scaling stuff
+    // This is the preset angles that can be modified
+    stick_scaling_init();
+    stick_scaling_finalize();
   }
 
+  // For switch Pro stuff
+  switch_analog_calibration_init();
+
+  uint8_t sub_mode = PUSB_MODE_SW;
   uint8_t comms_mode = COMM_MODE_USB;
-
-  settings_load();
-  //settings_reset_to_default(); //debug
-
-  sleep_ms(200);
-
-  // Initialize analog stick scaling stuff
-  // This is the preset angles that can be modified
-  stick_scaling_init();
-
-  // TEMP BECAUSE WE DO NOT HAVE
-  // DEFAULT CENTERS YET
-  cb_progcc_read_analog();
-  stick_scaling_capture_center(_progcc_analog);
-  stick_scaling_finalize();
+  if (button_memory->button_x)
+  {
+    sub_mode = PUSB_MODE_XI;
+  }
 
   // Determine launch mode
   switch(comms_mode)
@@ -186,6 +245,7 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
       bool did_usb_boot_ok = pusb_start(sub_mode, false);
       if (!did_usb_boot_ok)
       {
+
         // If USB mode fails, boot to bootloader.
         reset_usb_boot(0, 0);
         return;
@@ -196,6 +256,9 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
 
     // OTHER MODES NOT IMPLEMENTED FOR NOW
   }
+
+  // Enable lockout victimhood :,)
+  multicore_lockout_victim_init();
 
   // Launch second core
   multicore_launch_core1(_progcc_task_1);

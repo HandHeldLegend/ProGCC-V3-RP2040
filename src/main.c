@@ -214,7 +214,7 @@ int main()
     sleep_ms(200);
 
     rgb_s red = {
-        .r = 0,
+        .r = 150,
         .g = 128,
         .b = 200,
     };
