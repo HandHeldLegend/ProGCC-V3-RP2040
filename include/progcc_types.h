@@ -12,18 +12,18 @@ typedef enum
     MAPCODE_DLEFT,
     MAPCODE_DRIGHT,
 
-    MAPCODE_B_UP,
-    MAPCODE_B_DOWN,
-    MAPCODE_B_LEFT,
-    MAPCODE_B_RIGHT,
+    MAPCODE_B_A,
+    MAPCODE_B_B,
+    MAPCODE_B_X,
+    MAPCODE_B_Y,
 
     MAPCODE_T_L,
     MAPCODE_T_ZL,
     MAPCODE_T_R,
     MAPCODE_T_ZR,
 
-    MAPCODE_B_START,
-    MAPCODE_B_SELECT,
+    MAPCODE_B_PLUS,
+    MAPCODE_B_MINUS,
     MAPCODE_B_STICKL,
     MAPCODE_B_STICKR,
 } mapcode_t;
@@ -41,20 +41,21 @@ typedef struct
             mapcode_t dpad_left   : 4;
             mapcode_t dpad_right  : 4;
 
-            mapcode_t button_up       : 4;
-            mapcode_t button_down     : 4;
-            mapcode_t button_left     : 4;
-            mapcode_t button_right    : 4;
+            mapcode_t button_a      : 4;
+            mapcode_t button_b      : 4;
+            mapcode_t button_x      : 4;
+            mapcode_t button_y      : 4;
 
             mapcode_t trigger_l       : 4;
             mapcode_t trigger_zl      : 4;
             mapcode_t trigger_r       : 4;
             mapcode_t trigger_zr      : 4;
 
-            mapcode_t button_start    : 4;
-            mapcode_t button_select   : 4;
-            mapcode_t button_stick_left : 4;
-            mapcode_t button_stick_right : 4;
+            mapcode_t button_plus   : 4;
+            mapcode_t button_minus  : 4;
+
+            mapcode_t button_stick_left     : 4;
+            mapcode_t button_stick_right    : 4;
         };
         uint64_t val;
     };
@@ -81,6 +82,7 @@ typedef enum
     COMM_MODE_GC,
     COMM_MODE_N64,
     COMM_MODE_SNES,
+    COMM_MODE_DEBUG,
 } comm_mode_t;
 
 typedef enum
@@ -92,6 +94,13 @@ typedef enum
     PUSB_MODE_SW,
     PUSB_MODE_MAX,
 } usb_mode_t;
+
+typedef enum
+{
+    CALIBRATE_START,
+    CALIBRATE_CANCEL,
+    CALIBRATE_SAVE,
+} calibrate_set_t;
 
 typedef enum
 {

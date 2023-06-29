@@ -25,7 +25,7 @@ bool _rgb_update_ready(uint32_t timestamp)
 
     // Handle edge case where time has
     // looped around and is now less
-    if (this_time <= last_time)
+    if (this_time < last_time)
     {
         diff = (0xFFFFFFFF - last_time) + this_time;
     }

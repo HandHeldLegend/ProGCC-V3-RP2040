@@ -347,9 +347,15 @@ void stick_scaling_capture_center(a_data_s *input)
   c.ry_center = input->ry;
 }
 
-
+// Loads settings from memory (Settings need to be loaded first!)
 void stick_scaling_init()
 {
+  memcpy(l_angles, &global_loaded_settings.l_angles, 4*sizeof(float));
+  memcpy(r_angles, &global_loaded_settings.r_angles, 4*sizeof(float));
+
+  memcpy(l_angle_distances, &global_loaded_settings.l_angle_distances, 8*sizeof(float));
+  memcpy(r_angle_distances, &global_loaded_settings.r_angle_distances, 8*sizeof(float));
+
   calculate_diagonal_scalers(l_angles, l_angle_scalers);
   calculate_diagonal_scalers(r_angles, r_angle_scalers);
 }

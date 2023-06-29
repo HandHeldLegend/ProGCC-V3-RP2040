@@ -129,7 +129,7 @@ void rumble_translate(const uint8_t *data)
     uint8_t hba = (data[1] & 0xFE)/2;
 
     float ha = (float) hba*amp_range_inc;
-    progcc_utils_set_rumble((ha>10.0f)?PROGCC_RUMBLE_ON:PROGCC_RUMBLE_OFF);
+    cb_progcc_rumble_enable((ha>10.0f)?true:false);
 
     //printf("Amplitude: %.2f\n", ha);
 }

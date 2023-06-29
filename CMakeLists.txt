@@ -17,9 +17,11 @@ include_directories(
 add_executable(${PROJECT_NAME}
 src/main.c
 
-src/progcc_settings.c
+src/progcc.c
+
+
 src/progcc_defines.c
-src/progcc_utils.c
+src/progcc_settings.c
 
 src/devices/dinput.c
 src/devices/gcinput.c
@@ -37,6 +39,7 @@ src/switch/switch_spi.c
 src/switch/switch_analog.c
 
 src/rgb.c
+src/remap.c
 )
 
 target_compile_definitions(${PROJECT_NAME}

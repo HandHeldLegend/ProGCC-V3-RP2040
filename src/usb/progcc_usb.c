@@ -19,28 +19,8 @@ typedef void (*usb_cb_t)(button_data_s *, a_data_s *);
 
 usb_cb_t _usb_hid_cb = NULL;
 
-/* TEMPLATE FOR MODE SWITCH
-switch(_progcc_usb_mode)
-{
-  case PUSB_MODE_MAX:
-  default:
-  case PUSB_MODE_NS:
-    break;
-
-  case PUSB_MODE_GC:
-    break;
-
-  case PUSB_MODE_XI:
-    break;
-
-  case PUSB_MODE_DI:
-    break;
-}
-*/
-
 bool pusb_start(usb_mode_t mode, bool performance_mode)
 {
-
   _usb_performance_mode = performance_mode;
 
   switch(mode)
@@ -66,8 +46,6 @@ bool pusb_start(usb_mode_t mode, bool performance_mode)
     case PUSB_MODE_XI:
       _usb_hid_cb = xinput_hid_report;
       break;
-
-
   }
 
   _usb_mode = mode;
@@ -88,7 +66,7 @@ bool _pusb_poll_ready(uint32_t timestamp)
 
     // Handle edge case where time has
     // looped around and is now less
-    if (this_time <= last_time)
+    if (this_time < last_time)
     {
         diff = (0xFFFFFFFF - last_time) + this_time;
     }

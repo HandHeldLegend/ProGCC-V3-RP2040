@@ -15,6 +15,9 @@
 // Enable if we are using a keypad setup
 #define PROGCC_USE_KEYPAD 1
 
+// Analog input rate in Microseconds (us)
+#define PROGCC_ANALOG_RATE 1000
+
 // Whether or not we should use SPI based ADC for the analog sticks
 // If this is zero, we are using Gulikit's UART solution.
 #define PROGCC_USE_SPI_ADC 1

@@ -151,7 +151,7 @@ const uint8_t swpro_configuration_descriptor[] = {
 bool mac_sent = false;
 bool blank_sent = false;
 
-void swpro_hid_report(progcc_button_data_s *button_data, a_data_s *analog_data)
+void swpro_hid_report(button_data_s *button_data, a_data_s *analog_data)
 {
   if (!tud_hid_ready()) return;
 

@@ -19,7 +19,7 @@ short sign_axis(uint8_t input_axis)
     return (short) start;
 }
 
-void xinput_hid_report(progcc_button_data_s *button_data, a_data_s *analog_data)
+void xinput_hid_report(button_data_s *button_data, a_data_s *analog_data)
 {
   if (!tud_xinput_ready()) return;
 
