@@ -172,8 +172,8 @@ void _progcc_task_1()
   for(;;)
   {
     // Check if we need to save
-    settings_core0_save_check();
-
+    settings_core1_save_check();
+    imu_read_test(_progcc_timestamp);
     // Do analog stuff :)
     _progcc_analog_tick(_progcc_timestamp);
   }

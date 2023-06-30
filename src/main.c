@@ -78,7 +78,7 @@ void cb_progcc_hardware_setup()
 
     // initialize SPI at 1 MHz
     // initialize SPI at 3 MHz just to test
-    spi_init(spi0, 3000 * 1000);
+    spi_init(spi0, 10 * 1000 * 1000);
     gpio_set_function(PGPIO_SPI_CLK, GPIO_FUNC_SPI);
     gpio_set_function(PGPIO_SPI_TX, GPIO_FUNC_SPI);
     gpio_set_function(PGPIO_SPI_RX, GPIO_FUNC_SPI);
@@ -92,6 +92,18 @@ void cb_progcc_hardware_setup()
     gpio_init(PGPIO_RS_CS);
     gpio_set_dir(PGPIO_RS_CS, GPIO_OUT);
     gpio_put(PGPIO_RS_CS, true); // active low
+
+    // IMU 0 initialize
+    gpio_init(PGPIO_IMU0_CS);
+    gpio_set_dir(PGPIO_IMU0_CS, GPIO_OUT);
+    gpio_put(PGPIO_IMU0_CS, true); // active low
+
+    // IMU 1 initialize
+    gpio_init(PGPIO_IMU1_CS);
+    gpio_set_dir(PGPIO_IMU1_CS, GPIO_OUT);
+    gpio_put(PGPIO_IMU1_CS, true); // active low
+
+    imu_init();
 }
 
 void cb_progcc_rumble_enable(bool enable)

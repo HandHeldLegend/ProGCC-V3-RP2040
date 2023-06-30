@@ -99,7 +99,7 @@ void settings_reset_to_default()
 
 volatile bool _save_flag = false;
 
-void settings_core0_save_check()
+void settings_core1_save_check()
 {
   if (_save_flag)
   {
