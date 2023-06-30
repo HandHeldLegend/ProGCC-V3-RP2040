@@ -1,22 +1,23 @@
 #include "stick_scaling.h"
 #include <math.h>
 
-#define STICK_INTERNAL_CENTER 128
-#define STICK_DEAD_ZONE 4
-#define STICK_SCALE_DISTANCE STICK_INTERNAL_CENTER + STICK_DEAD_ZONE
+#define STICK_INTERNAL_CENTER 2048
+#define STICK_MAX 4095
+#define STICK_DEAD_ZONE 24
+#define STICK_SCALE_DISTANCE STICK_INTERNAL_CENTER
 
 
 #define ANGLE_TOLERANCE 1
 
-#define CLAMP_0_255(value) ((value) < 0 ? 0 : ((value) > 255 ? 255 : (value)))
+#define CLAMP_0_MAX(value) ((value) < 0 ? 0 : ((value) > STICK_MAX ? STICK_MAX : (value)))
 
 // Stores internal
 // calibration data
 a_calib_center_s c = {
-    .lx_center = 128,
-    .ly_center = 128,
-    .rx_center = 128,
-    .ly_center = 128,
+    .lx_center = STICK_INTERNAL_CENTER,
+    .ly_center = STICK_INTERNAL_CENTER,
+    .rx_center = STICK_INTERNAL_CENTER,
+    .ly_center = STICK_INTERNAL_CENTER,
 };
 
 // Init scalers
@@ -70,7 +71,7 @@ void calculate_distance_scalers(float *distances_in, float *scalers_out)
 {
   for(uint8_t i = 0; i < 8; i++)
   {
-    scalers_out[i] = (STICK_SCALE_DISTANCE) / (distances_in[i]);
+    scalers_out[i] = (STICK_SCALE_DISTANCE) / (distances_in[i]-STICK_DEAD_ZONE);
   }
 }
 
@@ -177,6 +178,14 @@ float get_scaled_distance(float angle, int x, int y, int center_x, int center_y,
 {
   // Get distance for angle
   float d = get_distance(x, y, center_x, center_y);
+  if (d < STICK_DEAD_ZONE)
+  {
+    d = 0;
+  }
+  else
+  {
+    d -= STICK_DEAD_ZONE;
+  }
 
   // Scale accordingly
   float s = get_distance_scaler(angle, scalers);
@@ -245,11 +254,8 @@ void stick_scaling_process_data(a_data_s *in, a_data_s *out)
   float rd = get_scaled_distance(ra, in->rx, in->ry, c.rx_center, c.ry_center, r_distance_scalers);
 
   // Process LEFT stick
-  if (ld >= STICK_DEAD_ZONE)
+  if (ld > 0)
   {
-    // Subtract deadzone area
-    ld -= STICK_DEAD_ZONE;
-
     float la_new = get_scaled_angle(la, l_angles, l_angle_scalers);
 
     // Generate normalized vector data
@@ -262,8 +268,8 @@ void stick_scaling_process_data(a_data_s *in, a_data_s *out)
     nlx *= ld;
     nly *= ld;
 
-    out->lx = CLAMP_0_255((int) roundf(nlx + 128));
-    out->ly = CLAMP_0_255((int) roundf(nly + 128));
+    out->lx = CLAMP_0_MAX((int) roundf(nlx + STICK_INTERNAL_CENTER));
+    out->ly = CLAMP_0_MAX((int) roundf(nly + STICK_INTERNAL_CENTER));
   }
   else
   {
@@ -271,10 +277,8 @@ void stick_scaling_process_data(a_data_s *in, a_data_s *out)
   }
 
   // Process RIGHT stick
-  if (rd >= STICK_DEAD_ZONE)
+  if (rd > 0)
   {
-    // Subtract deadzone area
-    rd -= STICK_DEAD_ZONE;
 
     float ra_new = get_scaled_angle(ra, r_angles, r_angle_scalers);
 
@@ -288,8 +292,8 @@ void stick_scaling_process_data(a_data_s *in, a_data_s *out)
     nrx *= rd;
     nry *= rd;
 
-    out->rx = CLAMP_0_255((int) roundf(nrx + 128));
-    out->ry = CLAMP_0_255((int) roundf(nry + 128));
+    out->rx = CLAMP_0_MAX((int) roundf(nrx + STICK_INTERNAL_CENTER));
+    out->ry = CLAMP_0_MAX((int) roundf(nry + STICK_INTERNAL_CENTER));
   }
   else
   {

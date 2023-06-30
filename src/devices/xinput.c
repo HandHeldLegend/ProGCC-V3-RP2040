@@ -1,9 +1,9 @@
 #include "xinput.h"
 
-short sign_axis(uint8_t input_axis)
+short sign_axis(int input_axis)
 {
 
-    int start = (int) input_axis - 127;
+    int start = (int) (input_axis>>4) - 127;
     if ((start * 256) > 32765)
     {
         start = 32765;
@@ -44,6 +44,9 @@ void xinput_hid_report(button_data_s *button_data, a_data_s *analog_data)
   data.button_b = button_data->button_b;
   data.button_x = button_data->button_x;
   data.button_y = button_data->button_y;
+
+  data.button_stick_l = button_data->button_stick_left;
+  data.button_stick_r = button_data->button_stick_right;
 
   data.analog_trigger_l = button_data->trigger_zl ? 255 : 0;
   data.analog_trigger_r = button_data->trigger_zr ? 255 : 0;

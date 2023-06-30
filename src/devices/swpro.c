@@ -179,10 +179,10 @@ void swpro_hid_report(button_data_s *button_data, a_data_s *analog_data)
   data.t_zl = button_data->trigger_zl;
   data.t_zr = button_data->trigger_zr;
 
-  data.ls_x = analog_data->lx<<4;
-  data.ls_y = analog_data->ly<<4;
-  data.rs_x = analog_data->rx<<4;
-  data.rs_y = analog_data->ry<<4;
+  data.ls_x = analog_data->lx;
+  data.ls_y = analog_data->ly;
+  data.rs_x = analog_data->rx;
+  data.rs_y = analog_data->ry;
 
   switch_commands_process(&data);
 }

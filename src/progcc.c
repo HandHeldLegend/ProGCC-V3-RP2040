@@ -166,9 +166,9 @@ void _progcc_analog_tick(uint32_t timestamp)
 
 }
 
+// Core 1 task loop entrypoint
 void _progcc_task_1()
 {
-
   for(;;)
   {
     // Check if we need to save
