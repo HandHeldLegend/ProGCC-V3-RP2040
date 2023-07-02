@@ -78,7 +78,7 @@ void cb_progcc_hardware_setup()
 
     // initialize SPI at 1 MHz
     // initialize SPI at 3 MHz just to test
-    spi_init(spi0, 10 * 1000 * 1000);
+    spi_init(spi0, 3000 * 1000);
     gpio_set_function(PGPIO_SPI_CLK, GPIO_FUNC_SPI);
     gpio_set_function(PGPIO_SPI_TX, GPIO_FUNC_SPI);
     gpio_set_function(PGPIO_SPI_RX, GPIO_FUNC_SPI);

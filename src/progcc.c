@@ -177,10 +177,6 @@ void _progcc_task_1()
     // Do analog stuff :)
     _progcc_analog_tick(_progcc_timestamp);
   }
-
-
-  // Read Gyro
-  // NOT IMPLEMENTED
 }
 
 

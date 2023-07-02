@@ -18,6 +18,7 @@
 #define SW_CMD_GET_SPI          0x10
 #define SW_CMD_SET_SPI          0x11
 #define SW_CMD_SET_NFC          0x21
+#define SW_CMD_SET_NFC_STATE    0x22
 #define SW_CMD_ENABLE_IMU       0x40
 #define SW_CMD_SET_IMUSENS      0x41
 #define SW_CMD_ENABLE_VIBRATE   0x48

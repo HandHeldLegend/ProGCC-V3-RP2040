@@ -46,14 +46,14 @@ void set_command(uint8_t command)
 
 void set_timer()
 {
-  static uint8_t _switch_timer = 0;
-  _switch_command_buffer[0] = _switch_timer;
+  static int16_t _switch_timer = 0;
+  _switch_command_buffer[0] = (uint8_t) _switch_timer;
   //printf("Td=%d \n", _switch_timer);
-  if (_switch_timer == 0xFF)
+  _switch_timer+=3;
+  if (_switch_timer > 0xFF)
   {
-    _switch_timer = 0;
+    _switch_timer -= 0xFF;
   }
-  else _switch_timer++;
 }
 
 void set_battconn()
@@ -246,6 +246,16 @@ void command_handler(uint8_t command, const uint8_t *data, uint16_t len)
       sw_spi_readfromaddress(data[12], data[11], data[15]);
       break;
 
+    case SW_CMD_SET_SPI:
+      printf("Write SPI. Address: %X, %X | Len: %d\n", data[12], data[11], data[15]);
+      set_ack(0x80);
+      for (uint16_t i = 0; i < data[15]; i++)
+      {
+        printf("0x%x, ", data[16+i]);
+      }
+      printf("\n");
+      break;
+
     case SW_CMD_GET_TRIGGERET:
       printf("Get trigger ET.\n");
       set_ack(0x83);
@@ -291,6 +301,7 @@ void command_handler(uint8_t command, const uint8_t *data, uint16_t len)
         printf("%X, ", data[i]);
       }
       printf("\n");
+      set_ack(0x80);
       break;
   }
 
@@ -329,6 +340,16 @@ void report_handler(uint8_t report_id, const uint8_t *data, uint16_t len)
   }
 }
 
+uint8_t _unknown_thing()
+{
+  static uint8_t out = 0xA;
+  if (out == 0xA) out = 0xB;
+  else if (out == 0xB ) out = 0xC;
+  else out = 0xA;
+
+  return out;
+}
+
 // PUBLIC FUNCTIONS
 void switch_commands_process(sw_input_s *input_data)
 {
@@ -346,6 +367,8 @@ void switch_commands_process(sw_input_s *input_data)
       set_timer();
       set_battconn();
 
+      imu_buffer_out(&_switch_command_buffer[12]);
+
       // Set input data
       _switch_command_buffer[2] = input_data->right_buttons;
       _switch_command_buffer[3] = input_data->shared_buttons;
@@ -360,7 +383,9 @@ void switch_commands_process(sw_input_s *input_data)
       _switch_command_buffer[8] = (input_data->rs_x & 0xFF);
       _switch_command_buffer[9] = (input_data->rs_x & 0xF00) >> 8;
       _switch_command_buffer[10] = (input_data->rs_y & 0xFF0) >> 4;
-      _switch_command_buffer[11] = 0x08;
+      _switch_command_buffer[11] = _unknown_thing();
+
+      //printf("V: %d, %d\n", _switch_command_buffer[46], _switch_command_buffer[47]);
 
       tud_hid_report(_switch_command_report_id, _switch_command_buffer, 64);
     }
