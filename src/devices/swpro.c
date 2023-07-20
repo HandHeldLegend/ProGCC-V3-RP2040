@@ -173,6 +173,7 @@ void swpro_hid_report(button_data_s *button_data, a_data_s *analog_data)
   data.b_capture= button_data->button_capture;
 
   data.sb_right = button_data->button_stick_right;
+  data.sb_left  = button_data->button_stick_left;
 
   data.t_r = button_data->trigger_r;
   data.t_l = button_data->trigger_l;

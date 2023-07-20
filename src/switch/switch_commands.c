@@ -64,8 +64,12 @@ void set_battconn()
 
 void set_devinfo()
 {
+  /* New firmware causes issue with gyro needs more research
   _switch_command_buffer[14] = 0x04; // NS Firmware primary   (4.x)
-  _switch_command_buffer[15] = 0x33; // NS Firmware secondary (x.21)
+  _switch_command_buffer[15] = 0x33; // NS Firmware secondary (x.21) */
+
+  _switch_command_buffer[14] = 0x03; // NS Firmware primary   (3.x)
+  _switch_command_buffer[15] = 72; // NS Firmware secondary (x.72)
 
   // Procon   - 0x03, 0x02
   // N64      - 0x0C, 0x11
@@ -215,6 +219,7 @@ void command_handler(uint8_t command, const uint8_t *data, uint16_t len)
 
     case SW_CMD_ENABLE_IMU:
       printf("Enable IMU: %d\n", data[11]);
+      imu_set_enabled(data[11]>0);
       set_ack(0x80);
       break;
 
@@ -350,6 +355,8 @@ uint8_t _unknown_thing()
   return out;
 }
 
+#define DEBUG_IMU_VAL 8
+
 // PUBLIC FUNCTIONS
 void switch_commands_process(sw_input_s *input_data)
 {
@@ -367,7 +374,9 @@ void switch_commands_process(sw_input_s *input_data)
       set_timer();
       set_battconn();
 
+      // END DEBUG
       imu_buffer_out(&_switch_command_buffer[12]);
+      imu_reset_idx();
 
       // Set input data
       _switch_command_buffer[2] = input_data->right_buttons;
@@ -376,14 +385,14 @@ void switch_commands_process(sw_input_s *input_data)
 
       // Set sticks directly from hoja_analog_data
       // Saves cycles :)
-      _switch_command_buffer[5] = (input_data->ls_x & 0xFF);
-      _switch_command_buffer[6] = (input_data->ls_x & 0xF00) >> 8;
+      _switch_command_buffer[5]   = (input_data->ls_x & 0xFF);
+      _switch_command_buffer[6]   = (input_data->ls_x & 0xF00) >> 8;
       //ns_input_report[7] |= (g_stick_data.lsy & 0xF) << 4;
-      _switch_command_buffer[7] = (input_data->ls_y & 0xFF0) >> 4;
-      _switch_command_buffer[8] = (input_data->rs_x & 0xFF);
-      _switch_command_buffer[9] = (input_data->rs_x & 0xF00) >> 8;
-      _switch_command_buffer[10] = (input_data->rs_y & 0xFF0) >> 4;
-      _switch_command_buffer[11] = _unknown_thing();
+      _switch_command_buffer[7]   = (input_data->ls_y & 0xFF0) >> 4;
+      _switch_command_buffer[8]   = (input_data->rs_x & 0xFF);
+      _switch_command_buffer[9]   = (input_data->rs_x & 0xF00) >> 8;
+      _switch_command_buffer[10]  = (input_data->rs_y & 0xFF0) >> 4;
+      _switch_command_buffer[11]  = _unknown_thing();
 
       //printf("V: %d, %d\n", _switch_command_buffer[46], _switch_command_buffer[47]);
 

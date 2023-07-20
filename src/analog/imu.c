@@ -2,8 +2,6 @@
 
 #define IMU_READ_RATE 2000 //400Hz min
 
-volatile uint8_t imu_reads = 0;
-
 // LSM6DSR REGISTERS
 
 #define FUNC_CFG_ACCESS 0x01
@@ -30,15 +28,22 @@ volatile uint8_t imu_reads = 0;
 
 #define IMU_OUTX_L_G 0x22
 
-volatile uint8_t imu_x[2] = {0};
-volatile uint8_t imu_y[2] = {0};
-volatile uint8_t imu_z[2] = {0};
+uint8_t imu_x[6] = {0};
+uint8_t imu_y[6] = {0};
+uint8_t imu_z[6] = {0};
 
-volatile uint8_t acc_x[2] = {0};
-volatile uint8_t acc_y[2] = {0};
-volatile uint8_t acc_z[2] = {0};
+uint8_t acc_x[6] = {0};
+uint8_t acc_y[6] = {0};
+uint8_t acc_z[6] = {0};
 
 auto_init_mutex(imu_mutex);
+
+bool _imu_enabled = false;
+
+void imu_set_enabled(bool enable)
+{
+  _imu_enabled = enable;
+}
 
 // Gets the last 3 IMU datasets and puts them out
 // for Nintendo Switch buffer
@@ -50,28 +55,63 @@ void imu_buffer_out(uint8_t *output)
 
   }
 
-  uint8_t oi = 0;
-  for (uint8_t i = 0; i < 3; i++)
-  {
-    // Output in Little-Endian
-    output[oi++] = acc_y[0];
-    output[oi++] = acc_y[1];
+  output[0] = acc_y[0];
+  output[1] = acc_y[1];
 
-    output[oi++] = acc_x[0];
-    output[oi++] = acc_x[1];
+  output[2] = acc_x[0];
+  output[3] = acc_x[1];
 
-    output[oi++] = acc_z[0];
-    output[oi++] = acc_z[1];
+  output[4] = acc_z[0];
+  output[5] = acc_z[1];
 
-    output[oi++] = imu_y[0];
-    output[oi++] = imu_y[1];
+  output[6]   = imu_y[0];
+  output[7]   = imu_y[1];
 
-    output[oi++] = imu_x[0];
-    output[oi++] = imu_x[1];
+  output[8]   = imu_x[0];
+  output[9]   = imu_x[1];
 
-    output[oi++] = imu_z[0];
-    output[oi++] = imu_z[1];
-  }
+  output[10]  = imu_z[0];
+  output[11]  = imu_z[1];
+
+  // Group 2
+
+  output[12] = acc_y[2];
+  output[13] = acc_y[3];
+
+  output[14] = acc_x[2];
+  output[15] = acc_x[3];
+
+  output[16] = acc_z[2];
+  output[17] = acc_z[3];
+
+  output[18]   = imu_y[2];
+  output[19]   = imu_y[3];
+
+  output[20]   = imu_x[2];
+  output[21]   = imu_x[3];
+
+  output[22]  = imu_z[2];
+  output[23]  = imu_z[3];
+
+  // Group 3
+
+  output[24] = acc_y[4];
+  output[25] = acc_y[5];
+
+  output[26] = acc_x[4];
+  output[27] = acc_x[5];
+
+  output[28] = acc_z[4];
+  output[29] = acc_z[5];
+
+  output[30]   = imu_y[4];
+  output[31]   = imu_y[5];
+
+  output[32]   = imu_x[4];
+  output[33]   = imu_x[5];
+
+  output[34]  = imu_z[4];
+  output[35]  = imu_z[5];
 
   mutex_exit(&imu_mutex);
 }
@@ -135,9 +175,16 @@ int16_t _concat_reg_data(uint8_t msb, uint8_t lsb, bool invert)
   return out;
 }
 
+uint8_t imu_read_idx = 0;
+
+void imu_reset_idx()
+{
+  imu_read_idx = 0;
+}
+
 void imu_read_test(uint32_t timestamp)
 {
-  if(_imu_update_ready(timestamp))
+  if(_imu_update_ready(timestamp) && _imu_enabled)
   {
     uint8_t i[12] = {0};
     gpio_put(PGPIO_IMU0_CS, false);
@@ -146,27 +193,29 @@ void imu_read_test(uint32_t timestamp)
     spi_read_blocking(spi0, 0, &i[0], 12);
     gpio_put(PGPIO_IMU0_CS, true);
 
-    imu_reads++;
-
     uint32_t owner_out;
     while(!mutex_try_enter(&imu_mutex, &owner_out))
     {
 
     }
 
-    imu_x[0] = i[0];
-    imu_x[1] = i[1];
-    imu_y[0] = i[2];
-    imu_y[1] = i[3];
-    imu_z[0] = i[4];
-    imu_z[1] = i[5];
+    uint8_t o = imu_read_idx*2;
 
-    acc_x[0] = 188;
-    acc_x[1] = 254;
-    acc_y[0] = 186;
-    acc_y[1] = 0;
-    acc_z[0] = 25;
-    acc_z[1] = 16;
+    imu_x[0+o] = i[0];
+    imu_x[1+o] = i[1];
+    imu_y[0+o] = i[2];
+    imu_y[1+o] = i[3];
+    imu_z[0+o] = i[4];
+    imu_z[1+o] = i[5];
+
+    acc_x[0+o] = 188;
+    acc_x[1+o] = 254;
+    acc_y[0+o] = 186;
+    acc_y[1+o] = 0;
+    acc_z[0+o] = 25;
+    acc_z[1+o] = 16;
+
+    if (imu_read_idx<3) imu_read_idx++;
 
     mutex_exit(&imu_mutex);
   }

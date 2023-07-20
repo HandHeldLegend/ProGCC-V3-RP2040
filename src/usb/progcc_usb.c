@@ -92,13 +92,6 @@ void pusb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_
 
   if (_pusb_poll_ready(timestamp))
   {
-    buf++;
-    if (buf==255)
-    {
-      buf = 0;
-      printf("IMU READS: %d\n", imu_reads);
-    }
-    imu_reads = 0;
     //if (_progcc_usb_busy) return;
     // Call the registered function
     if (_usb_hid_cb != NULL)

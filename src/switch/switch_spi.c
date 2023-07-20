@@ -189,54 +189,54 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
 
                 // GYRO X - default 7
                 case 0x2C:
-                    return 0x7;
+                    return 1;
                     break;
 
                 case 0x2D:
-                    return 0x00;
+                    return 0;
                     break;
 
                 // GYRO Y - default 65533
                 case 0x2E:
-                    return 0xF6;
+                    return 1;
                     break;
 
                 case 0x2F:
-                    return 0xFF;
+                    return 0;
                     break;
 
                 // GYRO Z - default 65526
                 case 0x30:
-                    return 0xFD;
+                    return 1;
                     break;
 
                 case 0x31:
-                    return 0xFF;
+                    return 0;
                     break;
 
                 // GYRO COEFF
                 case 0x32:
-                    return 59;
+                    return 0xE7;
                     break;
 
                 case 0x33:
-                    return 52;
+                    return 0x3B;
                     break;
 
                 case 0x34:
-                    return 59;
+                    return 0xE7;
                     break;
 
                 case 0x35:
-                    return 52;
+                    return 0x3B;
                     break;
 
                 case 0x36:
-                    return 59;
+                    return 0xE7;
                     break;
 
                 case 0x37:
-                    return 52;
+                    return 0x3B;
                     break;
 
                 case 0x3D ... 0x45:
@@ -297,7 +297,7 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
                 // Stage 3 configuration 0x6080, length 24
                 // Covers factory sensor and stick device params
 
-                // Start 6 axis offsets
+                // Start accelerometer offsets
                 case 0x80:
                     return 80;
                     break;
