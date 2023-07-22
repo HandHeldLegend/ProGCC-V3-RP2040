@@ -7,11 +7,14 @@
 
 #define CLAMP_0_MAX(value) ((value) < 0 ? 0 : ((value) > STICK_MAX ? STICK_MAX : (value)))
 
-float _stick_l_calibrated_angles[8]     = {0, 45, 90, 135, 180, 225, 270, 315};
+const float _angle_lut[8] = {0, 45, 90, 135, 180, 225, 270, 315};
+
+// E, NE, N, NW, W, SW, S, SE
+float _stick_l_calibrated_angles[8]     = {0, 0, 20, 0, 0, 0, -20, 0};
 float _stick_l_calibrated_distances[8]  = {600, 600, 600, 600, 600, 600, 600, 600};
 float _stick_l_distance_scalers[8] = {1,1,1,1,1,1,1,1};
 
-float _stick_r_calibrated_angles[8]     = {0, 45, 90, 135, 180, 225, 270, 315};
+float _stick_r_calibrated_angles[8]     = {0, 0, -20, 0, 0, 0, 20, 0};
 float _stick_r_calibrated_distances[8]  = {600, 600, 600, 600, 600, 600, 600, 600};
 float _stick_r_distance_scalers[8] = {1,1,1,1,1,1,1,1};
 
@@ -30,6 +33,14 @@ float _stick_angle_adjust(float angle, float adjustment)
   return out;
 }
 
+bool _stick_check_between_angles(float input, float angle1, float angle2)
+{
+  if (angle1 > angle2) // Edge case where angle 0 is a negative adjustment. (greater than)
+      return (input >= angle1) && (input < angle2);
+  else
+      return (input > angle2) && (input <= angle1);
+}
+
 // Returns the octant where the angle is
 int _stick_get_octant_adjusted(float angle)
 {
@@ -38,19 +49,48 @@ int _stick_get_octant_adjusted(float angle)
 
 int _stick_get_octant(float angle, float *angles)
 {
-
-
-  for(uint8_t i = 0; i < 8; i++)
+  float a1 = 0;
+  float a2 = 0;
+  for(uint8_t i = 0; i<8; i++)
   {
-    uint8_t s = i+1;
-    if (s>7) s = 7;
-    if (i==7) return 7;
+    uint8_t o = i+1;
 
-    if(angle>=angles[i] && angle<angles[s])
+    if (i==7)
     {
-      return i;
+      return 7;
+    }
+
+    if (i==0)
+    {
+      a1 = _stick_angle_adjust(_angle_lut[0], angles[0]);
+      a2 = _stick_angle_adjust(_angle_lut[1], angles[1]);
+      if (a1 > a2) // Edge case where angle 0 is a negative adjustment
+      {
+        if( (angle >= a1) || (angle < a2) )
+        {
+          return 0;
+        }
+      }
+      else // Edge case where angle 0 is a positive adjustment or no adjustment
+      {
+        if( (angle >= a1) && (angle < a2) )
+        {
+          return 0;
+        }
+      }
+    }
+    else
+    {
+      a1 = _stick_angle_adjust(_angle_lut[i], angles[i]);
+      a2 = _stick_angle_adjust(_angle_lut[o], angles[o]);
+      if( (angle>=a1) && (angle<a2) )
+      {
+        return i;
+      }
     }
   }
+
+  return 0;
 }
 
 // Returns the float angle given the XY coordinate pair and the
@@ -85,13 +125,16 @@ void _stick_normalized_vector(float angle, float *x, float *y)
 // Calculates the new angle output based on angle and distance
 void _stick_angle_distance_scaled(float angle, float distance, float *angles, float *scalers, float *out_x, float *out_y)
 {
-  int o = _stick_get_octant(angle, angles); // Get octant the stick is in
+  int o = _stick_get_octant(angle, &angles[0]); // Get octant the stick is in
 
   int o2 = o+1;
   if (o==7) o2 = 0;
 
-  float d = _stick_angle_adjust(angles[o2], -angles[o]); // Get distance of calibrated angle points
-  float a = _stick_angle_adjust(angle, -angles[o]); // Get normalized angle distance
+  float a2 = _stick_angle_adjust(_angle_lut[o2], angles[o2]);
+  float a1 = _stick_angle_adjust(_angle_lut[o], angles[o]);
+
+  float d = _stick_angle_adjust(a2, -a1); // Get distance of calibrated angle points
+  float a = _stick_angle_adjust(angle, -a1); // Get normalized angle distance
 
   float p = a/d; // Get the percent distance we are currently
   float p2 = 1.0f-p; // Get other percent remainder
