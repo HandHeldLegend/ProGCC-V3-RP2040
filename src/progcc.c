@@ -22,52 +22,38 @@ bool _analog_all_angles_got    = false;
 
 bool _remap_enabled = false;
 
-void _progcc_calibrate_analog_set(calibrate_set_t set)
+void _progcc_calibrate_analog_start()
 {
-  switch(set)
-  {
-    default:
-    case CALIBRATE_START:
-    {
-      rgb_s red = {
-        .r = 225,
-        .g = 0,
-        .b = 0,
-      };
-      rgb_set_all(red.color);
-      // Reset scaling distances
-      stick_scaling_reset_distances();
-      // Capture center value
-      cb_progcc_read_analog();
-      stick_scaling_capture_center(_progcc_analog);
-      _analog_centered  = true;
-      _analog_calibrate = true;
-    }
-    break;
+  rgb_s red = {
+    .r = 225,
+    .g = 0,
+    .b = 0,
+  };
+  rgb_set_all(red.color);
+  // Reset scaling distances
+  stick_scaling_reset_distances();
+  // Capture center value
+  cb_progcc_read_analog();
+  stick_scaling_capture_center(_progcc_analog);
+  _analog_all_angles_got = false;
+  _analog_centered  = true;
+  _analog_calibrate = true;
+}
 
-    case CALIBRATE_CANCEL:
-    {
-      _analog_calibrate = false;
-    }
-    break;
-
-    case CALIBRATE_SAVE:
-    {
-      rgb_s green = {
-        .r = 0,
-        .g = 0,
-        .b = 200,
-      };
-      rgb_set_all(green.color);
-      _analog_calibrate = false;
-      stick_scaling_save_all();
-      stick_scaling_finalize();
-      cb_progcc_rumble_enable(true);
-      sleep_ms(200);
-      cb_progcc_rumble_enable(false);
-    }
-    break;
-  }
+void _progcc_calibrate_analog_save()
+{
+  rgb_s green = {
+    .r = 0,
+    .g = 0,
+    .b = 200,
+  };
+  rgb_set_all(green.color);
+  _analog_calibrate = false;
+  stick_scaling_save_all();
+  cb_progcc_rumble_enable(true);
+  sleep_ms(200);
+  cb_progcc_rumble_enable(false);
+  stick_scaling_init();
 }
 
 
@@ -155,7 +141,7 @@ void _progcc_analog_tick(uint32_t timestamp)
 
       if (_progcc_buttons->button_capture)
       {
-        _progcc_calibrate_analog_set(CALIBRATE_SAVE);
+        _progcc_calibrate_analog_save();
       }
     }
     else
@@ -202,16 +188,16 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
   if (button_memory->button_minus && button_memory->button_plus)
   {
     settings_reset_to_default();
-    stick_scaling_init();
+
     // If we saved a default settings, initiate calibration
-    _progcc_calibrate_analog_set(CALIBRATE_START);
+    _progcc_calibrate_analog_start();
   }
   else if (!settings_load() || button_memory->button_home)
   {
     sleep_ms(200);
     stick_scaling_init();
     // If we saved a default settings, initiate calibration
-    _progcc_calibrate_analog_set(CALIBRATE_START);
+    _progcc_calibrate_analog_start();
   }
   else
   {
@@ -219,7 +205,6 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
     // Initialize analog stick scaling stuff
     // This is the preset angles that can be modified
     stick_scaling_init();
-    stick_scaling_finalize();
   }
 
   // For switch Pro stuff
