@@ -92,6 +92,18 @@ void cb_progcc_hardware_setup()
     gpio_init(PGPIO_RS_CS);
     gpio_set_dir(PGPIO_RS_CS, GPIO_OUT);
     gpio_put(PGPIO_RS_CS, true); // active low
+
+    // IMU 0 initialize
+    gpio_init(PGPIO_IMU0_CS);
+    gpio_set_dir(PGPIO_IMU0_CS, GPIO_OUT);
+    gpio_put(PGPIO_IMU0_CS, true); // active low
+
+    // IMU 1 initialize
+    gpio_init(PGPIO_IMU1_CS);
+    gpio_set_dir(PGPIO_IMU1_CS, GPIO_OUT);
+    gpio_put(PGPIO_IMU1_CS, true); // active low
+
+    imu_init();
 }
 
 void cb_progcc_rumble_enable(bool enable)

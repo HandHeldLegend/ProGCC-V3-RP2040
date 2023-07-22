@@ -37,7 +37,7 @@ typedef struct
 extern progcc_settings_s global_loaded_settings;
 
 bool settings_load();
-void settings_core0_save_check();
+void settings_core1_save_check();
 void settings_save();
 void settings_reset_to_default();
 void settings_set_centers(int lx, int ly, int rx, int ry);

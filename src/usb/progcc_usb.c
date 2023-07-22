@@ -13,7 +13,7 @@ bool _usb_performance_mode = false;
 bool _usb_busy = false;
 
 // Default 8ms (8000us)
-uint32_t _usb_rate = 8 * 1000;
+uint32_t _usb_rate = 7.5 * 1000;
 
 typedef void (*usb_cb_t)(button_data_s *, a_data_s *);
 
@@ -85,9 +85,12 @@ bool _pusb_poll_ready(uint32_t timestamp)
     return false;
 }
 
+uint8_t buf = 0;
+
 void pusb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_data)
 {
-  if (true)
+
+  if (_pusb_poll_ready(timestamp))
   {
     //if (_progcc_usb_busy) return;
     // Call the registered function

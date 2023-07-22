@@ -127,100 +127,116 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
                     break;
 
                 // TO-DO - Implement factory 6-Axis calibration.
+
+                // X XL
                 case 0x20:
                     return 35;
                     break;
-
+                // X XL
                 case 0x21:
                     return 0;
                     break;
 
+                // Y XL
                 case 0x22:
                     return 185;
                     break;
 
+                // Y XL
                 case 0x23:
                     return 255;
                     break;
 
+                // Z XL
                 case 0x24:
                     return 26;
                     break;
 
+                // Z XL
                 case 0x25:
                     return 1;
                     break;
 
+                // X COEFF
                 case 0x26:
                     return 0;
                     break;
 
+                // X COEFF
                 case 0x27:
                     return 64;
                     break;
 
+                // Y COEFF
                 case 0x28:
                     return 0;
                     break;
 
+                // Y COEFF
                 case 0x29:
                     return 64;
                     break;
 
+                // Z COEFF
                 case 0x2A:
                     return 0;
                     break;
 
+                // Z COEFF
                 case 0x2B:
                     return 64;
                     break;
 
+                // GYRO X - default 7
                 case 0x2C:
-                    return 73;
+                    return 1;
                     break;
 
                 case 0x2D:
                     return 0;
                     break;
 
+                // GYRO Y - default 65533
                 case 0x2E:
-                    return 248;
+                    return 1;
                     break;
 
                 case 0x2F:
-                    return 255;
+                    return 0;
                     break;
 
+                // GYRO Z - default 65526
                 case 0x30:
-                    return 217;
+                    return 1;
                     break;
 
                 case 0x31:
-                    return 255;
+                    return 0;
                     break;
 
+                // GYRO COEFF
                 case 0x32:
-                    return 59;
+                    return 0xE7;
                     break;
 
                 case 0x33:
-                    return 52;
+                    return 0x3B;
                     break;
 
                 case 0x34:
-                    return 59;
+                    return 0xE7;
                     break;
 
                 case 0x35:
-                    return 52;
+                    return 0x3B;
                     break;
 
                 case 0x36:
-                    return 59;
+                    return 0xE7;
                     break;
 
                 case 0x37:
-                    return 52;
+                    return 0x3B;
                     break;
 
                 case 0x3D ... 0x45:
@@ -230,69 +246,6 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
                 case 0x46 ... 0x4E:
                     return switch_analog_calibration_data[address-0x3D];
                     break;
-
-                // Default factory calibration
-                /*
-                case 0x3D:
-                case 0x3E:
-                case 0x3F:
-                    return 0x00; // Magic bytes not for factory use?
-                    break;
-
-                case 0x40:
-                    return 236;
-                    break;
-
-                case 0x41:
-                    return 55;
-                    break;
-
-                case 0x42:
-                    return 120;
-                    break;
-
-                case 0x43:
-                    return 24;
-                    break;
-
-                case 0x44:
-                    return 240;
-                    break;
-
-                case 0x45:
-                    return 7;
-                    break;
-
-                // TO-DO - Implement factory right stick calibration.
-                case 0x46:
-                case 0x47:
-                case 0x48:
-                    return 0; // Unused magic bytes?
-                    break;
-
-                case 0x49:
-                    return 248;
-                    break;
-
-                case 0x4A:
-                    return 22;
-                    break;
-
-                case 0x4B:
-                    return 122;
-                    break;
-
-                case 0x4C:
-                    return 10;
-                    break;
-
-                case 0x4D:
-                    return 49;
-                    break;
-
-                case 0x4E:
-                    return 6; //ns_input_stickcaldata.l_stick_cal[address-0x44];
-                    break;*/
 
                 case 0x4F:
                     return 0xFF; // Not sure
@@ -344,27 +297,22 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
                 // Stage 3 configuration 0x6080, length 24
                 // Covers factory sensor and stick device params
 
-                // Start 6 axis offsets
+                // Start accelerometer offsets
                 case 0x80:
                     return 80;
                     break;
-
                 case 0x81:
                     return 253;
                     break;
-
                 case 0x82:
                     return 0;
                     break;
-
                 case 0x83:
                     return 0;
                     break;
-
                 case 0x84:
                     return 198;
                     break;
-
                 case 0x85:
                     return 15;
                     break;

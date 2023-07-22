@@ -82,6 +82,9 @@
   #define PGPIO_LS_CS   1
   // Right stick ADC Chip Select
   #define PGPIO_RS_CS   4
+
+  #define PGPIO_IMU0_CS 28
+  #define PGPIO_IMU1_CS 29
 #endif
 
 #endif

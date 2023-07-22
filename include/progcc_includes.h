@@ -27,11 +27,13 @@
 #include "progcc_defines.h"
 #include "progcc_settings.h"
 
+#include "board_config.h"
+
 #include "stick_scaling.h"
+#include "imu.h"
 
 #include "ws2812.pio.h"
 #include "rgb.h"
-#include "board_config.h"
 
 #include "bsp/board.h"
 #include "tusb.h"
