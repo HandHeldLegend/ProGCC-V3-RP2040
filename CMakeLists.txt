@@ -32,7 +32,7 @@ src/devices/swpro.c
 src/usb/progcc_usb.c
 src/usb/xinput_device.c
 
-src/analog/stick_scaling.c
+src/analog/stick.c
 src/analog/imu.c
 
 src/switch/switch_commands.c

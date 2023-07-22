@@ -1,0 +1,183 @@
+#include "stick.h"
+
+#define STICK_INTERNAL_CENTER 2048
+#define STICK_MAX 4095
+#define STICK_DEAD_ZONE 24
+#define STICK_SCALE_DISTANCE STICK_INTERNAL_CENTER
+
+#define CLAMP_0_MAX(value) ((value) < 0 ? 0 : ((value) > STICK_MAX ? STICK_MAX : (value)))
+
+float _stick_l_calibrated_angles[8]     = {0, 45, 90, 135, 180. 225, 270, 315};
+float _stick_l_calibrated_distances[8]  = {600, 600, 600, 600, 600, 600, 600, 600};
+float _stick_l_distance_scalers[8] = {1,1,1,1,1,1,1,1};
+
+float _stick_r_calibrated_angles[8]     = {0, 45, 90, 135, 180. 225, 270, 315};
+float _stick_r_calibrated_distances[8]  = {600, 600, 600, 600, 600, 600, 600, 600};
+float _stick_r_distance_scalers[8] = {1,1,1,1,1,1,1,1};
+
+int _stick_l_center_x;
+int _stick_l_center_y;
+int _stick_r_center_x;
+int _stick_r_center_y;
+
+// Adjusts angle by the adjustment parameter
+// and returns the appropriate angle (loops around if needed)
+float _stick_angle_adjust(float angle, float adjustment)
+{
+  float out = angle + adjustment;
+  if (out>360.0f) out-=360;
+  else if (out<0) out+=360;
+  return out;
+}
+
+// Returns the octant where the angle is
+int _stick_get_octant_adjusted(float angle)
+{
+  return (int) _stick_angle_adjust(angle, 22.5f)/45;
+}
+
+int _stick_get_octant(float angle)
+{
+  return (int) angle/45;
+}
+
+// Returns the float angle given the XY coordinate pair and the
+// calibrated center point
+float _stick_get_angle(int x, int y, int center_x, int center_y) {
+  float angle = atan2f( (y - center_y), (x - center_x) ) * 180.0f / M_PI;
+  if (angle < 0) {
+    angle += 360.0f;
+  }
+  else if (angle > 360.0f) {
+    angle -= 360.0f;
+  }
+  return angle;
+}
+
+// Returns float distance between float coordinate pair
+// and 512,512 coordinate center point
+float _stick_get_distance(int x, int y, int center_x, int center_y) {
+  float dx = (float) x - (float) center_x;
+  float dy = (float) y - (float) center_y;
+  return sqrtf(dx * dx + dy * dy);
+}
+
+// Produces a normalized vector at a given angle
+void _stick_normalized_vector(float angle, float *x, float *y)
+{
+  float rad = angle * (M_PI / 180.0);
+  *x = cos(rad);
+  *y = sin(rad);
+}
+
+// Calculates the new angle output based on angle and distance
+void _stick_angle_distance_scaled(float angle, float distance, float *angles, float *scalers, float *out_x, float *out_y)
+{
+  int o = _stick_get_octant(angle); // Get octant the stick is in
+
+  int o2 = o+1;
+  if (o2>7) o2 = 7;
+
+  float d = angles[o2] - angles[o];        // Get distance of calibrated angle points
+
+  float a = _stick_angle_adjust(angle, -angles[o]); // Get normalized angle distance
+
+  float p = a/d; // Get the percent distance we are currently
+  float p2 = 1.0f-p; // Get other percent remainder
+
+  float s = (scalers[o]*p)+(scalers[o2]*p2);
+
+  float na = (p*45)+(o*45);
+
+  float nx  = 0;
+  float ny  = 0;
+  _stick_normalized_vector(na, &nx, &ny);
+
+  float nd = distance*s;
+  nx *= nd;
+  ny *= nd;
+
+  *out_x = CLAMP_0_MAX((int) roundf(nx+STICK_INTERNAL_CENTER));
+  *out_y = CLAMP_0_MAX((int) roundf(ny+STICK_INTERNAL_CENTER));;
+}
+
+// Calculate the angular scalers used to determine the distance scaler
+void _stick_calculate_distance_scalers(float *distances_in, float *scalers_out)
+{
+  for(uint8_t i = 0; i < 8; i++)
+  {
+    scalers_out[i] = (STICK_SCALE_DISTANCE) / (distances_in[i]);
+  }
+}
+
+// PUBLIC FUNCTIONS
+void stick_scaling_init()
+{
+
+}
+
+uint16_t _stick_distances_tracker = 0x00;
+
+void stick_scaling_reset_distances()
+{
+  _stick_distances_tracker = 0x00;
+  memset(_stick_l_calibrated_distances, 0, sizeof(float)*8);
+  memset(_stick_r_calibrated_distances, 0, sizeof(float)*8);
+}
+
+bool stick_scaling_capture_distances(a_data_s *in)
+{
+  // Get angles of input
+  float la = _stick_get_angle(in->lx, in->ly, _stick_l_center_x, _stick_l_center_y);
+  float ra = _stick_get_angle(in->rx, in->ry, _stick_r_center_x, _stick_r_center_y);
+
+  int lo = _stick_get_octant_adjusted(la);
+  int ro = _stick_get_octant_adjusted(ra);
+
+  // Get distance of input
+  float ld = _stick_get_distance(in->lx, in->ly, _stick_l_center_x, _stick_l_center_y);
+  float rd = _stick_get_distance(in->rx, in->ry, _stick_r_center_x, _stick_r_center_y);
+
+  float l_a_d = fmod(la, 45);
+  if((l_a_d < 1) || (l_a_d > 44))
+  {
+    if(ld > _stick_l_calibrated_distances[lo])
+    {
+      _stick_l_calibrated_distances[lo] = ld;
+      _stick_distances_tracker |= (1<<lo);
+    }
+  }
+
+
+  float r_a_d = fmod(ra, 45);
+  if ((r_a_d < 1) || (r_a_d > 44))
+  {
+    if(rd > _stick_l_calibrated_distances[ro])
+    {
+      _stick_r_calibrated_distances[ro] = rd;
+      _stick_distances_tracker |= (1<<(lo+8));
+    }
+  }
+
+  return (_stick_distances_tracker == 0xFFFF);
+
+}
+
+void stick_scaling_capture_center(a_data_s *input)
+{
+
+}
+
+void stick_scaling_process_data(a_data_s *in, a_data_s *out)
+{
+  // Get angles of input
+  float la = _stick_get_angle(in->lx, in->ly, _stick_l_center_x, _stick_l_center_y);
+  float ra = _stick_get_angle(in->rx, in->ry, _stick_r_center_x, _stick_r_center_y);
+
+  // Get distance of input
+  float ld = _stick_get_distance(in->lx, in->ly, _stick_l_center_x, _stick_l_center_y);
+  float rd = _stick_get_distance(in->rx, in->ry, _stick_r_center_x, _stick_r_center_y);
+
+  _stick_angle_distance_scaled(la, ld, _stick_l_calibrated_angles, _stick_l_distance_scalers, &out->lx, &out->ly);
+  _stick_angle_distance_scaled(ra, rd, _stick_r_calibrated_angles, _stick_r_distance_scalers, &out->rx, &out->ry);
+}
