@@ -111,7 +111,7 @@ void cb_progcc_rumble_enable(bool enable)
     if (enable)
     {
         pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
-        pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 120);
+        pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 100);
     }
     else
     {
@@ -233,4 +233,6 @@ int main()
     rgb_set_all(red.color);
 
     progcc_init(&button_data, &analog_data, &user_map);
+
+
 }

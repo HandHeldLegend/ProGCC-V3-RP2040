@@ -27,6 +27,7 @@
 #define SPI_READ_BIT 0x80
 
 #define IMU_OUTX_L_G 0x22
+#define IMU_OUTX_L_X 0x28
 
 int16_t imu_x_1[3] = {0};
 int16_t imu_y_1[3] = {0};
@@ -68,6 +69,7 @@ void imu_set_enabled(bool enable)
 {
   _imu_enabled = enable;
 }
+
 
 // Gets the last 3 IMU datasets and puts them out
 // for Nintendo Switch buffer
@@ -111,8 +113,8 @@ void imu_buffer_out(uint8_t *output)
   output[18]   = imu_8_y[2];
   output[19]   = imu_8_y[3];
 
-  output[20]   = imu_8_x[2];
-  output[21]   = imu_8_x[3];
+  //output[20]   = imu_8_x[2];
+  //output[21]   = imu_8_x[3];
 
   output[22]  = imu_8_z[2];
   output[23]  = imu_8_z[3];
@@ -131,8 +133,8 @@ void imu_buffer_out(uint8_t *output)
   output[30]   = imu_8_y[4];
   output[31]   = imu_8_y[5];
 
-  output[32]   = imu_8_x[4];
-  output[33]   = imu_8_x[5];
+  //output[32]   = imu_8_x[4];
+  //output[33]   = imu_8_x[5];
 
   output[34]  = imu_8_z[4];
   output[35]  = imu_8_z[5];
@@ -232,11 +234,16 @@ void imu_read_test(uint32_t timestamp)
     _flip = !_flip;
 
     uint8_t i[12] = {0};
-    const uint8_t reg = 0x80 | IMU_OUTX_L_G;
+    const uint8_t reg1 = 0x80 | IMU_OUTX_L_X;
+    const uint8_t reg2 = 0x80 | IMU_OUTX_L_G;
 
     gpio_put(PGPIO_IMU0_CS, false);
-    spi_write_blocking(spi0, &reg, 1);
-    spi_read_blocking(spi0, 0, &i[0], 12);
+    spi_write_blocking(spi0, &reg1, 1);
+    spi_read_blocking(spi0, 0, &i[6], 6);
+    gpio_put(PGPIO_IMU0_CS, true);
+    gpio_put(PGPIO_IMU0_CS, false);
+    spi_write_blocking(spi0, &reg2, 1);
+    spi_read_blocking(spi0, 0, &i[0], 6);
     gpio_put(PGPIO_IMU0_CS, true);
 
     imu_x_1[imu_read_idx] = _imu_concat_16(i[0], i[1]);
@@ -248,8 +255,12 @@ void imu_read_test(uint32_t timestamp)
     acc_z_1[imu_read_idx] = _imu_concat_16(i[10], i[11]);
 
     gpio_put(PGPIO_IMU1_CS, false);
-    spi_write_blocking(spi0, &reg, 1);
-    spi_read_blocking(spi0, 0, &i[0], 12);
+    spi_write_blocking(spi0, &reg1, 1);
+    spi_read_blocking(spi0, 0, &i[6], 6);
+    gpio_put(PGPIO_IMU1_CS, true);
+    gpio_put(PGPIO_IMU1_CS, false);
+    spi_write_blocking(spi0, &reg2, 1);
+    spi_read_blocking(spi0, 0, &i[0], 6);
     gpio_put(PGPIO_IMU1_CS, true);
 
     imu_x_2[imu_read_idx] = -_imu_concat_16(i[0], i[1]);
