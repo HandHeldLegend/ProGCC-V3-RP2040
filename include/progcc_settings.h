@@ -5,7 +5,7 @@
 
 // Corresponds to version number in web app.
 #define FIRMWARE_VERSION 0x0800
-#define SETTINGS_VERSION 0x7500
+#define SETTINGS_VERSION 0x7400
 
 typedef struct
 {
@@ -32,6 +32,10 @@ typedef struct
     // Angle distances one for each of the 8 directions
     float l_angle_distances[8];
     float r_angle_distances[8];
+
+    // IMU Calibration
+    uint8_t imu_calibration[26];
+
 } __attribute__ ((packed)) progcc_settings_s;
 
 extern progcc_settings_s global_loaded_settings;

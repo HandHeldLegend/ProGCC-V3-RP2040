@@ -254,11 +254,19 @@ void command_handler(uint8_t command, const uint8_t *data, uint16_t len)
     case SW_CMD_SET_SPI:
       printf("Write SPI. Address: %X, %X | Len: %d\n", data[12], data[11], data[15]);
       set_ack(0x80);
-      for (uint16_t i = 0; i < data[15]; i++)
+
+      // Write IMU calibration data
+      if ((data[12] == 0x80) && (data[11] == 0x26))
       {
-        printf("0x%x, ", data[16+i]);
+        for(uint16_t i = 0; i < 26; i++)
+        {
+          global_loaded_settings.imu_calibration[i] = data[16+i];
+          printf("0x%x, ", data[16+i]);
+          printf("\n");
+        }
+        settings_save();
       }
-      printf("\n");
+
       break;
 
     case SW_CMD_GET_TRIGGERET:

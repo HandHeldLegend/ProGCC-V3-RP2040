@@ -93,6 +93,10 @@ void settings_reset_to_default()
       683.8340f
     },
   };
+  for(uint16_t i = 0; i < 26; i++)
+  {
+    global_loaded_settings.imu_calibration[i] = 0xFF;
+  }
   memcpy(&global_loaded_settings, &set, sizeof(progcc_settings_s));
   _generate_mac();
 }
