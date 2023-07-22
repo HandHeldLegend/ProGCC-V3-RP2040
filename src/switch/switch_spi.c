@@ -216,27 +216,27 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
 
                 // GYRO COEFF
                 case 0x32:
-                    return 0xE7;
+                    return 0x3B;
                     break;
 
                 case 0x33:
-                    return 0x3B;
+                    return 0x34;
                     break;
 
                 case 0x34:
-                    return 0xE7;
+                    return 0x3B;
                     break;
 
                 case 0x35:
-                    return 0x3B;
+                    return 0x34;
                     break;
 
                 case 0x36:
-                    return 0xE7;
+                    return 0x3B;
                     break;
 
                 case 0x37:
-                    return 0x3B;
+                    return 0x34;
                     break;
 
                 case 0x3D ... 0x45:
@@ -434,18 +434,9 @@ uint8_t sw_spi_getaddressdata(uint8_t offset_address, uint8_t address)
                     return 0xFF; // No user config... maybe this helps :,)
                     break;
 
-                // Gyro magic?
-                case 0x26:
-                case 0x27:
-                    return 0xFF; // same as stick usually...
-                    break;
-
-                // END OF STAGE 5 //
-                // --------------------- //
-
-                // TO-DO - User 6-axis calibration data
-                case 0x28 ... 0x3F:
-                    return 0xFF;
+                // Gyro Calibration
+                case 0x26 ... 0x3F:
+                    return global_loaded_settings.imu_calibration[address-0x26];
                     break;
 
                 default:
