@@ -63,6 +63,50 @@ uint8_t acc_8_z[6] = {0};
 
 auto_init_mutex(imu_mutex);
 
+int16_t _imu_x_filter(int16_t new)
+{
+  static int16_t list[25] = {0};
+  static int xavg = 0;
+  static int xout = 0;
+  static uint8_t idx = 0;
+
+  xavg+=(int) new;
+  list[idx] = new;
+
+  uint8_t first = idx+1;
+  if(first==25) first = 0;
+
+  xavg+=list[idx];
+  xavg-= list[first];
+
+  idx+=1;
+  if(idx==25) idx = 0;
+
+  xout = xavg/25;
+
+  return (int16_t) xout;
+
+}
+
+int16_t _imu_concat_16(uint8_t low, uint8_t high)
+{
+  return (int16_t) ((high<<8) | low);
+}
+
+void _imu_process_8(int16_t val, uint8_t *out)
+{
+  out[0] = (val&0xFF);
+  out[1] = (val&0xFF00)>>8;
+}
+
+int16_t _imu_average_value (int16_t first, int16_t second)
+{
+  int total = ((int)first+(int)second)/2;
+  if (total>32767) return 32767;
+  if (total<-32768) return -32768;
+  return total;
+}
+
 bool _imu_enabled = false;
 
 void imu_set_enabled(bool enable)
@@ -80,6 +124,15 @@ void imu_buffer_out(uint8_t *output)
   {
 
   }
+
+  /*
+  _imu_x_filter(imu_x_a[0]);
+  _imu_x_filter(imu_x_a[1]);
+  int16_t gx = _imu_x_filter(imu_x_a[2]);
+
+  _imu_process_8(gx, &imu_8_x[0]);
+  _imu_process_8(gx, &imu_8_x[2]);
+  _imu_process_8(gx, &imu_8_x[4]);*/
 
   output[0] = acc_8_y[0];
   output[1] = acc_8_y[1];
@@ -113,8 +166,8 @@ void imu_buffer_out(uint8_t *output)
   output[18]   = imu_8_y[2];
   output[19]   = imu_8_y[3];
 
-  //output[20]   = imu_8_x[2];
-  //output[21]   = imu_8_x[3];
+  output[20]   = imu_8_x[2];
+  output[21]   = imu_8_x[3];
 
   output[22]  = imu_8_z[2];
   output[23]  = imu_8_z[3];
@@ -133,8 +186,8 @@ void imu_buffer_out(uint8_t *output)
   output[30]   = imu_8_y[4];
   output[31]   = imu_8_y[5];
 
-  //output[32]   = imu_8_x[4];
-  //output[33]   = imu_8_x[5];
+  output[32]   = imu_8_x[4];
+  output[33]   = imu_8_x[5];
 
   output[34]  = imu_8_z[4];
   output[35]  = imu_8_z[5];
@@ -199,25 +252,6 @@ bool _imu_update_ready(uint32_t timestamp)
   return false;
 }
 
-int16_t _imu_concat_16(uint8_t low, uint8_t high)
-{
-  return (int16_t) ((high<<8) | low);
-}
-
-void _imu_process_8(int16_t val, uint8_t *out)
-{
-  out[0] = (val&0xFF);
-  out[1] = (val&0xFF00)>>8;
-}
-
-int16_t _imu_average_value (int16_t first, int16_t second)
-{
-  int total = ((int)first+(int)second)/2;
-  if (total>32767) return 32767;
-  if (total<-32768) return -32768;
-  return total;
-}
-
 uint8_t imu_read_idx = 0;
 
 void imu_reset_idx()
@@ -246,8 +280,8 @@ void imu_read_test(uint32_t timestamp)
     spi_read_blocking(spi0, 0, &i[0], 6);
     gpio_put(PGPIO_IMU0_CS, true);
 
-    imu_x_1[imu_read_idx] = _imu_concat_16(i[0], i[1]);
-    imu_y_1[imu_read_idx] = -_imu_concat_16(i[2], i[3]);
+    imu_x_1[imu_read_idx] = -_imu_concat_16(i[0], i[1]);
+    imu_y_1[imu_read_idx] = _imu_concat_16(i[2], i[3]);
     imu_z_1[imu_read_idx] = _imu_concat_16(i[4], i[5]);
 
     acc_x_1[imu_read_idx] = -_imu_concat_16(i[6], i[7]);
@@ -263,8 +297,8 @@ void imu_read_test(uint32_t timestamp)
     spi_read_blocking(spi0, 0, &i[0], 6);
     gpio_put(PGPIO_IMU1_CS, true);
 
-    imu_x_2[imu_read_idx] = -_imu_concat_16(i[0], i[1]);
-    imu_y_2[imu_read_idx] = _imu_concat_16(i[2], i[3]);
+    imu_x_2[imu_read_idx] = _imu_concat_16(i[0], i[1]);
+    imu_y_2[imu_read_idx] = -_imu_concat_16(i[2], i[3]);
     imu_z_2[imu_read_idx] = _imu_concat_16(i[4], i[5]);
 
     acc_x_2[imu_read_idx] = _imu_concat_16(i[6], i[7]);
