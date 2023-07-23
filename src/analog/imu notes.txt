@@ -48,4 +48,3 @@ Output 16 bit vals for gyro standstill
 0x255
 
 Pro Controller gyro maybe hasn't been analyzed as thoroughly...
-Look at this packet!!

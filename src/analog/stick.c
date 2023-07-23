@@ -10,11 +10,11 @@
 const float _angle_lut[8] = {0, 45, 90, 135, 180, 225, 270, 315};
 
 // E, NE, N, NW, W, SW, S, SE
-float _stick_l_calibrated_angles[8]     = {0, 0, 20, 0, 0, 0, -20, 0};
+float _stick_l_calibrated_angles[8]     = {0, 0, 0, 0, 0, 0, 0, 0};
 float _stick_l_calibrated_distances[8]  = {600, 600, 600, 600, 600, 600, 600, 600};
 float _stick_l_distance_scalers[8] = {1,1,1,1,1,1,1,1};
 
-float _stick_r_calibrated_angles[8]     = {0, 0, -20, 0, 0, 0, 20, 0};
+float _stick_r_calibrated_angles[8]     = {0, 0, 0, 0, 0, 0, 0, 0};
 float _stick_r_calibrated_distances[8]  = {600, 600, 600, 600, 600, 600, 600, 600};
 float _stick_r_distance_scalers[8] = {1,1,1,1,1,1,1,1};
 
