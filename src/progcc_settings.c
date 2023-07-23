@@ -70,8 +70,8 @@ void settings_reset_to_default()
     .ly_center = 0,
     .rx_center = 0,
     .ry_center = 0,
-    .l_angles = {45.0f, 45.0f, 45.0f, 45.0f},
-    .r_angles = {45.0f, 45.0f, 45.0f, 45.0f},
+    .l_angles = {0, 45, 90, 135, 180, 225, 270, 315},
+    .r_angles = {0, 45, 90, 135, 180, 225, 270, 315},
     .l_angle_distances = {
       572.0219f,
       553.6759f,
@@ -150,18 +150,18 @@ void settings_set_centers(int lx, int ly, int rx, int ry)
 
 void settings_set_distances(float *l_angle_distances, float *r_angle_distances)
 {
-    memcpy(global_loaded_settings.l_angle_distances, l_angle_distances, sizeof(float)*8);
-    memcpy(global_loaded_settings.r_angle_distances, r_angle_distances, sizeof(float)*8);
+  memcpy(global_loaded_settings.l_angle_distances, l_angle_distances, sizeof(float)*8);
+  memcpy(global_loaded_settings.r_angle_distances, r_angle_distances, sizeof(float)*8);
 }
 
 void settings_set_angles(float *l_angles, float *r_angles)
 {
-    memcpy(global_loaded_settings.l_angles, l_angles, sizeof(float)*4);
-    memcpy(global_loaded_settings.r_angles, r_angles, sizeof(float)*4);
+  memcpy(global_loaded_settings.l_angles, l_angles, sizeof(float)*8);
+  memcpy(global_loaded_settings.r_angles, r_angles, sizeof(float)*8);
 }
 
 void settings_set_mode(uint8_t comms_mode, uint8_t usb_mode)
 {
-    global_loaded_settings.comms_mode   = comms_mode;
-    global_loaded_settings.usb_mode     = usb_mode;
+  global_loaded_settings.comms_mode   = comms_mode;
+  global_loaded_settings.usb_mode     = usb_mode;
 }

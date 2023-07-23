@@ -6,7 +6,6 @@
 #define STICK_DEAD_ZONE 24
 #define STICK_SCALE_DISTANCE STICK_INTERNAL_CENTER
 
-
 #define ANGLE_TOLERANCE 1
 
 #define CLAMP_0_MAX(value) ((value) < 0 ? 0 : ((value) > STICK_MAX ? STICK_MAX : (value)))

@@ -5,7 +5,7 @@
 
 // Corresponds to version number in web app.
 #define FIRMWARE_VERSION 0x0800
-#define SETTINGS_VERSION 0x7400
+#define SETTINGS_VERSION 0x7600
 
 typedef struct
 {
@@ -25,9 +25,9 @@ typedef struct
     int rx_center;
     int ry_center;
 
-    // Angle Cardinal Adjustments
-    float l_angles[4];
-    float r_angles[4];
+    // Angle Adjustments
+    float l_angles[8];
+    float r_angles[8];
 
     // Angle distances one for each of the 8 directions
     float l_angle_distances[8];
