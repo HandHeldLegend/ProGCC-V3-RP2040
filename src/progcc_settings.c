@@ -35,8 +35,7 @@ void _generate_mac()
   }
   printf("\n");
 }
-
-#define FLASH_TARGET_OFFSET (1536 * 1024)
+#define FLASH_TARGET_OFFSET (1200 * 1024)
 
 // Returns true if loaded ok
 // returns false if no settings and reset to default
@@ -66,38 +65,24 @@ void settings_reset_to_default()
     .performance_mode = false,
     .remap_profile = default_user_map.val,
 
-    .lx_center = 0,
-    .ly_center = 0,
-    .rx_center = 0,
-    .ry_center = 0,
-    .l_angles = {0, 45, 90, 135, 180, 225, 270, 315},
-    .r_angles = {0, 45, 90, 135, 180, 225, 270, 315},
+    .lx_center = 2048,
+    .ly_center = 2048,
+    .rx_center = 2048,
+    .ry_center = 2048,
+    .l_angles = {0,0,0,0,0,0,0,0},
+    .r_angles = {0,0,0,0,0,0,0,0},
     .l_angle_distances = {
-      572.0219f,
-      553.6759f,
-      603.0829f,
-      685.2306f,
-      704.0859f,
-      808.2234f,
-      677.0894f,
-      678.8225f
+      600, 600, 600, 600, 600, 600, 600, 600,
     },
     .r_angle_distances = {
-      637.0385f,
-      620.8978f,
-      598.0836f,
-      620.1814f,
-      608.0822f,
-      666.1486f,
-      580.0862f,
-      683.8340f
+      600, 600, 600, 600, 600, 600, 600, 600,
     },
   };
+  memcpy(&global_loaded_settings, &set, sizeof(progcc_settings_s));
   for(uint16_t i = 0; i < 26; i++)
   {
     global_loaded_settings.imu_calibration[i] = 0xFF;
   }
-  memcpy(&global_loaded_settings, &set, sizeof(progcc_settings_s));
   _generate_mac();
 }
 

@@ -106,9 +106,44 @@ void cb_progcc_hardware_setup()
     imu_init();
 }
 
+bool _rumble_update_ready(uint32_t timestamp)
+{
+  static uint32_t last_time = 0;
+  static uint32_t this_time = 0;
+
+  this_time = timestamp;
+
+  // Clear variable
+  uint32_t diff = 0;
+
+  // Handle edge case where time has
+  // looped around and is now less
+  if (this_time < last_time)
+  {
+    diff = (0xFFFFFFFF - last_time) + this_time;
+  }
+  else if (this_time > last_time)
+  {
+    diff = this_time - last_time;
+  }
+  else
+    return false;
+
+  // We want a target IMU rate defined
+  if (diff > 500000)
+  {
+    // Set the last time
+    last_time = this_time;
+    return true;
+  }
+  return false;
+}
+
+bool debug_rumble = false;
+
 void cb_progcc_rumble_enable(bool enable)
 {
-    if (enable)
+    if (debug_rumble)
     {
         pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
         pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 100);
@@ -233,6 +268,4 @@ int main()
     rgb_set_all(red.color);
 
     progcc_init(&button_data, &analog_data, &user_map);
-
-
 }

@@ -13,7 +13,7 @@ bool _usb_performance_mode = false;
 bool _usb_busy = false;
 
 // Default 8ms (8000us)
-uint32_t _usb_rate = 7.5 * 1000;
+uint32_t _usb_rate = 8000;
 
 typedef void (*usb_cb_t)(button_data_s *, a_data_s *);
 
@@ -52,6 +52,7 @@ bool pusb_start(usb_mode_t mode, bool performance_mode)
   return tusb_init();
 }
 
+/* DEPRECIATED 
 // Returns a bool to indicate whether or not
 // a comms frame should occur
 bool _pusb_poll_ready(uint32_t timestamp)
@@ -83,20 +84,39 @@ bool _pusb_poll_ready(uint32_t timestamp)
         return true;
     }
     return false;
-}
+} */
 
 uint8_t buf = 0;
+bool _usbNullerror = false;
 
-void pusb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_data)
+bool _pusb_ready()
+{
+  if (_usb_mode == PUSB_MODE_XI)
+  {
+    return tud_xinput_ready();
+  }
+  else if (_usb_mode == PUSB_MODE_WEB)
+  {
+    return tud_vendor_available();
+  }
+  else return tud_hid_ready();
+}
+
+void pusb_task(button_data_s *button_data, a_data_s *analog_data)
 {
 
-  if (_pusb_poll_ready(timestamp))
+  //if (_pusb_poll_ready(timestamp))
+  if(_pusb_ready())
   {
-    //if (_progcc_usb_busy) return;
     // Call the registered function
     if (_usb_hid_cb != NULL)
     {
         _usb_hid_cb(button_data, analog_data);
+    }
+    else if (!_usbNullerror)
+    {
+      _usbNullerror = true;
+      printf("_usb_hid_cb is NULL\n");
     }
   }
 
@@ -109,7 +129,6 @@ void pusb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_
 uint8_t const* tud_descriptor_device_cb(void) {
   switch(_usb_mode)
   {
-    case PUSB_MODE_MAX:
     default:
     case PUSB_MODE_DI:
       return (uint8_t const*) &di_device_descriptor;
@@ -169,8 +188,6 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
     case PUSB_MODE_XI:
       return (uint8_t const*) &xid_configuration_descriptor;
       break;
-
-
   }
 }
 
@@ -362,6 +379,16 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
   // first byte is length (including header), second byte is string type
   _desc_str[0] = (TUSB_DESC_STRING << 8 ) | (2*chr_count + 2);
   return _desc_str;
+}
+
+// Vendor Device Class CB for receiving data
+void tud_vendor_rx_cb(uint8_t itf)
+{
+  printf("WebUSB Data Received.\n");
+  uint8_t buffer[64] = {0};
+  uint32_t size = 0;
+  tud_vendor_n_read(itf, buffer, 64);
+  webusb_command_processor(buffer);
 }
 
 /********* USB Data Handling Utilities ***************/

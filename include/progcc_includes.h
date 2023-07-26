@@ -29,7 +29,7 @@
 
 #include "board_config.h"
 
-#include "stick_scaling.h"
+#include "stick.h"
 #include "imu.h"
 
 #include "ws2812.pio.h"
@@ -37,6 +37,7 @@
 
 #include "bsp/board.h"
 #include "tusb.h"
+#include "desc_bos.h"
 // XInput TinyUSB Driver
 #include "xinput_device.h"
 
@@ -45,6 +46,7 @@
 #include "xinput.h"
 #include "dinput.h"
 #include "swpro.h"
+#include "webusb.h"
 
 #include "progcc_usb.h"
 

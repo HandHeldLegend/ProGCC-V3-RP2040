@@ -93,7 +93,7 @@ void _rgb_animate_step()
         done = false;
     }
 
-    if (steps < RGB_FADE_STEPS)
+    if (steps <= RGB_FADE_STEPS)
     {
         float blender = blend_step * (float) steps;
         // Blend between old and next colors appropriately
@@ -128,9 +128,76 @@ void rgb_set_all(uint32_t color)
     _rgb_out_dirty = true;
 }
 
-void rgb_set_group(uint8_t group)
+void _rgb_set_sequential(rgb_s *colors, uint8_t len, uint32_t color)
 {
+    for(uint8_t i = 0; i < len; i++)
+    {
+        colors[i].color = color;
+    }
+}
 
+void rgb_set_group(rgb_group_t group, uint32_t color)
+{
+    switch(group)
+    {
+        default:
+        break;
+
+        case RGB_GROUP_RS:
+            _rgb_set_sequential(&_rgb_next[0], 4, color);
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_LS:
+            _rgb_set_sequential(&_rgb_next[4], 4, color);
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_DPAD:
+            _rgb_set_sequential(&_rgb_next[8], 4, color);
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_MINUS:
+            _rgb_next[12].color = color;
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_CAPTURE:
+            _rgb_next[13].color = color;
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_HOME:
+            _rgb_next[14].color = color;
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_PLUS:
+            _rgb_next[15].color = color;
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_Y:
+            _rgb_next[16].color = color;
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_X:
+            _rgb_next[17].color = color;
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_A:
+            _rgb_next[18].color = color;
+            _rgb_out_dirty = true;
+            break;
+
+        case RGB_GROUP_B:
+            _rgb_next[19].color = color;
+            _rgb_out_dirty = true;
+            break;
+    }
 }
 
 void rgb_init()

@@ -1,11 +1,12 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
-include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
-
-project(PROGCC_RP2040 CXX C ASM)
 # Set the C standard
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
+
+include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
+
+project(PROGCC_RP2040 C CXX ASM)
 
 pico_sdk_init()
 
@@ -28,7 +29,9 @@ src/devices/gcinput.c
 src/devices/nsinput.c
 src/devices/xinput.c
 src/devices/swpro.c
+src/devices/webusb.c
 
+src/usb/desc_bos.c
 src/usb/progcc_usb.c
 src/usb/xinput_device.c
 

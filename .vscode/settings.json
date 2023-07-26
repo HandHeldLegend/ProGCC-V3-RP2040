@@ -1,6 +1,6 @@
 {
-  "files.associations": {
-    "*.h": "c",
-    "type_traits": "c"
-  }
+    "files.associations": {
+        "progcc_defines.h": "c",
+        "desc_bos.h": "c"
+    }
 }

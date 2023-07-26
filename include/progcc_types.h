@@ -92,6 +92,7 @@ typedef enum
     PUSB_MODE_XI,
     PUSB_MODE_DI,
     PUSB_MODE_SW,
+    PUSB_MODE_WEB,
     PUSB_MODE_MAX,
 } usb_mode_t;
 

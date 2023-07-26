@@ -17,6 +17,7 @@ button_remap_s *_progcc_remap = NULL;
 volatile uint32_t _progcc_timestamp = 0;
 
 bool _analog_calibrate  = false;
+bool _analog_calibrate_octagon = false;
 bool _analog_centered   = false;
 bool _analog_all_angles_got    = false;
 
@@ -49,10 +50,12 @@ void _progcc_calibrate_analog_save()
   };
   rgb_set_all(green.color);
   _analog_calibrate = false;
-  stick_scaling_save_all();
+  _analog_calibrate_octagon = false;
   cb_progcc_rumble_enable(true);
   sleep_ms(200);
   cb_progcc_rumble_enable(false);
+  stick_scaling_save_all();
+  sleep_ms(200);
   stick_scaling_init();
 }
 
@@ -75,8 +78,8 @@ void _progcc_task_0()
   if (_progcc_usb_task_enable)
   {
     // Process USB if needed
-    pusb_task(_progcc_timestamp, &_progcc_buttons_remapped, &_progcc_analog_scaled);
     tud_task();
+    pusb_task(&_progcc_buttons_remapped, &_progcc_analog_scaled);
   }
 
   // Do callback for userland code insertion
@@ -128,7 +131,7 @@ void _progcc_analog_tick(uint32_t timestamp)
     if (_analog_calibrate)
     {
       // Capture analog data
-      if (stick_scaling_capture_distances(_progcc_analog) && !_analog_all_angles_got)
+      if (stick_scaling_capture_distances(_progcc_analog) && !_analog_all_angles_got && !_analog_calibrate_octagon)
       {
         _analog_all_angles_got = true;
         rgb_s red = {
@@ -137,6 +140,25 @@ void _progcc_analog_tick(uint32_t timestamp)
             .b = 128,
         };
         rgb_set_all(red.color);
+      }
+      else if(_progcc_buttons->button_a && _analog_calibrate_octagon)
+      {
+        if (stick_scaling_capture_angle(_progcc_analog))
+        {
+          rgb_s c1 = {
+            .r = 0,
+            .g = 128,
+            .b = 0,
+          };
+          rgb_set_all(c1.color);
+          sleep_ms(200);
+          rgb_s c2 = {
+              .r = 128,
+              .g = 128,
+              .b = 0,
+          };
+          rgb_set_all(c2.color);
+        }
       }
 
       if (_progcc_buttons->button_capture)
@@ -185,18 +207,22 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
   cb_progcc_read_buttons();
   cb_progcc_read_buttons();
 
-  if (button_memory->button_minus && button_memory->button_plus)
+  if (!settings_load())
   {
     settings_reset_to_default();
-
-    // If we saved a default settings, initiate calibration
-    _progcc_calibrate_analog_start();
-  }
-  else if (!settings_load() || button_memory->button_home)
-  {
     sleep_ms(200);
     stick_scaling_init();
     // If we saved a default settings, initiate calibration
+    _progcc_calibrate_analog_start();
+  }
+
+  if (button_memory->button_minus && button_memory->button_plus)
+  {
+    _progcc_calibrate_analog_start();
+  }
+  else if (button_memory->button_minus && button_memory->button_a)
+  {
+    _analog_calibrate_octagon = true;
     _progcc_calibrate_analog_start();
   }
   else
@@ -210,7 +236,7 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
   // For switch Pro stuff
   switch_analog_calibration_init();
 
-  uint8_t sub_mode = PUSB_MODE_SW;
+  uint8_t sub_mode = PUSB_MODE_SW; //PUSB_MODE_SW;
   uint8_t comms_mode = COMM_MODE_USB;
   if (button_memory->button_x)
   {

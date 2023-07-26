@@ -21,8 +21,6 @@ short sign_axis(int input_axis)
 
 void xinput_hid_report(button_data_s *button_data, a_data_s *analog_data)
 {
-  if (!tud_xinput_ready()) return;
-
   static xid_input_s data = {0};
   data.stick_left_x     = sign_axis((int) (analog_data->lx));
   data.stick_left_y     = sign_axis((int) (analog_data->ly));
