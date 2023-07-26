@@ -50,7 +50,7 @@ bool settings_load()
   {
     printf("Settings version does not match. Resetting... \n");
     settings_reset_to_default();
-    settings_save();
+    settings_save(false);
     return false;
   }
   return true;
@@ -77,6 +77,10 @@ void settings_reset_to_default()
     .r_angle_distances = {
       600, 600, 600, 600, 600, 600, 600, 600,
     },
+    .lx_snapback = 0,
+    .ly_snapback = 0,
+    .rx_snapback = 0,
+    .ry_snapback = 0,
   };
   memcpy(&global_loaded_settings, &set, sizeof(progcc_settings_s));
   for(uint16_t i = 0; i < 26; i++)
@@ -87,6 +91,7 @@ void settings_reset_to_default()
 }
 
 volatile bool _save_flag = false;
+volatile bool _webusb_indicate = false;
 
 void settings_core1_save_check()
 {
@@ -116,12 +121,20 @@ void settings_core1_save_check()
     // Restore interrups
     restore_interrupts(ints);
     multicore_lockout_end_blocking();
+
+    // Indicate change
+    if (_webusb_indicate)
+    {
+      webusb_save_confirm();
+      _webusb_indicate = false;
+    }
     _save_flag = false;
   }
 }
 
-void settings_save()
+void settings_save(bool webusb_indicate)
 {
+  _webusb_indicate = webusb_indicate;
   _save_flag = true;
 }
 
@@ -149,4 +162,25 @@ void settings_set_mode(uint8_t comms_mode, uint8_t usb_mode)
 {
   global_loaded_settings.comms_mode   = comms_mode;
   global_loaded_settings.usb_mode     = usb_mode;
+}
+
+void settings_set_snapback(uint8_t axis, uint8_t level)
+{
+  if (level > 7) level = 7;
+  switch(axis)
+  {
+    default:
+    case 0:
+      global_loaded_settings.lx_snapback = level;
+      break;
+    case 1:
+      global_loaded_settings.ly_snapback = level;
+      break;
+    case 2:
+      global_loaded_settings.rx_snapback = level;
+      break;
+    case 3:
+      global_loaded_settings.ry_snapback = level;
+      break;
+  }
 }

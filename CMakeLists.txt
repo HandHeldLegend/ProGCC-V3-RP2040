@@ -37,6 +37,7 @@ src/usb/xinput_device.c
 
 src/analog/stick.c
 src/analog/imu.c
+src/analog/snapback.c
 
 src/switch/switch_commands.c
 src/switch/switch_spi.c

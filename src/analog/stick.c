@@ -345,5 +345,5 @@ void stick_scaling_save_all()
   settings_set_centers(_stick_l_center_x, _stick_l_center_y, _stick_r_center_x, _stick_r_center_y);
   settings_set_distances(_stick_l_calibrated_distances, _stick_r_calibrated_distances);
   settings_set_angles(_stick_l_calibrated_angles, _stick_r_calibrated_angles);
-  settings_save();
+  settings_save(false);
 }

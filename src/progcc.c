@@ -59,7 +59,6 @@ void _progcc_calibrate_analog_save()
   stick_scaling_init();
 }
 
-
 void _progcc_task_0()
 {
   _progcc_timestamp = time_us_32();
@@ -166,9 +165,12 @@ void _progcc_analog_tick(uint32_t timestamp)
         _progcc_calibrate_analog_save();
       }
     }
+
+    // Normal stick reading process
     else
     {
       stick_scaling_process_data(_progcc_analog, &_progcc_analog_scaled);
+      snapback_process(&_progcc_analog_scaled);
     }
   }
 

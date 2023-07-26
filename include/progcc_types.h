@@ -195,30 +195,6 @@ typedef struct
 
 typedef struct
 {
-    int lx_center;
-    int ly_center;
-
-    int rx_center;
-    int ry_center;
-} __attribute__ ((packed)) a_calib_center_s;
-
-typedef struct
-{
-    int lx_hi;
-    int lx_lo;
-
-    int ly_hi;
-    int ly_lo;
-
-    int rx_hi;
-    int rx_lo;
-
-    int ry_hi;
-    int ry_lo;
-} __attribute__ ((packed)) a_calib_hilo_s;
-
-typedef struct
-{
     int lx;
     int ly;
     int rx;

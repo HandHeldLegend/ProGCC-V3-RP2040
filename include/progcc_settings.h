@@ -5,7 +5,7 @@
 
 // Corresponds to version number in web app.
 #define FIRMWARE_VERSION 0x0800
-#define SETTINGS_VERSION 0x7200
+#define SETTINGS_VERSION 0x7201
 
 typedef struct
 {
@@ -33,6 +33,11 @@ typedef struct
     float l_angle_distances[8];
     float r_angle_distances[8];
 
+    uint8_t lx_snapback;
+    uint8_t ly_snapback;
+    uint8_t rx_snapback;
+    uint8_t ry_snapback;
+
     // IMU Calibration
     uint8_t imu_calibration[26];
 
@@ -42,11 +47,12 @@ extern progcc_settings_s global_loaded_settings;
 
 bool settings_load();
 void settings_core1_save_check();
-void settings_save();
+void settings_save(bool webusb_indicate);
 void settings_reset_to_default();
 void settings_set_centers(int lx, int ly, int rx, int ry);
 void settings_set_distances(float *l_angle_distances, float *r_angle_distances);
 void settings_set_angles(float *l_angles, float *r_angles);
 void settings_set_mode(uint8_t comms_mode, uint8_t usb_mode);
+void settings_set_snapback(uint8_t axis, uint8_t level);
 
 #endif

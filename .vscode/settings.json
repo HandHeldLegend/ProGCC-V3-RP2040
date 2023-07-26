@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "progcc_defines.h": "c",
-        "desc_bos.h": "c"
+        "desc_bos.h": "c",
+        "progcc_settings.h": "c"
     }
 }

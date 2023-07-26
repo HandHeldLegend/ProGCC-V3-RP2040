@@ -30,6 +30,7 @@
 #include "board_config.h"
 
 #include "stick.h"
+#include "snapback.h"
 #include "imu.h"
 
 #include "ws2812.pio.h"
