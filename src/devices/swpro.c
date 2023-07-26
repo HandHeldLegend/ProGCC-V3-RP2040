@@ -196,7 +196,7 @@ void swpro_hid_report(button_data_s *button_data, a_data_s *analog_data)
   switch_commands_process(&data);
 }
 
-#define PROGCC_URL "handheldlegend.com"
+#define PROGCC_URL "handheldlegend.github.io/progcc_config"
 
 const tusb_desc_webusb_url_t desc_url =
     {
