@@ -5,30 +5,31 @@ bool _progcc_usb_task_enable = false;
 button_data_s *_progcc_buttons = NULL;
 button_data_s _progcc_buttons_remapped = {0};
 
-a_data_s      *_progcc_analog = NULL;
-a_data_s      _progcc_analog_scaled = {
-  .lx = 128,
-  .ly = 128,
-  .rx = 128,
-  .ry = 128,
+a_data_s *_progcc_analog = NULL;
+a_data_s _progcc_analog_scaled = {
+    .lx = 128,
+    .ly = 128,
+    .rx = 128,
+    .ry = 128,
 };
+a_data_s _progcc_analog_filtered = {0};
 
 button_remap_s *_progcc_remap = NULL;
 volatile uint32_t _progcc_timestamp = 0;
 
-bool _analog_calibrate  = false;
+bool _analog_calibrate = false;
 bool _analog_calibrate_octagon = false;
-bool _analog_centered   = false;
-bool _analog_all_angles_got    = false;
+bool _analog_centered = false;
+bool _analog_all_angles_got = false;
 
 bool _remap_enabled = false;
 
-void _progcc_calibrate_analog_start()
+void progcc_calibrate_analog_start()
 {
   rgb_s red = {
-    .r = 225,
-    .g = 0,
-    .b = 0,
+      .r = 225,
+      .g = 0,
+      .b = 0,
   };
   rgb_set_all(red.color);
   // Reset scaling distances
@@ -37,26 +38,40 @@ void _progcc_calibrate_analog_start()
   cb_progcc_read_analog();
   stick_scaling_capture_center(_progcc_analog);
   _analog_all_angles_got = false;
-  _analog_centered  = true;
+  _analog_centered = true;
   _analog_calibrate = true;
 }
 
-void _progcc_calibrate_analog_save()
+void progcc_calibrate_analog_save()
 {
-  rgb_s green = {
-    .r = 0,
-    .g = 0,
-    .b = 200,
-  };
-  rgb_set_all(green.color);
+  rgb_load_preset();
   _analog_calibrate = false;
   _analog_calibrate_octagon = false;
   cb_progcc_rumble_enable(true);
   sleep_ms(200);
   cb_progcc_rumble_enable(false);
-  stick_scaling_save_all();
+  stick_scaling_set_all();
+  settings_save();
   sleep_ms(200);
   stick_scaling_init();
+}
+
+void progcc_calibrate_analog_stop()
+{
+  rgb_load_preset();
+  _analog_calibrate = false;
+  _analog_calibrate_octagon = false;
+  cb_progcc_rumble_enable(true);
+  sleep_ms(200);
+  cb_progcc_rumble_enable(false);
+  stick_scaling_set_all();
+  sleep_ms(200);
+  stick_scaling_init();
+}
+
+void progcc_calibrate_angle_capture()
+{
+  stick_scaling_capture_angle(_progcc_analog);
 }
 
 void _progcc_task_0()
@@ -78,7 +93,7 @@ void _progcc_task_0()
   {
     // Process USB if needed
     tud_task();
-    pusb_task(&_progcc_buttons_remapped, &_progcc_analog_scaled);
+    pusb_task(&_progcc_buttons_remapped, &_progcc_analog_filtered);
   }
 
   // Do callback for userland code insertion
@@ -89,34 +104,74 @@ void _progcc_task_0()
 // a comms frame should occur
 bool _progcc_analog_ready(uint32_t timestamp)
 {
-    static uint32_t last_time   = 0;
-    static uint32_t this_time   = 0;
+  static uint32_t last_time = 0;
+  static uint32_t this_time = 0;
 
-    this_time = timestamp;
+  this_time = timestamp;
 
-    // Clear variable
-    uint32_t diff = 0;
+  // Clear variable
+  uint32_t diff = 0;
 
-    // Handle edge case where time has
-    // looped around and is now less
-    if (this_time < last_time)
-    {
-        diff = (0xFFFFFFFF - last_time) + this_time;
-    }
-    else if (this_time > last_time)
-    {
-        diff = this_time - last_time;
-    }
-    else return false;
-
-    // We want a target rate according to our variable
-    if (diff >= PROGCC_ANALOG_RATE)
-    {
-        // Set the last time
-        last_time = this_time;
-        return true;
-    }
+  // Handle edge case where time has
+  // looped around and is now less
+  if (this_time < last_time)
+  {
+    diff = (0xFFFFFFFF - last_time) + this_time;
+  }
+  else if (this_time > last_time)
+  {
+    diff = this_time - last_time;
+  }
+  else
     return false;
+
+  // We want a target rate according to our variable
+  if (diff >= PROGCC_ANALOG_RATE)
+  {
+    // Set the last time
+    last_time = this_time;
+    return true;
+  }
+  return false;
+}
+
+void _progcc_calibrate_loop()
+{
+  // Capture analog data
+  if (stick_scaling_capture_distances(_progcc_analog) && !_analog_all_angles_got && !_analog_calibrate_octagon)
+  {
+    _analog_all_angles_got = true;
+    rgb_s red = {
+        .r = 0,
+        .g = 128,
+        .b = 128,
+    };
+    rgb_set_all(red.color);
+  }
+  else if (_progcc_buttons->button_a && _analog_calibrate_octagon)
+  {
+    if (stick_scaling_capture_angle(_progcc_analog))
+    {
+      rgb_s c1 = {
+          .r = 0,
+          .g = 128,
+          .b = 0,
+      };
+      rgb_set_all(c1.color);
+      sleep_ms(200);
+      rgb_s c2 = {
+          .r = 128,
+          .g = 128,
+          .b = 0,
+      };
+      rgb_set_all(c2.color);
+    }
+  }
+
+  if (_progcc_buttons->button_capture)
+  {
+    progcc_calibrate_analog_save();
+  }
 }
 
 // It will auto unblock until the configured
@@ -127,59 +182,24 @@ void _progcc_analog_tick(uint32_t timestamp)
   {
     // Read analog sticks
     cb_progcc_read_analog();
+
     if (_analog_calibrate)
     {
-      // Capture analog data
-      if (stick_scaling_capture_distances(_progcc_analog) && !_analog_all_angles_got && !_analog_calibrate_octagon)
-      {
-        _analog_all_angles_got = true;
-        rgb_s red = {
-            .r = 0,
-            .g = 128,
-            .b = 128,
-        };
-        rgb_set_all(red.color);
-      }
-      else if(_progcc_buttons->button_a && _analog_calibrate_octagon)
-      {
-        if (stick_scaling_capture_angle(_progcc_analog))
-        {
-          rgb_s c1 = {
-            .r = 0,
-            .g = 128,
-            .b = 0,
-          };
-          rgb_set_all(c1.color);
-          sleep_ms(200);
-          rgb_s c2 = {
-              .r = 128,
-              .g = 128,
-              .b = 0,
-          };
-          rgb_set_all(c2.color);
-        }
-      }
-
-      if (_progcc_buttons->button_capture)
-      {
-        _progcc_calibrate_analog_save();
-      }
+      _progcc_calibrate_loop();
     }
-
     // Normal stick reading process
     else
     {
       stick_scaling_process_data(_progcc_analog, &_progcc_analog_scaled);
-      snapback_process(&_progcc_analog_scaled);
+      snapback_process(&_progcc_analog_scaled, &_progcc_analog_filtered);
     }
   }
-
 }
 
 // Core 1 task loop entrypoint
 void _progcc_task_1()
 {
-  for(;;)
+  for (;;)
   {
     // Check if we need to save
     settings_core1_save_check();
@@ -189,8 +209,6 @@ void _progcc_task_1()
   }
 }
 
-
-
 void progcc_remapping_enable(bool enable)
 {
   _remap_enabled = enable;
@@ -199,7 +217,7 @@ void progcc_remapping_enable(bool enable)
 void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_remap_s *remap_profile)
 {
   _progcc_buttons = button_memory;
-  _progcc_analog  = analog_memory;
+  _progcc_analog = analog_memory;
 
   // Set up hardware first
   cb_progcc_hardware_setup();
@@ -215,23 +233,21 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
     sleep_ms(200);
     stick_scaling_init();
     // If we saved a default settings, initiate calibration
-    _progcc_calibrate_analog_start();
+    progcc_calibrate_analog_start();
   }
   else
   {
-    uint32_t tmp[12] = {0};
-    memcpy(tmp, global_loaded_settings.rgb_colors, sizeof(uint32_t)*12);
-    rgb_load_buffer(tmp);
+    rgb_load_preset();
   }
 
   if (button_memory->button_minus && button_memory->button_plus)
   {
-    _progcc_calibrate_analog_start();
+    progcc_calibrate_analog_start();
   }
   else if (button_memory->button_minus && button_memory->button_a)
   {
     _analog_calibrate_octagon = true;
-    _progcc_calibrate_analog_start();
+    progcc_calibrate_analog_start();
   }
   else
   {
@@ -244,7 +260,7 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
   // For switch Pro stuff
   switch_analog_calibration_init();
 
-  uint8_t sub_mode = PUSB_MODE_SW; //PUSB_MODE_SW;
+  uint8_t sub_mode = PUSB_MODE_SW; // PUSB_MODE_SW;
   uint8_t comms_mode = COMM_MODE_USB;
   if (button_memory->button_x)
   {
@@ -252,22 +268,22 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
   }
 
   // Determine launch mode
-  switch(comms_mode)
+  switch (comms_mode)
   {
-    default:
-    case COMM_MODE_USB:
+  default:
+  case COMM_MODE_USB:
+  {
+    bool did_usb_boot_ok = pusb_start(sub_mode, false);
+    if (!did_usb_boot_ok)
     {
-      bool did_usb_boot_ok = pusb_start(sub_mode, false);
-      if (!did_usb_boot_ok)
-      {
 
-        // If USB mode fails, boot to bootloader.
-        reset_usb_boot(0, 0);
-        return;
-      }
-      _progcc_usb_task_enable = true;
+      // If USB mode fails, boot to bootloader.
+      reset_usb_boot(0, 0);
+      return;
     }
-    break;
+    _progcc_usb_task_enable = true;
+  }
+  break;
 
     // OTHER MODES NOT IMPLEMENTED FOR NOW
   }
@@ -277,7 +293,7 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
 
   // Launch second core
   multicore_launch_core1(_progcc_task_1);
-  for(;;)
+  for (;;)
   {
     _progcc_task_0();
   }
@@ -296,7 +312,7 @@ void progcc_setup_gpio_push(uint8_t gpio)
   gpio_init(gpio);
   gpio_pull_up(gpio);
   gpio_set_dir(gpio, GPIO_IN);
-  //printf("Set up GPIO: %d", (uint8_t) gpio);
+  // printf("Set up GPIO: %d", (uint8_t) gpio);
 }
 
 void progcc_setup_gpio_button(uint8_t gpio)
@@ -304,5 +320,5 @@ void progcc_setup_gpio_button(uint8_t gpio)
   gpio_init(gpio);
   gpio_pull_up(gpio);
   gpio_set_dir(gpio, GPIO_IN);
-  //printf("Set up GPIO: %d", (uint8_t) gpio);
+  // printf("Set up GPIO: %d", (uint8_t) gpio);
 }

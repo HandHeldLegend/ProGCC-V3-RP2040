@@ -136,11 +136,11 @@ void _rgb_set_sequential(rgb_s *colors, uint8_t len, uint32_t color)
     }
 }
 
-void rgb_load_buffer(uint32_t *buffer)
+void rgb_load_preset()
 {
     for(uint8_t i = 0; i < RGB_GROUP_MAX; i++)
     {
-        rgb_set_group(i, buffer[i], false);
+        rgb_set_group(i, global_loaded_settings.rgb_colors[i], false);
     }
     _rgb_out_dirty = true;
 }

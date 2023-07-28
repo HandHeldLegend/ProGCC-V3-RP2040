@@ -15,6 +15,11 @@ void cb_progcc_rumble_enable(bool enable);
 
 void cb_progcc_task_0_hook(uint32_t timestamp);
 
+void progcc_calibrate_analog_start();
+void progcc_calibrate_analog_stop();
+void progcc_calibrate_analog_save();
+void progcc_calibrate_angle_capture();
+
 void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_remap_s *remap_profile);
 
 void progcc_load_remap(button_remap_s *remap_profile);

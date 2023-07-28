@@ -3,7 +3,7 @@
 float _snapback_lut_a[8] = {0, 0.14f, 0.28f, 0.42f, 0.56f, 0.70f, 0.84f, 1.0f};
 float _snapback_lut_b[8] = {1.0f, 0.86f, 0.72f, 0.58f, 0.44f, 0.30f, 0.16f, 0};
 
-void snapback_process(a_data_s *input)
+void snapback_process(a_data_s *input, a_data_s *output)
 {
     static int lx_t = 0;
     static int ly_t = 0;
@@ -73,10 +73,10 @@ void snapback_process(a_data_s *input)
     ry_current += ry_avg * _snapback_lut_a[global_loaded_settings.ry_snapback];
 
     // Set outputs
-    input->lx = (int) lx_current;
-    input->ly = (int) ly_current;
-    input->rx = (int) rx_current;
-    input->ry = (int) ry_current;
+    output->lx = (int) lx_current;
+    output->ly = (int) ly_current;
+    output->rx = (int) rx_current;
+    output->ry = (int) ry_current;
 
     // Add one to our index
     idx += 1;

@@ -3,6 +3,9 @@
         "progcc_defines.h": "c",
         "desc_bos.h": "c",
         "progcc_settings.h": "c",
-        "webusb.h": "c"
+        "webusb.h": "c",
+        "stick.h": "c",
+        "snapback.h": "c",
+        "progcc.h": "c"
     }
 }

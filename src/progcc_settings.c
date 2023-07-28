@@ -152,9 +152,13 @@ void settings_core1_save_check()
   }
 }
 
-void settings_save(bool webusb_indicate)
+void settings_save_webindicate()
 {
-  _webusb_indicate = webusb_indicate;
+  _webusb_indicate = true;
+}
+
+void settings_save()
+{
   _save_flag = true;
 }
 

@@ -19,6 +19,35 @@ void webusb_command_processor(uint8_t *data)
 
         break;
 
+        case WEBUSB_CMD_CALIBRATION_START:
+            {
+                printf("WebUSB: Got calibration START command.\n");
+                progcc_calibrate_analog_start();
+                _webusb_out_buffer[0] = WEBUSB_CMD_CALIBRATION_START;
+                tud_vendor_n_write(0, _webusb_out_buffer, 64);
+                tud_vendor_n_flush(0);
+            }
+            break;
+
+        case WEBUSB_CMD_CALIBRATION_STOP:
+            {
+                printf("WebUSB: Got calibration STOP command.\n");
+                progcc_calibrate_analog_stop();
+                _webusb_out_buffer[0] = WEBUSB_CMD_CALIBRATION_STOP;
+                tud_vendor_n_write(0, _webusb_out_buffer, 64);
+                tud_vendor_n_flush(0);
+            }
+            break;
+
+        case WEBUSB_CMD_OCTAGON_SET:
+            {
+                printf("WebUSB: Got angle capture command.\n");
+                progcc_calibrate_angle_capture();
+                stick_scaling_set_all();
+                stick_scaling_init();
+            }
+            break;
+
         // Set RGB Group
         case WEBUSB_CMD_RGB_SET:
             {
@@ -76,7 +105,8 @@ void webusb_command_processor(uint8_t *data)
         case WEBUSB_CMD_SAVEALL:
             {
                 printf("WebUSB: Got SAVE command.\n");
-                settings_save(true);
+                settings_save_webindicate();
+                settings_save();
             }
             break;
     }

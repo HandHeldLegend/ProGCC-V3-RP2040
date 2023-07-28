@@ -30,7 +30,7 @@ typedef enum{
     RGB_GROUP_MAX,
 } rgb_group_t;
 
-void rgb_load_buffer(uint32_t *buffer);
+void rgb_load_preset();
 
 void rgb_set_group(rgb_group_t group, uint32_t color, bool set_dirty);
 

@@ -17,7 +17,8 @@ typedef enum
   WEBUSB_CMD_SNAPBACK_GET = 0xA2,
 
   // Start calibration mode (standard)
-  WEBUSB_CMD_CALIBRATION_SET = 0x03,
+  WEBUSB_CMD_CALIBRATION_START = 0x03,
+  WEBUSB_CMD_CALIBRATION_STOP = 0xA3,
 
   // Update calibration angle (octagon)
   WEBUSB_CMD_OCTAGON_SET = 0x04,
