@@ -268,16 +268,11 @@ void imu_read_test(uint32_t timestamp)
     _flip = !_flip;
 
     uint8_t i[12] = {0};
-    const uint8_t reg1 = 0x80 | IMU_OUTX_L_X;
-    const uint8_t reg2 = 0x80 | IMU_OUTX_L_G;
+    const uint8_t reg = 0x80 | IMU_OUTX_L_G;
 
     gpio_put(PGPIO_IMU0_CS, false);
-    spi_write_blocking(spi0, &reg1, 1);
-    spi_read_blocking(spi0, 0, &i[6], 6);
-    gpio_put(PGPIO_IMU0_CS, true);
-    gpio_put(PGPIO_IMU0_CS, false);
-    spi_write_blocking(spi0, &reg2, 1);
-    spi_read_blocking(spi0, 0, &i[0], 6);
+    spi_write_blocking(spi0, &reg, 1);
+    spi_read_blocking(spi0, 0, &i[0], 12);
     gpio_put(PGPIO_IMU0_CS, true);
 
     imu_x_1[imu_read_idx] = -_imu_concat_16(i[0], i[1]);
@@ -289,12 +284,8 @@ void imu_read_test(uint32_t timestamp)
     acc_z_1[imu_read_idx] = _imu_concat_16(i[10], i[11]);
 
     gpio_put(PGPIO_IMU1_CS, false);
-    spi_write_blocking(spi0, &reg1, 1);
-    spi_read_blocking(spi0, 0, &i[6], 6);
-    gpio_put(PGPIO_IMU1_CS, true);
-    gpio_put(PGPIO_IMU1_CS, false);
-    spi_write_blocking(spi0, &reg2, 1);
-    spi_read_blocking(spi0, 0, &i[0], 6);
+    spi_write_blocking(spi0, &reg, 1);
+    spi_read_blocking(spi0, 0, &i[0], 12);
     gpio_put(PGPIO_IMU1_CS, true);
 
     imu_x_2[imu_read_idx] = _imu_concat_16(i[0], i[1]);
