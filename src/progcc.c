@@ -217,6 +217,12 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
     // If we saved a default settings, initiate calibration
     _progcc_calibrate_analog_start();
   }
+  else
+  {
+    uint32_t tmp[12] = {0};
+    memcpy(tmp, global_loaded_settings.rgb_colors, sizeof(uint32_t)*12);
+    rgb_load_buffer(tmp);
+  }
 
   if (button_memory->button_minus && button_memory->button_plus)
   {

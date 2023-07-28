@@ -143,7 +143,7 @@ bool debug_rumble = false;
 
 void cb_progcc_rumble_enable(bool enable)
 {
-    if (debug_rumble)
+    if (enable)
     {
         pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
         pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 100);

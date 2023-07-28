@@ -53,6 +53,7 @@ bool settings_load()
     settings_save(false);
     return false;
   }
+
   return true;
 }
 
@@ -81,12 +82,31 @@ void settings_reset_to_default()
     .ly_snapback = 0,
     .rx_snapback = 0,
     .ry_snapback = 0,
+
+    .rgb_colors = {
+      COLOR_RED.color,
+      COLOR_ORANGE.color,
+
+      COLOR_YELLOW.color,
+
+      COLOR_GREEN.color,
+      COLOR_BLUE.color,
+      COLOR_CYAN.color,
+      COLOR_PURPLE.color,
+
+      COLOR_RED.color,
+      COLOR_GREEN.color,
+      COLOR_BLUE.color,
+      COLOR_YELLOW.color,
+      COLOR_BLUE.color,
+    },
   };
   memcpy(&global_loaded_settings, &set, sizeof(progcc_settings_s));
   for(uint16_t i = 0; i < 26; i++)
   {
     global_loaded_settings.imu_calibration[i] = 0xFF;
   }
+  memset(&global_loaded_settings.imu_offsets[0], 0, 12);
   _generate_mac();
 }
 

@@ -41,6 +41,12 @@ typedef struct
     // IMU Calibration
     uint8_t imu_calibration[26];
 
+    // IMU Offsets for more precision
+    uint8_t imu_offsets[12];
+
+    // RGB Color Store
+    uint32_t rgb_colors[12];
+
 } __attribute__ ((packed)) progcc_settings_s;
 
 extern progcc_settings_s global_loaded_settings;
