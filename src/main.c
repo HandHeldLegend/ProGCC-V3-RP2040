@@ -130,7 +130,7 @@ bool _rumble_update_ready(uint32_t timestamp)
     return false;
 
   // We want a target IMU rate defined
-  if (diff > 500000)
+  if (diff > 8000)
   {
     // Set the last time
     last_time = this_time;
@@ -141,18 +141,46 @@ bool _rumble_update_ready(uint32_t timestamp)
 
 bool debug_rumble = false;
 
+bool rumble_on = false;
+bool ramp_up = false;
+bool ramp_down = false;
+
+void _rumble_tick(uint32_t timestamp)
+{
+    static int lvl = 0;
+
+    if(_rumble_update_ready(timestamp))
+    {
+        if (rumble_on)
+        {
+            lvl += 10;
+            if (lvl >= 130)
+            {
+                lvl = 130;
+            }
+            pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
+            pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, lvl);
+        }
+        else
+        {
+            lvl -= 20;
+            if (lvl <= 0)
+            {
+                lvl = 0;
+                pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 0);
+                pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 255);
+            }
+            else
+            {
+                pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, lvl);
+            } 
+        }
+    }
+}
+
 void cb_progcc_rumble_enable(bool enable)
 {
-    if (enable)
-    {
-        pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
-        pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 100);
-    }
-    else
-    {
-        pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 0);
-        pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 255);
-    }
+    rumble_on = enable;
 }
 
 void cb_progcc_read_buttons()
@@ -239,6 +267,7 @@ void cb_progcc_read_analog()
 void cb_progcc_task_0_hook(uint32_t timestamp)
 {
     rgb_tick(timestamp);
+    _rumble_tick(timestamp);
 }
 
 int main()
