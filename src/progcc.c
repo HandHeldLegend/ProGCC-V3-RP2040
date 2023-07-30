@@ -93,7 +93,7 @@ void _progcc_task_0()
   {
     // Process USB if needed
     tud_task();
-    pusb_task(&_progcc_buttons_remapped, &_progcc_analog_filtered);
+    pusb_task(_progcc_timestamp, &_progcc_buttons_remapped, &_progcc_analog_filtered);
   }
 
   // Do callback for userland code insertion
@@ -273,7 +273,7 @@ void progcc_init(button_data_s *button_memory, a_data_s *analog_memory, button_r
   default:
   case COMM_MODE_USB:
   {
-    bool did_usb_boot_ok = pusb_start(sub_mode, false);
+    bool did_usb_boot_ok = pusb_start(sub_mode);
     if (!did_usb_boot_ok)
     {
 

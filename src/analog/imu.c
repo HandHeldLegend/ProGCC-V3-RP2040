@@ -109,12 +109,6 @@ int16_t _imu_average_value (int16_t first, int16_t second)
 
 bool _imu_enabled = false;
 
-void imu_set_enabled(bool enable)
-{
-  _imu_enabled = enable;
-}
-
-
 // Gets the last 3 IMU datasets and puts them out
 // for Nintendo Switch buffer
 void imu_buffer_out(uint8_t *output)
@@ -259,11 +253,19 @@ void imu_reset_idx()
   imu_read_idx = 0;
 }
 
+void imu_set_enabled(bool enable)
+{
+  _imu_enabled = enable;
+  imu_reset_idx();
+}
+
 bool _flip = false;
 
 void imu_read_test(uint32_t timestamp)
 {
-  if(_imu_update_ready(timestamp) && _imu_enabled && (imu_read_idx < 3))
+  if (!_imu_enabled && (imu_read_idx < 3)) return;
+
+  if(_imu_update_ready(timestamp))
   {
     _flip = !_flip;
 

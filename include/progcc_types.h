@@ -98,6 +98,12 @@ typedef enum
 
 typedef enum
 {
+    USBRATE_8 = 8000,
+    USBRATE_1 = 4000,
+} usb_rate_t;
+
+typedef enum
+{
     CALIBRATE_START,
     CALIBRATE_CANCEL,
     CALIBRATE_SAVE,

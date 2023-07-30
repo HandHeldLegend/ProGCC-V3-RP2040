@@ -9,41 +9,52 @@
 #include "progcc_usb.h"
 
 usb_mode_t _usb_mode    = PUSB_MODE_XI;
-bool _usb_performance_mode = false;
 bool _usb_busy = false;
 
 // Default 8ms (8000us)
-uint32_t _usb_rate = 8000;
+uint32_t _usb_rate = 7600;
 
 typedef void (*usb_cb_t)(button_data_s *, a_data_s *);
 
 usb_cb_t _usb_hid_cb = NULL;
 
-bool pusb_start(usb_mode_t mode, bool performance_mode)
+void _pusb_set_interval(usb_rate_t rate)
 {
-  _usb_performance_mode = performance_mode;
+  _usb_rate = rate;
+}
+
+bool pusb_start(usb_mode_t mode)
+{
+
+  imu_set_enabled(false);
 
   switch(mode)
   {
     case PUSB_MODE_MAX:
     default:
     case PUSB_MODE_DI:
+      _pusb_set_interval(USBRATE_8);
       _usb_hid_cb = dinput_hid_report;
       break;
 
     case PUSB_MODE_SW:
+      _pusb_set_interval(USBRATE_8);
       _usb_hid_cb = swpro_hid_report;
       break;
 
     case PUSB_MODE_NS:
+      _pusb_set_interval(USBRATE_8);
+      imu_set_enabled(true);
       _usb_hid_cb = nsinput_hid_report;
       break;
 
     case PUSB_MODE_GC:
+      _pusb_set_interval(USBRATE_8);
       _usb_hid_cb = gcinput_hid_report;
       break;
 
     case PUSB_MODE_XI:
+      _pusb_set_interval(USBRATE_8);
       _usb_hid_cb = xinput_hid_report;
       break;
   }
@@ -52,7 +63,6 @@ bool pusb_start(usb_mode_t mode, bool performance_mode)
   return tusb_init();
 }
 
-/* DEPRECIATED 
 // Returns a bool to indicate whether or not
 // a comms frame should occur
 bool _pusb_poll_ready(uint32_t timestamp)
@@ -84,7 +94,7 @@ bool _pusb_poll_ready(uint32_t timestamp)
         return true;
     }
     return false;
-} */
+} 
 
 uint8_t buf = 0;
 bool _usbNullerror = false;
@@ -102,24 +112,24 @@ bool _pusb_ready()
   else return tud_hid_ready();
 }
 
-void pusb_task(button_data_s *button_data, a_data_s *analog_data)
+void pusb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_data)
 {
-
-  //if (_pusb_poll_ready(timestamp))
-  if(_pusb_ready())
+  if (_pusb_ready())
   {
-    // Call the registered function
-    if (_usb_hid_cb != NULL)
+    if (_pusb_poll_ready(timestamp))
     {
-        _usb_hid_cb(button_data, analog_data);
-    }
-    else if (!_usbNullerror)
-    {
-      _usbNullerror = true;
-      printf("_usb_hid_cb is NULL\n");
+      // Call the registered function
+      if (_usb_hid_cb != NULL)
+      {
+          _usb_hid_cb(button_data, analog_data);
+      }
+      else if (!_usbNullerror)
+      {
+        _usbNullerror = true;
+        printf("_usb_hid_cb is NULL\n");
+      }
     }
   }
-
 }
 
 /********* TinyUSB HID callbacks ***************/
@@ -170,18 +180,10 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
       break;
 
     case PUSB_MODE_NS:
-      if (_usb_performance_mode)
-      {
-        return (uint8_t const*) &ns_configuration_descriptor_performance;
-      }
       return (uint8_t const*) &ns_configuration_descriptor;
       break;
 
     case PUSB_MODE_GC:
-      if (_usb_performance_mode)
-      {
-        return (uint8_t const*) &gc_configuration_descriptor_performance;
-      }
       return (uint8_t const*) &gc_configuration_descriptor;
       break;
 
@@ -319,6 +321,7 @@ uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
     {
         case PUSB_MODE_MAX:
         default:
+            break;
         case PUSB_MODE_DI:
             return di_hid_report_descriptor;
             break;

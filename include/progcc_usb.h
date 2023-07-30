@@ -13,8 +13,8 @@
 
 extern bool _usb_busy;
 
-bool pusb_start(usb_mode_t mode, bool performance_mode);
+bool pusb_start(usb_mode_t mode);
 uint8_t dir_to_hat(hat_mode_t hat_type, uint8_t leftRight, uint8_t upDown);
-void pusb_task(button_data_s *button_data, a_data_s *analog_data);
+void pusb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_data);
 
 #endif

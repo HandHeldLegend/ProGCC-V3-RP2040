@@ -6,6 +6,7 @@
         "webusb.h": "c",
         "stick.h": "c",
         "snapback.h": "c",
-        "progcc.h": "c"
+        "progcc.h": "c",
+        "progcc_usb.h": "c"
     }
 }

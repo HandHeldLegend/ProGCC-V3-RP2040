@@ -6,5 +6,4 @@ const char* global_string_descriptor[] = {
     "HHL",              // 1: Manufacturer
     "ProGCC V3",        // 2: Product
     "000000",           // 3: Serials, should use chip ID
-
 };
