@@ -174,11 +174,13 @@ void _progcc_calibrate_loop()
   }
 }
 
+const uint32_t _analog_interval = 500;
+
 // It will auto unblock until the configured
 // analog input rate is met
 void _progcc_analog_tick(uint32_t timestamp)
 {
-  if (_progcc_analog_ready(timestamp))
+  if (interval_run(timestamp, _analog_interval))
   {
     // Read analog sticks
     cb_progcc_read_analog();

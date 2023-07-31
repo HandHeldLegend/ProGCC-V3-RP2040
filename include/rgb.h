@@ -2,6 +2,7 @@
 #define RGB_F_H
 
 #include "progcc_includes.h"
+#include "interval.h"
 
 //#define RGB_S_COLOR(r, g, b) ((rgb_s) { .color = ((r << 16) | (g << 8) | (b))})
 

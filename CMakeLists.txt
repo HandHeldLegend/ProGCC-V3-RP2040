@@ -12,7 +12,7 @@ pico_sdk_init()
 
 include_directories(
 	include include/devices include/usb
-	include/analog include/switch
+	include/analog include/switch include/utilities
 	)
 
 add_executable(${PROJECT_NAME}

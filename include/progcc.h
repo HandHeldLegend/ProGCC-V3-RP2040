@@ -2,6 +2,7 @@
 #define PROGCC_H
 
 #include "progcc_includes.h"
+#include "interval.h"
 
 void cb_progcc_hardware_setup();
 

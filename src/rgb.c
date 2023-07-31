@@ -11,40 +11,6 @@ rgb_s _rgb_next[NUM_PIXELS]     = {0};
 rgb_s _rgb_current[NUM_PIXELS]  = {0};
 rgb_s _rgb_last[NUM_PIXELS]     = {0};
 
-// Returns a bool to indicate whether or not
-// an animation frame should occur
-bool _rgb_update_ready(uint32_t timestamp)
-{
-    static uint32_t last_time   = 0;
-    static uint32_t this_time   = 0;
-
-    this_time = timestamp;
-
-    // Clear variable
-    uint32_t diff = 0;
-
-    // Handle edge case where time has
-    // looped around and is now less
-    if (this_time < last_time)
-    {
-        diff = (0xFFFFFFFF - last_time) + this_time;
-    }
-    else
-    {
-        diff = this_time - last_time;
-    }
-
-    // We want a target LED rate of ~60hz
-    // 16666us
-    if (diff >= 16666)
-    {
-        // Set the last time
-        last_time = this_time;
-        return true;
-    }
-    return false;
-}
-
 static inline uint32_t urgb_u32(uint8_t r, uint8_t g, uint8_t b) {
     return
             ((uint32_t) (r) << 8) |
@@ -113,7 +79,7 @@ void _rgb_animate_step()
 }
 
 // Enable the RGB transition to the next color
-void _rgb_set_dirty()
+inline void _rgb_set_dirty()
 {
     _rgb_out_dirty = true;
 }
@@ -215,11 +181,13 @@ void rgb_init()
     ws2812_program_init(RGB_PIO, RGB_SM, offset, WS2812_PIN, IS_RGBW);
 }
 
+const uint32_t _rgb_interval = 16666;
+
 // One tick of RGB logic
 // only performs actions if necessary
 void rgb_tick(uint32_t timestamp)
 {
-    if(_rgb_update_ready(timestamp))
+    if(interval_run(timestamp, _rgb_interval))
     {
         _rgb_animate_step();
     }
