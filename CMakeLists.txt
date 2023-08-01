@@ -10,41 +10,16 @@ project(PROGCC_RP2040 C CXX ASM)
 
 pico_sdk_init()
 
+add_subdirectory(lib/hoja-lib-rp2040)
+
 include_directories(
-	include include/devices include/usb
-	include/analog include/switch include/utilities
-	)
+	include
+)
 
 add_executable(${PROJECT_NAME}
-src/main.c
-
-src/progcc.c
-
-
-src/progcc_defines.c
-src/progcc_settings.c
-
-src/devices/dinput.c
-src/devices/gcinput.c
-src/devices/nsinput.c
-src/devices/xinput.c
-src/devices/swpro.c
-src/devices/webusb.c
-
-src/usb/desc_bos.c
-src/usb/progcc_usb.c
-src/usb/xinput_device.c
-
-src/analog/stick.c
-src/analog/imu.c
-src/analog/snapback.c
-
-src/switch/switch_commands.c
-src/switch/switch_spi.c
-src/switch/switch_analog.c
-
-src/rgb.c
-src/remap.c
+	src/main.c
+	src/app_rumble.c 
+	src/app_imu.c
 )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -56,11 +31,10 @@ target_compile_definitions(${PROJECT_NAME}
 	#PICO_FLASH_SPI_CLKDIV=8
 	)
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/generated)
-pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
-#pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio/joybus.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
 target_link_libraries(${PROJECT_NAME}
+PRIVATE
+hoja_lib
 pico_stdlib
 pico_bootrom
 pico_multicore

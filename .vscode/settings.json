@@ -8,6 +8,14 @@
         "snapback.h": "c",
         "progcc.h": "c",
         "progcc_usb.h": "c",
-        "rgb.h": "c"
+        "rgb.h": "c",
+        "hoja.h": "c",
+        "hoja_includes.h": "c",
+        "nspi.h": "c",
+        "app_rumble.h": "c",
+        "app.h": "c",
+        "app_imu.h": "c",
+        "imu.h": "c",
+        "analog.h": "c"
     }
 }

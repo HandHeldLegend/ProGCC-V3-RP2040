@@ -1,4 +1,6 @@
-#include "progcc_includes.h"
+#include "hoja_includes.h"
+#include "app_rumble.h"
+#include "app_imu.h"
 
 #define X_AXIS_CONFIG 0xD0
 #define Y_AXIS_CONFIG 0xF0
@@ -26,28 +28,24 @@ button_remap_s user_map = {
     .button_stick_right = MAPCODE_B_STICKR,
 };
 
-// Set up local input vars
-button_data_s button_data = {0};
-a_data_s analog_data = {0};
-
 uint main_slice_num = 0;
 uint brake_slice_num = 0;
 
-void cb_progcc_hardware_setup()
+void cb_hoja_hardware_setup()
 {
     // Set up GPIO for input buttons
-    progcc_setup_gpio_button(PGPIO_BUTTON_RS);
-    progcc_setup_gpio_button(PGPIO_BUTTON_LS);
+    hoja_setup_gpio_button(PGPIO_BUTTON_RS);
+    hoja_setup_gpio_button(PGPIO_BUTTON_LS);
 
-    progcc_setup_gpio_push(PGPIO_PUSH_A);
-    progcc_setup_gpio_push(PGPIO_PUSH_B);
-    progcc_setup_gpio_push(PGPIO_PUSH_C);
-    progcc_setup_gpio_push(PGPIO_PUSH_D);
+    hoja_setup_gpio_push(PGPIO_PUSH_A);
+    hoja_setup_gpio_push(PGPIO_PUSH_B);
+    hoja_setup_gpio_push(PGPIO_PUSH_C);
+    hoja_setup_gpio_push(PGPIO_PUSH_D);
 
-    progcc_setup_gpio_scan(PGPIO_SCAN_A);
-    progcc_setup_gpio_scan(PGPIO_SCAN_B);
-    progcc_setup_gpio_scan(PGPIO_SCAN_C);
-    progcc_setup_gpio_scan(PGPIO_SCAN_D);
+    hoja_setup_gpio_scan(PGPIO_SCAN_A);
+    hoja_setup_gpio_scan(PGPIO_SCAN_B);
+    hoja_setup_gpio_scan(PGPIO_SCAN_C);
+    hoja_setup_gpio_scan(PGPIO_SCAN_D);
 
     // Set up Rumble GPIO
     gpio_init(PGPIO_RUMBLE_MAIN);
@@ -103,126 +101,49 @@ void cb_progcc_hardware_setup()
     gpio_set_dir(PGPIO_IMU1_CS, GPIO_OUT);
     gpio_put(PGPIO_IMU1_CS, true); // active low
 
-    imu_init();
+    app_imu_init();
 }
 
-bool _rumble_update_ready(uint32_t timestamp)
-{
-  static uint32_t last_time = 0;
-  static uint32_t this_time = 0;
-
-  this_time = timestamp;
-
-  // Clear variable
-  uint32_t diff = 0;
-
-  // Handle edge case where time has
-  // looped around and is now less
-  if (this_time < last_time)
-  {
-    diff = (0xFFFFFFFF - last_time) + this_time;
-  }
-  else if (this_time > last_time)
-  {
-    diff = this_time - last_time;
-  }
-  else
-    return false;
-
-  // We want a target IMU rate defined
-  if (diff > 8000)
-  {
-    // Set the last time
-    last_time = this_time;
-    return true;
-  }
-  return false;
-}
-
-bool debug_rumble = false;
-
-bool rumble_on = false;
-bool ramp_up = false;
-bool ramp_down = false;
-
-void _rumble_tick(uint32_t timestamp)
-{
-    static int lvl = 0;
-
-    if(_rumble_update_ready(timestamp))
-    {
-        if (rumble_on)
-        {
-            lvl += 10;
-            if (lvl >= 130)
-            {
-                lvl = 130;
-            }
-            pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
-            pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, lvl);
-        }
-        else
-        {
-            lvl -= 20;
-            if (lvl <= 0)
-            {
-                lvl = 0;
-                pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 0);
-                pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 255);
-            }
-            else
-            {
-                pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, lvl);
-            } 
-        }
-    }
-}
-
-void cb_progcc_rumble_enable(bool enable)
-{
-    rumble_on = enable;
-}
-
-void cb_progcc_read_buttons()
+void cb_hoja_read_buttons(button_data_s *data)
 {
     // Keypad version
     gpio_put(PGPIO_SCAN_A, false);
     sleep_us(100);
-    button_data.button_a = !gpio_get(PGPIO_PUSH_C);
-    button_data.button_b = !gpio_get(PGPIO_PUSH_D);
-    button_data.button_x = !gpio_get(PGPIO_PUSH_A);
-    button_data.button_y = !gpio_get(PGPIO_PUSH_B);
+    data->button_a  = !gpio_get(PGPIO_PUSH_C);
+    data->button_b  = !gpio_get(PGPIO_PUSH_D);
+    data->button_x  = !gpio_get(PGPIO_PUSH_A);
+    data->button_y  = !gpio_get(PGPIO_PUSH_B);
     gpio_put(PGPIO_SCAN_A, true);
 
     gpio_put(PGPIO_SCAN_B, false);
     sleep_us(100);
-    button_data.dpad_left = !gpio_get(PGPIO_PUSH_D);
-    button_data.dpad_right = !gpio_get(PGPIO_PUSH_C);
-    button_data.dpad_down = !gpio_get(PGPIO_PUSH_B);
-    button_data.dpad_up = !gpio_get(PGPIO_PUSH_A);
+    data->dpad_left     = !gpio_get(PGPIO_PUSH_D);
+    data->dpad_right    = !gpio_get(PGPIO_PUSH_C);
+    data->dpad_down     = !gpio_get(PGPIO_PUSH_B);
+    data->dpad_up       = !gpio_get(PGPIO_PUSH_A);
     gpio_put(PGPIO_SCAN_B, true);
 
     gpio_put(PGPIO_SCAN_C, false);
     sleep_us(100);
-    button_data.button_plus = !gpio_get(PGPIO_PUSH_A);
-    button_data.button_home = !gpio_get(PGPIO_PUSH_B);
-    button_data.button_capture = !gpio_get(PGPIO_PUSH_D);
-    button_data.button_minus = !gpio_get(PGPIO_PUSH_C);
+    data->button_plus       = !gpio_get(PGPIO_PUSH_A);
+    data->button_home       = !gpio_get(PGPIO_PUSH_B);
+    data->button_capture    = !gpio_get(PGPIO_PUSH_D);
+    data->button_minus      = !gpio_get(PGPIO_PUSH_C);
     gpio_put(PGPIO_SCAN_C, true);
 
     gpio_put(PGPIO_SCAN_D, false);
     sleep_us(100);
-    button_data.trigger_r = !gpio_get(PGPIO_PUSH_B);
-    button_data.trigger_l = !gpio_get(PGPIO_PUSH_D);
-    button_data.trigger_zl = !gpio_get(PGPIO_PUSH_A);
-    button_data.trigger_zr = !gpio_get(PGPIO_PUSH_C);
+    data->trigger_r     = !gpio_get(PGPIO_PUSH_B);
+    data->trigger_l     = !gpio_get(PGPIO_PUSH_D);
+    data->trigger_zl    = !gpio_get(PGPIO_PUSH_A);
+    data->trigger_zr    = !gpio_get(PGPIO_PUSH_C);
     gpio_put(PGPIO_SCAN_D, true);
 
-    button_data.button_stick_right = !gpio_get(PGPIO_BUTTON_RS);
-    button_data.button_stick_left = !gpio_get(PGPIO_BUTTON_LS);
+    data->button_stick_right = !gpio_get(PGPIO_BUTTON_RS);
+    data->button_stick_left = !gpio_get(PGPIO_BUTTON_LS);
 }
 
-void cb_progcc_read_analog()
+void cb_hoja_read_analog(a_data_s *data)
 {
     // Set up buffers for each axis
     uint8_t buffer_lx[3] = {0};
@@ -258,43 +179,30 @@ void cb_progcc_read_analog()
     gpio_put(PGPIO_RS_CS, true);
 
     // Convert data
-    analog_data.lx = BUFFER_TO_UINT16(buffer_lx);
-    analog_data.ly = BUFFER_TO_UINT16(buffer_ly);
-    analog_data.rx = BUFFER_TO_UINT16(buffer_rx);
-    analog_data.ry = BUFFER_TO_UINT16(buffer_ry);
+    data->lx = BUFFER_TO_UINT16(buffer_lx);
+    data->ly = BUFFER_TO_UINT16(buffer_ly);
+    data->rx = BUFFER_TO_UINT16(buffer_rx);
+    data->ry = BUFFER_TO_UINT16(buffer_ry);
 }
 
-void cb_progcc_task_0_hook(uint32_t timestamp)
+void cb_hoja_task_0_hook(uint32_t timestamp)
 {
-    rgb_tick(timestamp);
-    _rumble_tick(timestamp);
+    app_rumble_task(timestamp);
 }
 
 int main()
 {
     stdio_init_all();
     sleep_ms(100);
-    //board_init();
 
     printf("ProGCC Started.\n");
 
-    progcc_setup_gpio_button(PGPIO_BUTTON_MODE);
+    hoja_setup_gpio_button(PGPIO_BUTTON_MODE);
     // Handle bootloader stuff
     if (!gpio_get(PGPIO_BUTTON_MODE))
     {
         reset_usb_boot(0, 0);
     }
 
-    rgb_init();
-
-    sleep_ms(200);
-
-    rgb_s red = {
-        .r = 150,
-        .g = 128,
-        .b = 200,
-    };
-    rgb_set_all(red.color);
-
-    progcc_init(&button_data, &analog_data, &user_map);
+    hoja_init();
 }
