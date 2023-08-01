@@ -21,7 +21,7 @@ void _hoja_task_0()
 
   // Read buttons
   cb_hoja_read_buttons(&_button_data);
-  memcpy(&_button_data_processed, &_button_data, sizeof(_button_data));
+  remap_buttons_task();
 
   if (_hoja_usb_task_enable)
   {
@@ -93,6 +93,9 @@ void hoja_init()
       analog_init(&_analog_data, &_analog_data_processed, &_button_data);
     }
   }
+
+  // Initialize button remapping
+  remap_init(&_button_data, &_button_data_processed);
 
   // For switch Pro stuff
   switch_analog_calibration_init();

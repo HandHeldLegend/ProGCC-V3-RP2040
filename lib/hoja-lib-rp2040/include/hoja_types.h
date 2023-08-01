@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 
+#define MAPCODE_MAX 16
 // Map code is used during remap
 // operations and configuration
 typedef enum

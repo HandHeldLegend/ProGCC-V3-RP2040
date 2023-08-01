@@ -102,6 +102,28 @@ void webusb_command_processor(uint8_t *data)
             }
             break;
 
+        case WEBUSB_CMD_REMAP_SET:
+            {
+                printf("WebUSB: Got Remap SET command.\n");
+                remap_listen_enable(data[1]);
+            }
+            break;
+
+        case WEBUSB_CMD_REMAP_GET:
+            {
+                printf("WebUSB: Got Remap GET command.\n");
+                remap_send_data_webusb();
+            }
+            break;
+
+        case WEBUSB_CMD_REMAP_DEFAULT:
+            {
+                printf("WebUSB: Got Remap SET default command.\n");
+                remap_reset_default();
+                remap_send_data_webusb();
+            }
+            break;
+
         case WEBUSB_CMD_SAVEALL:
             {
                 printf("WebUSB: Got SAVE command.\n");

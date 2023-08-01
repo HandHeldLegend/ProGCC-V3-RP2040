@@ -33,6 +33,9 @@ typedef enum
   // Get all remap data available
   WEBUSB_CMD_REMAP_GET = 0xA6,
 
+  // Reset all remap to default
+  WEBUSB_CMD_REMAP_DEFAULT = 0x07,
+
   WEBUSB_CMD_SAVEALL = 0xF1,
 } webusb_cmd_t;
 

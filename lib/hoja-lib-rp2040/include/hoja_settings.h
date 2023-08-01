@@ -5,7 +5,7 @@
 
 // Corresponds to version number in web app.
 #define FIRMWARE_VERSION 0x0800
-#define SETTINGS_VERSION 0xB001
+#define SETTINGS_VERSION 0xB002
 
 typedef struct
 {

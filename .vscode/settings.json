@@ -16,6 +16,7 @@
         "app.h": "c",
         "app_imu.h": "c",
         "imu.h": "c",
-        "analog.h": "c"
+        "analog.h": "c",
+        "remap.h": "c"
     }
 }

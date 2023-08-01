@@ -1,26 +1,6 @@
 #include "hoja_settings.h"
 
-const button_remap_s default_user_map = {
-    .dpad_up = MAPCODE_DUP,
-    .dpad_down = MAPCODE_DDOWN,
-    .dpad_left = MAPCODE_DLEFT,
-    .dpad_right = MAPCODE_DRIGHT,
 
-    .button_a = MAPCODE_B_A,
-    .button_b = MAPCODE_B_B,
-    .button_x = MAPCODE_B_X,
-    .button_y = MAPCODE_B_Y,
-
-    .trigger_l = MAPCODE_T_ZL,
-    .trigger_r = MAPCODE_T_ZR,
-    .trigger_zl = MAPCODE_T_L,
-    .trigger_zr = MAPCODE_T_R,
-
-    .button_plus = MAPCODE_B_PLUS,
-    .button_minus = MAPCODE_B_MINUS,
-    .button_stick_left = MAPCODE_B_STICKL,
-    .button_stick_right = MAPCODE_B_STICKR,
-};
 
 hoja_settings_s global_loaded_settings = {0};
 
@@ -64,8 +44,6 @@ void settings_reset_to_default()
     .comms_mode = COMM_MODE_USB,
     .usb_mode = PUSB_MODE_XI,
     .performance_mode = false,
-    .remap_profile = default_user_map.val,
-
     .lx_center = 2048,
     .ly_center = 2048,
     .rx_center = 2048,
@@ -102,6 +80,7 @@ void settings_reset_to_default()
     },
   };
   memcpy(&global_loaded_settings, &set, sizeof(hoja_settings_s));
+  remap_reset_default();
   for(uint16_t i = 0; i < 26; i++)
   {
     global_loaded_settings.imu_calibration[i] = 0xFF;
