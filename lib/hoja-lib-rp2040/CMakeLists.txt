@@ -4,6 +4,7 @@ target_sources(hoja_lib INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/src/hoja.c
   ${CMAKE_CURRENT_LIST_DIR}/src/hoja_settings.c
   ${CMAKE_CURRENT_LIST_DIR}/src/hoja_defines.c 
+  ${CMAKE_CURRENT_LIST_DIR}/src/hoja_comms.c 
 
   ${CMAKE_CURRENT_LIST_DIR}/src/utilities/rgb.c 
 
@@ -77,6 +78,7 @@ target_link_libraries(hoja_lib INTERFACE
   hardware_spi
   hardware_sync
   hardware_timer
+  hardware_irq
 
   tinyusb_device
   tinyusb_board

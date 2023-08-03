@@ -43,6 +43,7 @@ typedef struct
     uint8_t analog_trigger_r;
 } __attribute__ ((packed)) gamecube_input_s;
 
+void gamecube_comms_task(button_data_s *buttons, a_data_s *analog);
 void gamecube_init();
 
 #endif

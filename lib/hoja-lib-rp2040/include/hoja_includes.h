@@ -14,6 +14,7 @@
 #include "pico/rand.h"
 
 #include "hardware/pio.h"
+#include "hardware/irq.h"
 #include "hardware/gpio.h"
 #include "hardware/clocks.h"
 #include "hardware/dma.h"
@@ -28,6 +29,7 @@
 #include "hoja_settings.h"
 #include "hoja_usb.h"
 #include "hoja_defines.h"
+#include "hoja_comms.h"
 
 #include "board_config.h"
 

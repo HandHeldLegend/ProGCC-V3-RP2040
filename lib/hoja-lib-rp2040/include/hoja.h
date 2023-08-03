@@ -13,11 +13,6 @@ void cb_hoja_rumble_enable(bool enable);
 
 void cb_hoja_task_1_hook(uint32_t timestamp);
 
-void hoja_calibrate_analog_start();
-void hoja_calibrate_analog_stop();
-void hoja_calibrate_analog_save();
-void hoja_calibrate_angle_capture();
-
 void hoja_init();
 
 void hoja_load_remap(button_remap_s *remap_profile);
