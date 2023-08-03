@@ -108,7 +108,7 @@ void cb_hoja_read_buttons(button_data_s *data)
 {
     // Keypad version
     gpio_put(PGPIO_SCAN_A, false);
-    sleep_us(100);
+    sleep_us(5);
     data->button_a  = !gpio_get(PGPIO_PUSH_C);
     data->button_b  = !gpio_get(PGPIO_PUSH_D);
     data->button_x  = !gpio_get(PGPIO_PUSH_A);
@@ -116,7 +116,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_A, true);
 
     gpio_put(PGPIO_SCAN_B, false);
-    sleep_us(100);
+    sleep_us(5);
     data->dpad_left     = !gpio_get(PGPIO_PUSH_D);
     data->dpad_right    = !gpio_get(PGPIO_PUSH_C);
     data->dpad_down     = !gpio_get(PGPIO_PUSH_B);
@@ -124,7 +124,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_B, true);
 
     gpio_put(PGPIO_SCAN_C, false);
-    sleep_us(100);
+    sleep_us(5);
     data->button_plus       = !gpio_get(PGPIO_PUSH_A);
     data->button_home       = !gpio_get(PGPIO_PUSH_B);
     data->button_capture    = !gpio_get(PGPIO_PUSH_D);
@@ -132,7 +132,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_C, true);
 
     gpio_put(PGPIO_SCAN_D, false);
-    sleep_us(100);
+    sleep_us(5);
     data->trigger_r     = !gpio_get(PGPIO_PUSH_B);
     data->trigger_l     = !gpio_get(PGPIO_PUSH_D);
     data->trigger_zl    = !gpio_get(PGPIO_PUSH_A);
@@ -141,6 +141,8 @@ void cb_hoja_read_buttons(button_data_s *data)
 
     data->button_stick_right = !gpio_get(PGPIO_BUTTON_RS);
     data->button_stick_left = !gpio_get(PGPIO_BUTTON_LS);
+
+    data->button_safemode = !gpio_get(PGPIO_BUTTON_MODE);
 }
 
 void cb_hoja_read_analog(a_data_s *data)
@@ -185,7 +187,7 @@ void cb_hoja_read_analog(a_data_s *data)
     data->ry = BUFFER_TO_UINT16(buffer_ry);
 }
 
-void cb_hoja_task_0_hook(uint32_t timestamp)
+void cb_hoja_task_1_hook(uint32_t timestamp)
 {
     app_rumble_task(timestamp);
 }

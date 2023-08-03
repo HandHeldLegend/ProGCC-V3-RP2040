@@ -34,6 +34,7 @@
 #include "analog.h"
 #include "snapback.h"
 #include "imu.h"
+#include "safemode.h"
 
 #include "ws2812.pio.h"
 #include "nserial.pio.h"

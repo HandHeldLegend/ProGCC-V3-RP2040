@@ -79,7 +79,7 @@ void _rgb_animate_step()
 }
 
 // Enable the RGB transition to the next color
-inline void _rgb_set_dirty()
+void rgb_set_dirty()
 {
     _rgb_out_dirty = true;
 }
@@ -91,7 +91,6 @@ void rgb_set_all(uint32_t color)
     {
         _rgb_next[i].color = color;
     }
-    _rgb_out_dirty = true;
 }
 
 void _rgb_set_sequential(rgb_s *colors, uint8_t len, uint32_t color)
@@ -106,12 +105,11 @@ void rgb_load_preset()
 {
     for(uint8_t i = 0; i < RGB_GROUP_MAX; i++)
     {
-        rgb_set_group(i, global_loaded_settings.rgb_colors[i], false);
+        rgb_set_group(i, global_loaded_settings.rgb_colors[i]);
     }
-    _rgb_out_dirty = true;
 }
 
-void rgb_set_group(rgb_group_t group, uint32_t color, bool set_dirty)
+void rgb_set_group(rgb_group_t group, uint32_t color)
 {
     switch(group)
     {
@@ -120,57 +118,46 @@ void rgb_set_group(rgb_group_t group, uint32_t color, bool set_dirty)
 
         case RGB_GROUP_RS:
             _rgb_set_sequential(&_rgb_next[0], 4, color);
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_LS:
             _rgb_set_sequential(&_rgb_next[4], 4, color);
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_DPAD:
             _rgb_set_sequential(&_rgb_next[8], 4, color);
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_MINUS:
             _rgb_next[12].color = color;
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_CAPTURE:
             _rgb_next[13].color = color;
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_HOME:
             _rgb_next[14].color = color;
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_PLUS:
             _rgb_next[15].color = color;
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_Y:
             _rgb_next[16].color = color;
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_X:
             _rgb_next[17].color = color;
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_A:
             _rgb_next[18].color = color;
-            _rgb_out_dirty = set_dirty;
             break;
 
         case RGB_GROUP_B:
             _rgb_next[19].color = color;
-            _rgb_out_dirty = set_dirty;
             break;
     }
 }

@@ -34,6 +34,8 @@ void analog_calibrate_start()
         .b = 0,
     };
     rgb_set_all(c.color);
+    rgb_set_dirty();
+
     // Reset scaling distances
     stick_scaling_reset_distances();
     _analog_all_angles_got = false;
@@ -44,6 +46,7 @@ void analog_calibrate_start()
 void analog_calibrate_stop()
 {
     rgb_load_preset();
+    rgb_set_dirty();
 
     _analog_calibrate = false;
 
@@ -59,6 +62,7 @@ void analog_calibrate_stop()
 void analog_calibrate_save()
 {
     rgb_load_preset();
+    rgb_set_dirty();
 
     _analog_calibrate = false;
 
@@ -95,6 +99,7 @@ void _analog_calibrate_loop()
             .b = 128,
         };
         rgb_set_all(c.color);
+        rgb_set_dirty();
     }
 
     if(_buttons->button_home)

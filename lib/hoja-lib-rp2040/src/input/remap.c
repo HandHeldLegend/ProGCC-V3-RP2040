@@ -168,12 +168,21 @@ void remap_listen_enable(mapcode_t mapcode)
 
 void remap_buttons_task()
 {
-  _buttons_out->buttons_system = _buttons_in->buttons_system;
   _buttons_out->buttons_all = 0x00;
+  _buttons_out->buttons_system = 0x00;
 
   if (_button_remap_listen)
   {
     _remap_listener(_buttons_in->buttons_all);
+  }
+
+  if (!safe_mode_check())
+  {
+    _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_plus, _button_remap_arr[MAPCODE_B_PLUS]);
+    _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_minus, _button_remap_arr[MAPCODE_B_MINUS]);
+
+    _buttons_out->button_home     = _buttons_in->button_home;
+    _buttons_out->button_capture  = _buttons_in->button_capture;
   }
 
   _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->dpad_up, _button_remap_arr[MAPCODE_DUP]);
@@ -186,8 +195,10 @@ void remap_buttons_task()
   _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_x, _button_remap_arr[MAPCODE_B_X]);
   _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_y, _button_remap_arr[MAPCODE_B_Y]);
 
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_plus, _button_remap_arr[MAPCODE_B_PLUS]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_minus, _button_remap_arr[MAPCODE_B_MINUS]);
+  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->trigger_l, _button_remap_arr[MAPCODE_T_L]);
+  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->trigger_r, _button_remap_arr[MAPCODE_T_R]);
+  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->trigger_zl, _button_remap_arr[MAPCODE_T_ZL]);
+  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->trigger_zr, _button_remap_arr[MAPCODE_T_ZR]);
 
   _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_stick_left, _button_remap_arr[MAPCODE_B_STICKL]);
   _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_stick_right, _button_remap_arr[MAPCODE_B_STICKR]);

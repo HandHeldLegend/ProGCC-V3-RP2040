@@ -59,7 +59,8 @@ void webusb_command_processor(uint8_t *data)
                     .b = data[4],
                 };
                 global_loaded_settings.rgb_colors[data[1]] = col.color;
-                rgb_set_group(data[1], col.color, true);
+                rgb_set_group(data[1], col.color);
+                rgb_set_dirty();
             }
             break;
 

@@ -99,8 +99,8 @@ typedef enum
 
 typedef enum
 {
-    USBRATE_8 = 8000,
-    USBRATE_1 = 4000,
+    USBRATE_8 = 7800,
+    USBRATE_1 = 400,
 } usb_rate_t;
 
 typedef enum
@@ -194,7 +194,8 @@ typedef struct
             // Menu buttons (Not remappable by API)
             uint8_t button_capture  : 1;
             uint8_t button_home     : 1;
-            uint8_t padding         : 6;
+            uint8_t button_safemode : 1;
+            uint8_t padding         : 5;
         };
         uint8_t buttons_system;
     };

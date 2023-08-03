@@ -13,7 +13,7 @@ usb_mode_t _usb_mode    = PUSB_MODE_XI;
 bool _usb_busy = false;
 
 // Default 8ms (8000us)
-uint32_t _usb_rate = 7600;
+uint32_t _usb_rate = 0;
 
 typedef void (*usb_cb_t)(button_data_s *, a_data_s *);
 
@@ -59,37 +59,88 @@ bool hoja_usb_start(usb_mode_t mode)
 }
 
 uint8_t buf = 0;
-bool _usbNullerror = false;
 
-bool _hoja_usb_ready()
+
+bool _hoja_usb_ready(bool reset)
 {
+  static bool _usbClear = false;
+
+  if (reset)
+  {
+    _usbClear = false;
+  }
+
+  if (_usbClear) return true;
+
   if (_usb_mode == PUSB_MODE_XI)
   {
-    return tud_xinput_ready();
+    _usbClear = tud_xinput_ready();
   }
   else if (_usb_mode == PUSB_MODE_WEB)
   {
-    return tud_vendor_available();
+    _usbClear = tud_vendor_available();
   }
-  else return tud_hid_ready();
+  else _usbClear = tud_hid_ready();
+
+  return _usbClear;
+}
+
+// This is a function that will return
+// a value of 'true' if an interval is met.
+// IE helps you run functions at set intervals without blocking (as much).
+bool _usb_interval_run(uint32_t timestamp, uint32_t interval, bool reset)
+{
+  static uint32_t last_time = 0;
+  static uint32_t this_time = 0;
+  static bool reset_flag = false;
+
+  if (reset)
+  {
+    reset_flag = true;
+    return false;
+  }
+
+  this_time = timestamp;
+
+  if (reset_flag)
+  {
+    last_time = this_time;
+    reset_flag = false;
+  }
+
+  // Clear variable
+  uint32_t diff = 0;
+
+  // Handle edge case where time has
+  // looped around and is now less
+  if (this_time < last_time)
+  {
+    diff = (0xFFFFFFFF - last_time) + this_time;
+  }
+  else if (this_time > last_time)
+  {
+    diff = this_time - last_time;
+  }
+  else
+    return false;
+
+  // We want a target rate according to our variable
+  if (diff >= interval)
+  {
+    // Set the last time
+    last_time = this_time;
+    return true;
+  }
+  return false;
 }
 
 void hoja_usb_task(uint32_t timestamp, button_data_s *button_data, a_data_s *analog_data)
 {
-  if (_hoja_usb_ready())
+  if (_hoja_usb_ready(false))
   {
-    if (interval_run(timestamp, _usb_rate))
+    if (_usb_interval_run(timestamp, _usb_rate, false) || _usb_mode == PUSB_MODE_XI)
     {
-      // Call the registered function
-      if (_usb_hid_cb != NULL)
-      {
-          _usb_hid_cb(button_data, analog_data);
-      }
-      else if (!_usbNullerror)
-      {
-        _usbNullerror = true;
-        printf("_usb_hid_cb is NULL\n");
-      }
+      _usb_hid_cb(button_data, analog_data);
     }
   }
 }
@@ -164,10 +215,11 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_
 {
     switch (_usb_mode)
     {
-        case PUSB_MODE_DI:
-            if ((report[0] == 0x01) || (report[0] == 0x02))
+        case PUSB_MODE_SW:
+            if ((report[0] == 0x30))
             {
-                //usb_process_data();
+                _usb_interval_run(0, 0, true);
+                _hoja_usb_ready(true);
             }
             break;
 
@@ -176,7 +228,8 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_
         case PUSB_MODE_XI:
             if ( (report[0] == 0x00) && (report[1] == XID_REPORT_LEN))
             {
-                //usb_process_data();
+                _usb_interval_run(0, 0, true);
+                _hoja_usb_ready(true);
             }
 
             break;

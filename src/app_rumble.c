@@ -15,9 +15,9 @@ void app_rumble_task(uint32_t timestamp)
         if (rumble_on)
         {
             lvl += 10;
-            if (lvl >= 130)
+            if (lvl >= 110)
             {
-                lvl = 130;
+                lvl = 110;
             }
             pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
             pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, lvl);

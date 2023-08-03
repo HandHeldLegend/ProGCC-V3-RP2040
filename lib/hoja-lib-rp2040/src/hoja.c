@@ -21,6 +21,7 @@ void _hoja_task_0()
 
   // Read buttons
   cb_hoja_read_buttons(&_button_data);
+  safe_mode_task(&_button_data);
   remap_buttons_task();
 
   if (_hoja_usb_task_enable)
@@ -29,11 +30,6 @@ void _hoja_task_0()
     tud_task();
     hoja_usb_task(_hoja_timestamp, &_button_data_processed, &_analog_data_processed);
   }
-
-  rgb_task(_hoja_timestamp);
-
-  // Do callback for userland code insertion
-  cb_hoja_task_0_hook(_hoja_timestamp);
 }
 
 // Core 1 task loop entrypoint
@@ -49,6 +45,11 @@ void _hoja_task_1()
 
     // Do IMU stuff
     imu_task(_hoja_timestamp);
+
+    rgb_task(_hoja_timestamp);
+
+    // Do callback for userland code insertion
+    cb_hoja_task_1_hook(_hoja_timestamp);
   }
 }
 
@@ -72,6 +73,7 @@ void hoja_init()
         .b = 200,
     };
     rgb_set_all(c.color);
+    rgb_set_dirty();
   }
   
   // Read buttons to get a current state
@@ -90,6 +92,7 @@ void hoja_init()
     else
     {
       rgb_load_preset();
+      rgb_set_dirty();
       analog_init(&_analog_data, &_analog_data_processed, &_button_data);
     }
   }

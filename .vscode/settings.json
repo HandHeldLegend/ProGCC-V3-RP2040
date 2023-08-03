@@ -17,6 +17,9 @@
         "app_imu.h": "c",
         "imu.h": "c",
         "analog.h": "c",
-        "remap.h": "c"
+        "remap.h": "c",
+        "safemode.h": "c",
+        "xinput_device.h": "c",
+        "typeinfo": "c"
     }
 }
