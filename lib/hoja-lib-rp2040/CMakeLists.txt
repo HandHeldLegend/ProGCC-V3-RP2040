@@ -24,7 +24,7 @@ target_sources(hoja_lib INTERFACE
 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/dinput.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/gcinput.c 
-  ${CMAKE_CURRENT_LIST_DIR}/src/devices/joybus.c 
+  ${CMAKE_CURRENT_LIST_DIR}/src/devices/gamecube.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/nspi.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/swpro.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/webusb.c 
@@ -52,7 +52,7 @@ target_include_directories(hoja_lib INTERFACE
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/generated)
 pico_generate_pio_header(hoja_lib ${CMAKE_CURRENT_LIST_DIR}/pio/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/include/generated)
 pico_generate_pio_header(hoja_lib ${CMAKE_CURRENT_LIST_DIR}/pio/nserial.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/include/generated)
-#pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio/joybus.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
+pico_generate_pio_header(hoja_lib ${CMAKE_CURRENT_LIST_DIR}/pio/joybus.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/include/generated)
 
 
 #add_custom_command(OUTPUT ${CMAKE_CURRENT_LIST_DIR}/generated/cvideo.pio.h

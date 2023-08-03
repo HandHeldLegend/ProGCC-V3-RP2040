@@ -20,6 +20,7 @@
         "remap.h": "c",
         "safemode.h": "c",
         "xinput_device.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "gamecube.h": "c"
     }
 }

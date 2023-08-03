@@ -104,7 +104,7 @@ void hoja_init()
   switch_analog_calibration_init();
 
   uint8_t sub_mode = PUSB_MODE_SW; // PUSB_MODE_SW;
-  uint8_t comms_mode = COMM_MODE_USB;
+  uint8_t comms_mode = COMM_MODE_GC;
 
   if (_button_data.button_x)
   {
@@ -126,6 +126,12 @@ void hoja_init()
         return;
       }
       _hoja_usb_task_enable = true;
+    }
+    break;
+
+    case COMM_MODE_GC:
+    {
+      gamecube_init();
     }
     break;
     // OTHER MODES NOT IMPLEMENTED FOR NOW
