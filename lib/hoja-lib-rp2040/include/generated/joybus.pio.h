@@ -13,7 +13,7 @@
 // ------ //
 
 #define joybus_wrap_target 0
-#define joybus_wrap 18
+#define joybus_wrap 24
 
 #define joybus_offset_joybusin 0u
 #define joybus_offset_joybusout 12u
@@ -33,19 +33,25 @@ static const uint16_t joybus_program_instructions[] = {
     0xc000, // 10: irq    nowait 0                   
     0x0000, // 11: jmp    0                          
     0xe081, // 12: set    pindirs, 1                 
-    0x7821, // 13: out    x, 1            side 1     
-    0x1730, // 14: jmp    !x, 16          side 0 [7] 
-    0x170d, // 15: jmp    13              side 0 [7] 
-    0xa342, // 16: nop                           [3] 
-    0xb942, // 17: nop                    side 1 [1] 
-    0x000d, // 18: jmp    13                         
+    0x7f21, // 13: out    x, 1            side 1 [7] 
+    0x1733, // 14: jmp    !x, 19          side 0 [7] 
+    0xbf42, // 15: nop                    side 1 [7] 
+    0xa042, // 16: nop                               
+    0x1fed, // 17: jmp    !osre, 13       side 1 [7] 
+    0x0016, // 18: jmp    22                         
+    0xb742, // 19: nop                    side 0 [7] 
+    0xa042, // 20: nop                               
+    0x17ed, // 21: jmp    !osre, 13       side 0 [7] 
+    0xbf42, // 22: nop                    side 1 [7] 
+    0xb742, // 23: nop                    side 0 [7] 
+    0x000d, // 24: jmp    13                         
             //     .wrap
 };
 
 #if !PICO_NO_HARDWARE
 static const struct pio_program joybus_program = {
     .instructions = joybus_program_instructions,
-    .length = 19,
+    .length = 25,
     .origin = -1,
 };
 
@@ -70,11 +76,11 @@ static inline void joybus_program_init(PIO pio, uint sm, uint offset, uint pin, 
     gpio_pull_up(pin);
     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
     // Must run 12800000hz
-    float div = clock_get_hz(clk_sys) / (4000000 );
+    float div = clock_get_hz(clk_sys) / (8000000 );
     sm_config_set_clkdiv(c, div);
     // Set sideset pin
     sm_config_set_sideset_pins(c, pin);
-    sm_config_set_out_shift(c, false, true, 8);
+    sm_config_set_out_shift(c, true, true, 8);
     sm_config_set_fifo_join(c, PIO_FIFO_JOIN_TX);
     // Load our configuration, and jump to the start of the program
     pio_sm_init(pio, sm, offset, c);

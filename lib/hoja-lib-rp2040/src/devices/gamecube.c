@@ -6,8 +6,13 @@ static pio_sm_config _gamecube_c;
 
 void gamecube_load_buffer()
 {
-  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0x0);
-  //pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0x1);
+  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0xFF);
+  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0x00);
+  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0xFF);
+  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0x00);
+  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0x00);
+  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0xFF);
+  sleep_us(64);
 }
 
 void gamecube_isr_handler(void)

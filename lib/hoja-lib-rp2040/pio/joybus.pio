@@ -40,13 +40,20 @@ bytecomplete:
 PUBLIC joybusout:
     set pindirs, 1
 output:
-    out x, 1        side 1 ;[1] ; Side-set still takes place when instruction stalls
-    jmp !x do_zero  side 0 [7] ; Branch on the bit we shifted out. low pulse
+    out x, 1        side 1 [7] ;Side-set still takes place when instruction stalls
+    jmp !x do_zero   side 0 [7]; Branch on the bit we shifted out. low pulse
 do_one:
-    jmp  output  side 0 [7] ; Continue driving low, for a long pulse
+    nop side 1 [7]
+    nop
+    jmp !osre output side 1 [7] ; Drive high extended
+    jmp do_end
 do_zero:
-    nop [3]
-    nop             side 1 [1] ; Or drive high, for a short pulse
+    nop side 0 [7]
+    nop
+    jmp !osre output side 0 [7]
+do_end:
+    nop side 1 [7]
+    nop side 0 [7]
     jmp output
 .wrap
 
@@ -70,13 +77,13 @@ static inline void joybus_program_init(PIO pio, uint sm, uint offset, uint pin, 
     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 
     // Must run 12800000hz
-    float div = clock_get_hz(clk_sys) / (4000000 );
+    float div = clock_get_hz(clk_sys) / (8000000 );
     sm_config_set_clkdiv(c, div);
 
     
     // Set sideset pin
     sm_config_set_sideset_pins(c, pin);
-    sm_config_set_out_shift(c, false, true, 8);
+    sm_config_set_out_shift(c, true, true, 8);
     sm_config_set_fifo_join(c, PIO_FIFO_JOIN_TX);
 
     // Load our configuration, and jump to the start of the program
