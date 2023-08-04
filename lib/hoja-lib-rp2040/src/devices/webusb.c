@@ -17,7 +17,23 @@ void webusb_command_processor(uint8_t *data)
     {
         default:
 
-        break;
+            break;
+
+        case WEBUSB_CMD_FW_SET:
+            {
+                reset_usb_boot(0, 0);
+            }
+            break;
+
+        case WEBUSB_CMD_FW_GET:
+            {
+                _webusb_out_buffer[0] = WEBUSB_CMD_FW_GET;
+                _webusb_out_buffer[1] = (FIRMWARE_VERSION & 0xFF00)>>8;
+                _webusb_out_buffer[2] = FIRMWARE_VERSION & 0xFF;
+                tud_vendor_n_write(0, _webusb_out_buffer, 64);
+                tud_vendor_n_flush(0);
+            }
+            break;
 
         case WEBUSB_CMD_CALIBRATION_START:
             {
