@@ -107,11 +107,16 @@ void hoja_init()
   switch_analog_calibration_init();
 
   uint8_t sub_mode = PUSB_MODE_SW; // PUSB_MODE_SW;
-  uint8_t comms_mode = COMM_MODE_GC;
+  uint8_t comms_mode = COMM_MODE_USB;
 
   if (_button_data.button_x)
   {
+    comms_mode = COMM_MODE_USB;
     sub_mode = PUSB_MODE_XI;
+  }
+  else if (_button_data.button_a)
+  {
+    comms_mode = COMM_MODE_GC;
   }
 
   // Determine launch mode

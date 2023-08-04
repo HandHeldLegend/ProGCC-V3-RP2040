@@ -2,6 +2,7 @@
 #define GAMECUBE_H
 
 #include "hoja_includes.h"
+#include "interval.h"
 
 typedef struct
 {
@@ -43,7 +44,7 @@ typedef struct
     uint8_t analog_trigger_r;
 } __attribute__ ((packed)) gamecube_input_s;
 
-void gamecube_comms_task(button_data_s *buttons, a_data_s *analog);
+void gamecube_comms_task(uint32_t timestamp, button_data_s *buttons, a_data_s *analog);
 void gamecube_init();
 
 #endif

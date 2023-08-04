@@ -6,7 +6,7 @@ void hoja_comms_task(uint32_t timestamp, button_data_s * buttons, a_data_s * ana
 {
     if(_comms_cb != NULL)
     {
-        _comms_cb(buttons, analog);
+        _comms_cb(timestamp, buttons, analog);
     }
 }
 

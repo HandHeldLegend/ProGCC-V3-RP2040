@@ -33,7 +33,7 @@ static const uint16_t joybus_program_instructions[] = {
     0x4001, // 10: in     pins, 1                    
     0x0047, // 11: jmp    x--, 7                     
     0x0001, // 12: jmp    1                          
-    0xc000, // 13: irq    nowait 0                   
+    0xd800, // 13: irq    nowait 0        side 1     
     0x0001, // 14: jmp    1                          
     0xf881, // 15: set    pindirs, 1      side 1     
     0x7b21, // 16: out    x, 1            side 1 [3] 

@@ -21,6 +21,7 @@
         "safemode.h": "c",
         "xinput_device.h": "c",
         "typeinfo": "c",
-        "gamecube.h": "c"
+        "gamecube.h": "c",
+        "hoja_comms.h": "c"
     }
 }

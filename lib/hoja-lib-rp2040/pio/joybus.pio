@@ -33,7 +33,7 @@ bitloop:
   jmp bytestart
 completed:
   ; Set interrupt, do not wait for it to clear
-  irq nowait 0
+  irq nowait 0 side 1
   jmp bytestart
 
 PUBLIC joybusout:
