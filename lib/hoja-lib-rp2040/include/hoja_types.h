@@ -99,8 +99,8 @@ typedef enum
 
 typedef enum
 {
-    USBRATE_8 = 7800,
-    USBRATE_1 = 400,
+    USBRATE_8 = 7600,
+    USBRATE_1 = 600,
 } usb_rate_t;
 
 typedef enum
