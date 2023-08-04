@@ -30,6 +30,9 @@ void _hoja_task_0()
     tud_task();
     hoja_usb_task(_hoja_timestamp, &_button_data_processed, &_analog_data_processed);
   }
+  {
+    hoja_comms_task(_hoja_timestamp, &_button_data_processed, &_analog_data_processed);
+  }
 }
 
 // Core 1 task loop entrypoint
@@ -108,13 +111,18 @@ void hoja_init()
 
   if (_button_data.button_x)
   {
+    comms_mode = COMM_MODE_USB;
     sub_mode = PUSB_MODE_XI;
+  }
+  else if (_button_data.button_a)
+  {
+    comms_mode = COMM_MODE_GC;
   }
 
   // Determine launch mode
   switch (comms_mode)
   {
-    default:
+    
     case COMM_MODE_USB:
     {
       bool did_usb_boot_ok = hoja_usb_start(sub_mode);
@@ -127,6 +135,10 @@ void hoja_init()
       }
       _hoja_usb_task_enable = true;
     }
+    break;
+
+    default:
+      hoja_comms_init(comms_mode);
     break;
     // OTHER MODES NOT IMPLEMENTED FOR NOW
   }

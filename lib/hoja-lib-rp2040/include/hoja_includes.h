@@ -14,6 +14,7 @@
 #include "pico/rand.h"
 
 #include "hardware/pio.h"
+#include "hardware/irq.h"
 #include "hardware/gpio.h"
 #include "hardware/clocks.h"
 #include "hardware/dma.h"
@@ -22,11 +23,13 @@
 #include "hardware/timer.h"
 #include "hardware/uart.h"
 #include "hardware/flash.h"
+#include "hardware/watchdog.h"
 
 #include "hoja_types.h"
 #include "hoja_settings.h"
 #include "hoja_usb.h"
 #include "hoja_defines.h"
+#include "hoja_comms.h"
 
 #include "board_config.h"
 
@@ -38,6 +41,7 @@
 
 #include "ws2812.pio.h"
 #include "nserial.pio.h"
+#include "joybus.pio.h"
 #include "rgb.h"
 
 #include "bsp/board.h"
@@ -50,7 +54,10 @@
 #include "xinput.h"
 #include "dinput.h"
 #include "swpro.h"
+
 #include "webusb.h"
+
+#include "gamecube.h"
 
 #include "remap.h"
 #include "hoja.h"

@@ -131,6 +131,16 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->button_minus      = !gpio_get(PGPIO_PUSH_C);
     gpio_put(PGPIO_SCAN_C, true);
 
+    /*
+    if (data->button_capture)
+    {
+        reset_usb_boot(0, 0);
+    }
+    if (data->button_home)
+    {
+        watchdog_reboot(0, 0, 0);
+    }*/
+
     gpio_put(PGPIO_SCAN_D, false);
     sleep_us(5);
     data->trigger_r     = !gpio_get(PGPIO_PUSH_B);
