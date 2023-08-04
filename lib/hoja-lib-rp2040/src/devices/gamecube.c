@@ -89,6 +89,7 @@ static void _gamecube_isr_handler(void)
 {
   if (pio_interrupt_get(GAMEPAD_PIO, 0))
   {
+    _gc_got_data=true;
     pio_interrupt_clear(GAMEPAD_PIO, 0);
     uint16_t c = 40;
     while(c--) asm("nop");
@@ -102,7 +103,6 @@ static void _gamecube_isr_txdone(void)
   {
     pio_interrupt_clear(GAMEPAD_PIO, 1);
     joybus_set_in(true, GAMEPAD_PIO, GAMEPAD_SM, _gamecube_offset, &_gamecube_c, PGPIO_NS_SERIAL);
-    _gc_got_data=true;
   }
 }
 
@@ -129,10 +129,13 @@ void gamecube_comms_task(uint32_t timestamp, button_data_s *buttons, a_data_s *a
   {
     if(interval_resettable_run(timestamp, 40000, _gc_got_data))
     {
+      printf("RESET.");
       _gamecube_reset_state();
+      sleep_ms(100);
     }
     else
     {
+      _gc_got_data = false;
       _out_buffer.blank_2 = 1;
       _out_buffer.button_a = buttons->button_a;
       _out_buffer.button_b = buttons->button_b;
