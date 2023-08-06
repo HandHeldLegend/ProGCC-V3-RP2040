@@ -5,7 +5,7 @@
 
 // Corresponds to version number in web app.
 #define FIRMWARE_VERSION 0x0800
-#define SETTINGS_VERSION 0xB002
+#define SETTINGS_VERSION 0xB003
 
 typedef struct
 {
@@ -16,6 +16,7 @@ typedef struct
     uint8_t     usb_mode;
     bool        performance_mode;
     uint64_t    remap_profile;
+    uint16_t    remap_unset;
 
     uint8_t     switch_mac_address[6];
 

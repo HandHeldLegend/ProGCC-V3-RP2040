@@ -56,33 +56,50 @@ void _gamecube_reset_state()
   joybus_set_in(true, GAMEPAD_PIO, GAMEPAD_SM, _gamecube_offset, &_gamecube_c, PGPIO_NS_SERIAL);
 }
 
+volatile uint8_t _byteCounter = 3;
+volatile uint8_t _workingCmd = 0x00;
 void __time_critical_func(_gamecube_command_handler)()
 {
-  volatile uint8_t cmd = pio_sm_get(GAMEPAD_PIO, GAMEPAD_SM);
+  uint16_t c = 40;
 
-  switch (cmd)
+  if(_workingCmd == 0x40)
   {
-    default:
-      printf("Unknown: %x\n", cmd);
-      break;
-    case 0x00:
-      joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _gamecube_offset, &_gamecube_c, PGPIO_NS_SERIAL);
-      _gamecube_send_probe();
-    break;
-
-    case 0x40:
-      _gamecube_in_buffer[0] = pio_sm_get(GAMEPAD_PIO, GAMEPAD_SM);
-      _gamecube_in_buffer[1] = pio_sm_get(GAMEPAD_PIO, GAMEPAD_SM);
-
+    _byteCounter-=1;
+    uint8_t dat = pio_sm_get(GAMEPAD_PIO, GAMEPAD_SM);
+    if(_byteCounter==0)
+    {
+      _workingCmd = 0x00;
+      while(c--) asm("nop");
       joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _gamecube_offset, &_gamecube_c, PGPIO_NS_SERIAL);
       _gamecube_send_poll();
-    break;
-
-    case 0x41:
-      joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _gamecube_offset, &_gamecube_c, PGPIO_NS_SERIAL);
-      _gamecube_send_origin();
-    break;
+    }
   }
+  else
+  {
+    _workingCmd = pio_sm_get(GAMEPAD_PIO, GAMEPAD_SM);
+    switch (_workingCmd)
+    {
+      default:
+        break;
+      case 0x00:
+        while(c--) asm("nop");
+        joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _gamecube_offset, &_gamecube_c, PGPIO_NS_SERIAL);
+        _gamecube_send_probe();
+      break;
+
+      case 0x40:
+        _byteCounter=2;
+      break;
+
+      case 0x41:
+        while(c--) asm("nop");
+        joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _gamecube_offset, &_gamecube_c, PGPIO_NS_SERIAL);
+        _gamecube_send_origin();
+      break;
+    }
+  }
+
+  
 }
 
 static void _gamecube_isr_handler(void)

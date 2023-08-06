@@ -1,7 +1,5 @@
 #include "hoja_settings.h"
 
-
-
 hoja_settings_s global_loaded_settings = {0};
 
 // Internal functions for command processing

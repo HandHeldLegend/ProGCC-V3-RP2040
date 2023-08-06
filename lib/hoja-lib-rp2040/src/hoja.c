@@ -28,6 +28,7 @@ void _hoja_task_0()
   {
     // Process USB if needed
     tud_task();
+    snapback_webcapture_task(_hoja_timestamp, &_analog_data_processed);
     hoja_usb_task(_hoja_timestamp, &_button_data_processed, &_analog_data_processed);
   }
   {

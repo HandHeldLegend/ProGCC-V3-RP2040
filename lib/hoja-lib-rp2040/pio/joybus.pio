@@ -13,14 +13,7 @@
 PUBLIC joybusin:
   set pindirs, 0
 bytestart:
-   set x, 6 ; Set x scratch register as bit counter to allow 8 loops
-  ; Ensure line is idle or high first
-  wait 1 pin, 0
-  ; Wait until pin goes LOW, then wait 10 cycles (2.5us)
-  wait 0 pin, 0 [7]
-  nop
-  jmp pin completed ; Jump to completed if we detect a STOP
-  in null, 1        ; Push null (0) into IN register because if we got here it's a zero
+  set x, 7 ; Set x scratch register as bit counter to allow 8 loops
 bitloop:
   wait 1 pin, 0     ; Wait for line HIGH
   wait 0 pin, 0 [7]
@@ -29,8 +22,6 @@ bitloop:
   in pins, 1
   ; Decrement x and jump to bitloop if we aren't at 0 yet
   jmp x-- bitloop
-  ; When we get here we got a stop bit
-  jmp bytestart
 completed:
   ; Set interrupt, do not wait for it to clear
   irq nowait 0 side 1

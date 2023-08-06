@@ -2,9 +2,9 @@
 #define SNAPBACK_H
 
 #include "hoja_includes.h"
+#include "interval.h"
 
-#define SNAPBACK_COUNT 32
-
-void snapback_process(a_data_s *input, a_data_s *output);
+void snapback_process(uint32_t timestamp, a_data_s *input, a_data_s *output);
+void snapback_webcapture_task(uint32_t timestamp, a_data_s *data);
 
 #endif

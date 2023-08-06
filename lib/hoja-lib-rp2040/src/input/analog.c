@@ -123,7 +123,7 @@ void analog_task(uint32_t timestamp)
         else
         {
             stick_scaling_process_data(_data_in, &scaled_analog_data);
-            snapback_process(&scaled_analog_data, _data_out);
+            snapback_process(timestamp, &scaled_analog_data, _data_out);
         }
     }
 }
