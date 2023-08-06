@@ -7,9 +7,12 @@ uint _gamecube_irq_tx;
 uint _gamecube_offset;
 pio_sm_config _gamecube_c;
 
+volatile bool _gc_got_data = false;
+bool _gc_running = false;
+
 uint8_t _gamecube_out_buffer[8] = {0};
 volatile uint8_t _gamecube_in_buffer[8] = {0};
-gamecube_input_s _out_buffer = {.stick_left_x = 127, .stick_left_y = 127, .stick_right_x=127, .stick_right_y=127};
+static gamecube_input_s _out_buffer = {.stick_left_x = 127, .stick_left_y = 127, .stick_right_x=127, .stick_right_y=127};
 
 #define ALIGNED_JOYBUS_8(val) ((val) << 24)
 
@@ -48,16 +51,13 @@ void _gamecube_send_poll()
   pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, ALIGNED_JOYBUS_8(_out_buffer.analog_trigger_r));
 }
 
-volatile bool _gc_got_data = false;
-bool _gc_running = false;
-
 void _gamecube_reset_state()
 {
   joybus_set_in(true, GAMEPAD_PIO, GAMEPAD_SM, _gamecube_offset, &_gamecube_c, PGPIO_NS_SERIAL);
 }
 
-volatile uint8_t _byteCounter = 3;
-volatile uint8_t _workingCmd = 0x00;
+static volatile uint8_t _byteCounter = 3;
+static volatile uint8_t _workingCmd = 0x00;
 void __time_critical_func(_gamecube_command_handler)()
 {
   uint16_t c = 40;

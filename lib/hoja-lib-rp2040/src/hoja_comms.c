@@ -18,5 +18,9 @@ void hoja_comms_init(comm_mode_t comms_mode)
             _comms_cb = gamecube_comms_task;
             gamecube_init();
         break;
+
+        case COMM_MODE_N64:
+            _comms_cb = n64_comms_task;
+        break;
     }
 }

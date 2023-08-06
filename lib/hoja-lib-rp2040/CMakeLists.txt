@@ -26,6 +26,7 @@ target_sources(hoja_lib INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/dinput.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/gcinput.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/gamecube.c 
+  ${CMAKE_CURRENT_LIST_DIR}/src/devices/n64.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/nspi.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/swpro.c 
   ${CMAKE_CURRENT_LIST_DIR}/src/devices/webusb.c 

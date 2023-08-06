@@ -119,6 +119,10 @@ void hoja_init()
   {
     comms_mode = COMM_MODE_GC;
   }
+  else if (_button_data.button_b)
+  {
+    comms_mode = COMM_MODE_N64;
+  }
 
   // Determine launch mode
   switch (comms_mode)

@@ -22,6 +22,8 @@
         "xinput_device.h": "c",
         "typeinfo": "c",
         "gamecube.h": "c",
-        "hoja_comms.h": "c"
+        "hoja_comms.h": "c",
+        "type_traits": "c",
+        "n64.h": "c"
     }
 }

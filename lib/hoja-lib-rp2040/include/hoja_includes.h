@@ -58,6 +58,7 @@
 #include "webusb.h"
 
 #include "gamecube.h"
+#include "n64.h"
 
 #include "remap.h"
 #include "hoja.h"
