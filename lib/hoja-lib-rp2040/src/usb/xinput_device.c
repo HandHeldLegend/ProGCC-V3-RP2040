@@ -223,7 +223,6 @@ bool tud_xinput_ready(void)
     return tud_ready() && (ep_in != 0) && !usbd_edpt_busy(rhport, ep_in);
 }
 
-
 const usbd_class_driver_t tud_xinput_driver =
 {
     #if CFG_TUSB_DEBUG >= 2

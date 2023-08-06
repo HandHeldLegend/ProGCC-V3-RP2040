@@ -1,6 +1,7 @@
 #include "remap.h"
 
-#define REMAP_SHIFT(button, shift) (button << shift)
+buttons_unset_s _unset = {0};
+#define REMAP_SET(button, shift, unset) ( (!unset) ? ((button) << shift) : 0)
 
 button_data_s *_buttons_in;
 button_data_s *_buttons_out;
@@ -9,6 +10,7 @@ button_remap_s _buttons_remap;
 mapcode_t _button_remap_arr[MAPCODE_MAX];
 mapcode_t _button_remap_code;
 bool _button_remap_listen = false;
+
 
 const button_remap_s default_user_map = {
     .dpad_up = MAPCODE_DUP,
@@ -34,6 +36,9 @@ const button_remap_s default_user_map = {
 
 void _remap_load_remap()
 {
+  _buttons_remap.val = global_loaded_settings.remap_profile;
+  _unset.val = global_loaded_settings.remap_unset;
+
   // Load the struct values into the remap array.
   // The exact loading depends on how the struct is defined and how the buttons are encoded,
   // but here's an example:
@@ -81,9 +86,10 @@ void _remap_pack_remap()
   _buttons_remap.button_stick_right = _button_remap_arr[MAPCODE_B_STICKR];
 
   global_loaded_settings.remap_profile = _buttons_remap.val;
+  global_loaded_settings.remap_unset = _unset.val;
 }
 
-void _remap_listener(uint16_t buttons)
+void _remap_listener(uint16_t buttons, bool clear)
 {
   /* Now we need to listen for which button has been pressed
    *  We do this by taking in the raw value and shifting
@@ -91,22 +97,41 @@ void _remap_listener(uint16_t buttons)
    *  we know that we want to assign our set mapcode TO
    *  that button
    */
-  mapcode_t m = 0;
+  mapcode_t assign_to = 0;
   bool got_map = false;
+
+  // Let's say our mapcode for _button_remap_code is L
 
   for (uint8_t i = 0; i < 16; i++)
   {
     if ((buttons >> i) & 0x1)
     {
       got_map = true;
-      m = i;
+      assign_to = i;
       break;
     }
   }
 
+  // Now we have the button that should ACTIVATE L
+
   if (got_map)
   {
-    _button_remap_arr[_button_remap_code] = m;
+
+    if(_unset.val & (1<<_button_remap_code))
+    {
+      _unset.val &= ~(1<<_button_remap_code);
+    }
+
+    _button_remap_arr[_button_remap_code] = assign_to;
+    printf("Assigned %i to output %i\n", assign_to, _button_remap_code);
+    _button_remap_listen = false;
+    _remap_pack_remap();
+    remap_send_data_webusb();
+  }
+  else if(clear)
+  {
+    printf("Disabled function for button %i\n", _button_remap_code);
+    _unset.val |= (1<<_button_remap_code);
     _button_remap_listen = false;
     _remap_pack_remap();
     remap_send_data_webusb();
@@ -135,6 +160,8 @@ void remap_send_data_webusb()
   b[14] = rm.button_minus;
   b[15] = rm.button_stick_left;
   b[16] = rm.button_stick_right;
+  b[17] = (_unset.val & 0xFF00) >> 8;
+  b[18] = (_unset.val & 0xFF);
   tud_vendor_n_write(0, b, 64);
   tud_vendor_n_flush(0);
 }
@@ -142,13 +169,14 @@ void remap_send_data_webusb()
 void remap_reset_default()
 {
   global_loaded_settings.remap_profile = default_user_map.val;
+  global_loaded_settings.remap_unset = 0;
+  _remap_load_remap();
 }
 
 void remap_init(button_data_s *in, button_data_s *out)
 {
   _buttons_in = in;
   _buttons_out = out;
-  _buttons_remap.val = global_loaded_settings.remap_profile;
   _remap_load_remap();
 }
 
@@ -173,33 +201,36 @@ void remap_buttons_task()
 
   if (_button_remap_listen)
   {
-    _remap_listener(_buttons_in->buttons_all);
+    bool c = _buttons_in->button_home;
+    if(c) _buttons_in->button_home = 0;
+    _remap_listener(_buttons_in->buttons_all, c);
   }
 
   if (!safe_mode_check())
   {
-    _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_plus, _button_remap_arr[MAPCODE_B_PLUS]);
-    _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_minus, _button_remap_arr[MAPCODE_B_MINUS]);
+    _buttons_out->buttons_all |= REMAP_SET(_buttons_in->button_plus, _button_remap_arr[MAPCODE_B_PLUS], _unset.button_plus);
+    _buttons_out->buttons_all |= REMAP_SET(_buttons_in->button_minus, _button_remap_arr[MAPCODE_B_MINUS], _unset.button_minus);
 
-    _buttons_out->button_home     = _buttons_in->button_home;
-    _buttons_out->button_capture  = _buttons_in->button_capture;
+    _buttons_out->button_home = _buttons_in->button_home;
+    _buttons_out->button_capture = _buttons_in->button_capture;
   }
 
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->dpad_up, _button_remap_arr[MAPCODE_DUP]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->dpad_down, _button_remap_arr[MAPCODE_DDOWN]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->dpad_left, _button_remap_arr[MAPCODE_DLEFT]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->dpad_right, _button_remap_arr[MAPCODE_DRIGHT]);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->dpad_up, _button_remap_arr[MAPCODE_DUP], _unset.dpad_up);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->dpad_down, _button_remap_arr[MAPCODE_DDOWN], _unset.dpad_down);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->dpad_left, _button_remap_arr[MAPCODE_DLEFT], _unset.dpad_left);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->dpad_right, _button_remap_arr[MAPCODE_DRIGHT], _unset.dpad_right);
 
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_a, _button_remap_arr[MAPCODE_B_A]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_b, _button_remap_arr[MAPCODE_B_B]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_x, _button_remap_arr[MAPCODE_B_X]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_y, _button_remap_arr[MAPCODE_B_Y]);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->button_a, _button_remap_arr[MAPCODE_B_A], _unset.button_a);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->button_b, _button_remap_arr[MAPCODE_B_B], _unset.button_b);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->button_x, _button_remap_arr[MAPCODE_B_X], _unset.button_x);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->button_y, _button_remap_arr[MAPCODE_B_Y], _unset.button_y);
 
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->trigger_l, _button_remap_arr[MAPCODE_T_L]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->trigger_r, _button_remap_arr[MAPCODE_T_R]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->trigger_zl, _button_remap_arr[MAPCODE_T_ZL]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->trigger_zr, _button_remap_arr[MAPCODE_T_ZR]);
+  // Now when L is pressed, it activates the data we set.
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->trigger_l, _button_remap_arr[MAPCODE_T_L], _unset.trigger_l);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->trigger_r, _button_remap_arr[MAPCODE_T_R], _unset.trigger_r);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->trigger_zl, _button_remap_arr[MAPCODE_T_ZL], _unset.trigger_zl);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->trigger_zr, _button_remap_arr[MAPCODE_T_ZR], _unset.trigger_zr);
 
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_stick_left, _button_remap_arr[MAPCODE_B_STICKL]);
-  _buttons_out->buttons_all |= REMAP_SHIFT(_buttons_in->button_stick_right, _button_remap_arr[MAPCODE_B_STICKR]);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->button_stick_left, _button_remap_arr[MAPCODE_B_STICKL], _unset.button_stick_left);
+  _buttons_out->buttons_all |= REMAP_SET(_buttons_in->button_stick_right, _button_remap_arr[MAPCODE_B_STICKR], _unset.button_stick_right);
 }

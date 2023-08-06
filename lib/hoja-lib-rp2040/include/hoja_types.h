@@ -41,26 +41,49 @@ typedef struct
             mapcode_t dpad_down   : 4;
             mapcode_t dpad_left   : 4;
             mapcode_t dpad_right  : 4;
-
             mapcode_t button_a      : 4;
             mapcode_t button_b      : 4;
             mapcode_t button_x      : 4;
             mapcode_t button_y      : 4;
-
             mapcode_t trigger_l       : 4;
             mapcode_t trigger_zl      : 4;
             mapcode_t trigger_r       : 4;
             mapcode_t trigger_zr      : 4;
-
             mapcode_t button_plus   : 4;
             mapcode_t button_minus  : 4;
-
             mapcode_t button_stick_left     : 4;
             mapcode_t button_stick_right    : 4;
         };
         uint64_t val;
     };
 } button_remap_s;
+
+typedef struct
+{
+    union
+    {
+        struct
+        {
+            bool dpad_up       : 1;
+            bool dpad_down     : 1;
+            bool dpad_left     : 1;
+            bool dpad_right    : 1;
+            bool button_a      : 1;
+            bool button_b      : 1;
+            bool button_x      : 1;
+            bool button_y      : 1;
+            bool trigger_l     : 1;
+            bool trigger_zl    : 1;
+            bool trigger_r     : 1;
+            bool trigger_zr    : 1;
+            bool button_plus   : 1;
+            bool button_minus  : 1;
+            bool button_stick_left     : 1;
+            bool button_stick_right    : 1; 
+        };
+        uint16_t val;
+    };
+} buttons_unset_s;
 
 typedef struct
 {
@@ -99,8 +122,8 @@ typedef enum
 
 typedef enum
 {
-    USBRATE_8 = 7800,
-    USBRATE_1 = 400,
+    USBRATE_8 = 7600,
+    USBRATE_1 = 600,
 } usb_rate_t;
 
 typedef enum
@@ -208,7 +231,7 @@ typedef struct
     int ly;
     int rx;
     int ry;
-} __attribute__ ((packed)) a_data_s;
+} a_data_s;
 
 // IMU data structure
 typedef struct
