@@ -144,6 +144,7 @@ void remap_send_data_webusb()
   uint8_t b[64] = {0};
   b[0] = WEBUSB_CMD_REMAP_GET;
   button_remap_s rm = {.val = global_loaded_settings.remap_profile};
+  _unset.val = global_loaded_settings.remap_unset;
   b[1] = rm.dpad_up;
   b[2] = rm.dpad_down;
   b[3] = rm.dpad_left;
@@ -162,8 +163,8 @@ void remap_send_data_webusb()
   b[16] = rm.button_stick_right;
   b[17] = (_unset.val & 0xFF00) >> 8;
   b[18] = (_unset.val & 0xFF);
-  tud_vendor_n_write(0, b, 64);
   tud_vendor_n_flush(0);
+  tud_vendor_n_write(0, b, 64);
 }
 
 void remap_reset_default()

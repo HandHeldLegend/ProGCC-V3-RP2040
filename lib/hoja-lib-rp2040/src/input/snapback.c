@@ -30,7 +30,7 @@ uint32_t _timestamp_delta(uint32_t new, uint32_t old)
     return 0;
 }
 
-#define ARC_MAX_WIDTH 25
+#define ARC_MAX_WIDTH 32
 #define ARC_MIN_WIDTH 6
 #define ARC_MAX_LOOP ARC_MAX_WIDTH-1
 #define CENTERVAL 2048
