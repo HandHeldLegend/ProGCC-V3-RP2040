@@ -178,11 +178,9 @@ void snapback_process(uint32_t timestamp, a_data_s *input, a_data_s *output)
     static axis_s ry = {0};
 
     output->lx = _add_axis(input->lx, &lx);
-
-    output->ly = _add_axis(input->ly, &ly);;
-    output->rx = _add_axis(input->rx, &rx);;
-    output->ry = _add_axis(input->ry, &ry);;
-
+    output->ly = _add_axis(input->ly, &ly);
+    output->rx = _add_axis(input->rx, &rx);
+    output->ry = _add_axis(input->ry, &ry);
 }
 
 uint8_t _snapback_report[64] = {0};

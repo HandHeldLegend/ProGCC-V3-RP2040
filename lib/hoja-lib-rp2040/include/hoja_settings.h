@@ -4,7 +4,7 @@
 #include "hoja_includes.h"
 
 // Corresponds to version number in web app.
-#define FIRMWARE_VERSION 0x0800
+#define FIRMWARE_VERSION 0x0801
 #define SETTINGS_VERSION 0xB003
 
 typedef struct
