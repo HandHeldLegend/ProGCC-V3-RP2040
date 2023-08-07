@@ -175,8 +175,8 @@ void n64_comms_task(uint32_t timestamp, button_data_s *buttons, a_data_s *analog
       _out_buffer.button_r = buttons->trigger_zr;
       _out_buffer.button_z = buttons->trigger_zl;
 
-      float lx = (analog->lx*0.0488f) - 100;
-      float ly = (analog->ly*0.0488f) - 100;
+      float lx = (analog->lx*0.041514f) - 85;
+      float ly = (analog->ly*0.041514f) - 85;
 
       _out_buffer.stick_x = (int8_t) lx;
       _out_buffer.stick_y = (int8_t) ly;
