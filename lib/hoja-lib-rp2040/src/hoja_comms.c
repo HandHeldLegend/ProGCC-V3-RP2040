@@ -1,6 +1,7 @@
 #include "hoja_comms.h"
 
 comms_cb_t _comms_cb = NULL;
+static input_mode_t _hoja_input_mode = 0;
 
 void hoja_comms_task(uint32_t timestamp, button_data_s * buttons, a_data_s * analog)
 {
@@ -10,16 +11,29 @@ void hoja_comms_task(uint32_t timestamp, button_data_s * buttons, a_data_s * ana
     }
 }
 
-void hoja_comms_init(comm_mode_t comms_mode)
+input_mode_t hoja_comms_current_mode()
 {
-    switch(comms_mode)
+    return _hoja_input_mode;
+}
+
+void hoja_comms_init(input_mode_t input_mode)
+{
+    _hoja_input_mode = input_mode;
+    switch(input_mode)
     {
-        case COMM_MODE_GC:
+        case INPUT_MODE_SWPRO:
+            hoja_usb_start(INPUT_MODE_SWPRO);
+            break;
+
+        case INPUT_MODE_XINPUT:
+            hoja_usb_start(INPUT_MODE_XINPUT);
+            break;
+
+        case INPUT_MODE_GAMECUBE:
             _comms_cb = gamecube_comms_task;
-            gamecube_init();
         break;
 
-        case COMM_MODE_N64:
+        case INPUT_MODE_N64:
             _comms_cb = n64_comms_task;
         break;
     }

@@ -108,12 +108,12 @@ void webusb_command_processor(uint8_t *data)
 
         case WEBUSB_CMD_SNAPBACK_GET:
             {
-                printf("WebUSB: Got Snapback GET command.\n");
+                printf("DEPRECIATED: WebUSB: Got Snapback GET command.\n");
                 _webusb_out_buffer[0] = WEBUSB_CMD_SNAPBACK_GET;
-                _webusb_out_buffer[1] = global_loaded_settings.lx_snapback;
-                _webusb_out_buffer[2] = global_loaded_settings.ly_snapback;
-                _webusb_out_buffer[3] = global_loaded_settings.rx_snapback;
-                _webusb_out_buffer[4] = global_loaded_settings.ry_snapback;
+                _webusb_out_buffer[1] = 0;
+                _webusb_out_buffer[2] = 0;
+                _webusb_out_buffer[3] = 0;
+                _webusb_out_buffer[4] = 0;
                 tud_vendor_n_write(0, _webusb_out_buffer, 64);
                 tud_vendor_n_flush(0);
             }
@@ -122,22 +122,22 @@ void webusb_command_processor(uint8_t *data)
         case WEBUSB_CMD_REMAP_SET:
             {
                 printf("WebUSB: Got Remap SET command.\n");
-                remap_listen_enable(data[1]);
+                remap_listen_enable(data[1], data[2]);
             }
             break;
 
         case WEBUSB_CMD_REMAP_GET:
             {
                 printf("WebUSB: Got Remap GET command.\n");
-                remap_send_data_webusb();
+                remap_send_data_webusb(data[1]);
             }
             break;
 
         case WEBUSB_CMD_REMAP_DEFAULT:
             {
                 printf("WebUSB: Got Remap SET default command.\n");
-                remap_reset_default();
-                remap_send_data_webusb();
+                remap_reset_default(data[1]);
+                remap_send_data_webusb(data[1]);
             }
             break;
 

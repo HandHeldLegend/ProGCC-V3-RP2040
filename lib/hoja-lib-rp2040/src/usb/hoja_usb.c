@@ -9,7 +9,7 @@
 #include "hoja_usb.h"
 #include "interval.h"
 
-usb_mode_t _usb_mode    = PUSB_MODE_XI;
+usb_mode_t _usb_mode    = INPUT_MODE_XINPUT;
 bool _usb_clear = false;
 
 // Default 8ms (8000us)
@@ -24,31 +24,20 @@ void _hoja_usb_set_interval(usb_rate_t rate)
   _usb_rate = rate;
 }
 
-bool hoja_usb_start(usb_mode_t mode)
+bool hoja_usb_start(input_mode_t mode)
 {
 
   imu_set_enabled(false);
 
   switch(mode)
   {
-    case PUSB_MODE_MAX:
     default:
-    case PUSB_MODE_DI:
-      _hoja_usb_set_interval(USBRATE_8);
-      _usb_hid_cb = dinput_hid_report;
-      break;
-
-    case PUSB_MODE_SW:
+    case INPUT_MODE_SWPRO:
       _hoja_usb_set_interval(USBRATE_8);
       _usb_hid_cb = swpro_hid_report;
       break;
 
-    case PUSB_MODE_GC:
-      _hoja_usb_set_interval(USBRATE_8);
-      _usb_hid_cb = gcinput_hid_report;
-      break;
-
-    case PUSB_MODE_XI:
+    case INPUT_MODE_XINPUT:
       _hoja_usb_set_interval(USBRATE_8);
       _usb_hid_cb = xinput_hid_report;
       break;
@@ -62,7 +51,7 @@ uint8_t buf = 0;
 
 static inline bool _hoja_usb_ready()
 {
-  if (_usb_mode == PUSB_MODE_XI)
+  if (_usb_mode == INPUT_MODE_XINPUT)
   {
     return tud_xinput_ready();
   }
@@ -92,19 +81,11 @@ uint8_t const* tud_descriptor_device_cb(void) {
   switch(_usb_mode)
   {
     default:
-    case PUSB_MODE_DI:
-      return (uint8_t const*) &di_device_descriptor;
-      break;
-
-    case PUSB_MODE_SW:
+    case INPUT_MODE_SWPRO:
       return (uint8_t const*) &swpro_device_descriptor;
       break;
 
-    case PUSB_MODE_GC:
-      return (uint8_t const*) &gc_device_descriptor;
-      break;
-
-    case PUSB_MODE_XI:
+    case INPUT_MODE_XINPUT:
       return (uint8_t const*) &xid_device_descriptor;
       break;
   }
@@ -117,21 +98,13 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
   (void)index;  // for multiple configurations
   switch(_usb_mode)
   {
-    case PUSB_MODE_MAX:
     default:
-    case PUSB_MODE_DI:
-      return (uint8_t const*) &di_configuration_descriptor;
-      break;
 
-    case PUSB_MODE_SW:
+    case INPUT_MODE_SWPRO:
       return (uint8_t const*) &swpro_configuration_descriptor;
       break;
 
-    case PUSB_MODE_GC:
-      return (uint8_t const*) &gc_configuration_descriptor;
-      break;
-
-    case PUSB_MODE_XI:
+    case INPUT_MODE_XINPUT:
       return (uint8_t const*) &xid_configuration_descriptor;
       break;
   }
@@ -155,7 +128,7 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_
     _usb_clear = true;
     switch (_usb_mode)
     {
-        case PUSB_MODE_SW:
+        case INPUT_MODE_SWPRO:
             if ((report[0] == 0x30))
             {
                 
@@ -164,19 +137,12 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_
 
         default:
 
-        case PUSB_MODE_XI:
+        case INPUT_MODE_XINPUT:
             if ( (report[0] == 0x00) && (report[1] == XID_REPORT_LEN))
             {
 
             }
 
-            break;
-
-        case PUSB_MODE_GC:
-            if (report[0] == 0x21)
-            {
-                //usb_process_data();
-            }
             break;
     }
 
@@ -189,20 +155,9 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
 {
   switch (_usb_mode)
   {
-    case PUSB_MODE_MAX:
     default:
-    case PUSB_MODE_DI:
-      if (!report_id && !report_type)
-      {
-          /*
-          if (buffer[0] == CMD_USB_REPORTID)
-          {
-              //command_handler(buffer, bufsize);
-          }*/
-      }
-      break;
 
-    case PUSB_MODE_SW:
+    case INPUT_MODE_SWPRO:
       if (!report_id && !report_type)
       {
         if (buffer[0] == SW_OUT_ID_RUMBLE)
@@ -216,22 +171,8 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
 
       }
       break;
-    case PUSB_MODE_NS:
-      break;
-    case PUSB_MODE_GC:
-      if (!report_id && !report_type)
-      {
-        if (buffer[0] == 0x11)
-        {
-            //rx_vibrate = (buffer[1] > 0) ? true : false;
-        }
-        else if (buffer[0] == 0x13)
-        {
-            //ESP_LOGI("INIT", "Rx");
-        }
-      }
-      break;
-    case PUSB_MODE_XI:
+
+    case INPUT_MODE_XINPUT:
       if (!report_id && !report_type)
       {
           if ((buffer[0] == 0x00) && (buffer[1] == 0x08))
@@ -257,19 +198,10 @@ uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
     (void) instance;
     switch (_usb_mode)
     {
-        case PUSB_MODE_MAX:
         default:
-            break;
-        case PUSB_MODE_DI:
-            return di_hid_report_descriptor;
-            break;
-        case PUSB_MODE_SW:
+        case INPUT_MODE_SWPRO:
             return swpro_hid_report_descriptor;
             break;
-        case PUSB_MODE_GC:
-            return gc_hid_report_descriptor;
-            break;
-
     }
     return NULL;
 }

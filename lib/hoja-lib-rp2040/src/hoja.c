@@ -101,52 +101,31 @@ void hoja_init()
     }
   }
 
-  // Initialize button remapping
-  remap_init(&_button_data, &_button_data_processed);
-
   // For switch Pro stuff
   switch_analog_calibration_init();
 
-  uint8_t sub_mode = PUSB_MODE_SW; // PUSB_MODE_SW;
-  uint8_t comms_mode = COMM_MODE_USB;
+  _hoja_usb_task_enable = true;
+  input_mode_t _hoja_input_mode = 0;
 
   if (_button_data.button_x)
   {
-    comms_mode = COMM_MODE_USB;
-    sub_mode = PUSB_MODE_XI;
+    _hoja_input_mode = INPUT_MODE_XINPUT;
   }
   else if (_button_data.button_a)
   {
-    comms_mode = COMM_MODE_GC;
+    _hoja_usb_task_enable = false;
+    _hoja_input_mode = INPUT_MODE_GAMECUBE;
   }
   else if (_button_data.button_b)
   {
-    comms_mode = COMM_MODE_N64;
+    _hoja_usb_task_enable = false;
+    _hoja_input_mode = INPUT_MODE_N64;
   }
 
-  // Determine launch mode
-  switch (comms_mode)
-  {
-    
-    case COMM_MODE_USB:
-    {
-      bool did_usb_boot_ok = hoja_usb_start(sub_mode);
-      if (!did_usb_boot_ok)
-      {
+  // Initialize button remapping
+  remap_init(_hoja_input_mode, &_button_data, &_button_data_processed);
 
-        // If USB mode fails, boot to bootloader.
-        reset_usb_boot(0, 0);
-        return;
-      }
-      _hoja_usb_task_enable = true;
-    }
-    break;
-
-    default:
-      hoja_comms_init(comms_mode);
-    break;
-    // OTHER MODES NOT IMPLEMENTED FOR NOW
-  }
+  hoja_comms_init(_hoja_input_mode);
 
   // Enable lockout victimhood :,)
   multicore_lockout_victim_init();

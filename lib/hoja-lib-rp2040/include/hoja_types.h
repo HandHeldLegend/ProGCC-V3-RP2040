@@ -8,25 +8,34 @@
 // operations and configuration
 typedef enum
 {
-    MAPCODE_DUP = 0,
-    MAPCODE_DDOWN,
-    MAPCODE_DLEFT,
-    MAPCODE_DRIGHT,
+    MAPCODE_DUP     = 0,
+    MAPCODE_DDOWN   = 1,
+    MAPCODE_DLEFT   = 2,
+    MAPCODE_DRIGHT  = 3,
 
-    MAPCODE_B_A,
-    MAPCODE_B_B,
-    MAPCODE_B_X,
-    MAPCODE_B_Y,
+    MAPCODE_B_A = 4,
+    MAPCODE_B_B = 5,
 
-    MAPCODE_T_L,
-    MAPCODE_T_ZL,
-    MAPCODE_T_R,
-    MAPCODE_T_ZR,
+    MAPCODE_B_X = 6,
+    MAPCODE_CUP = 6,
 
-    MAPCODE_B_PLUS,
-    MAPCODE_B_MINUS,
-    MAPCODE_B_STICKL,
-    MAPCODE_B_STICKR,
+    MAPCODE_B_Y    = 7,
+    MAPCODE_CDOWN  = 7,
+
+    MAPCODE_T_L    = 8,
+    MAPCODE_CLEFT  = 8,
+
+    MAPCODE_T_ZL    = 9,
+
+    MAPCODE_T_R     = 10,
+    MAPCODE_CRIGHT  = 10,
+
+    MAPCODE_T_ZR    = 11,
+
+    MAPCODE_B_PLUS      = 12,
+    MAPCODE_B_MINUS     = 13,
+    MAPCODE_B_STICKL    = 14,
+    MAPCODE_B_STICKR    = 15,
 } mapcode_t;
 
 // Remapping struct used to determine
@@ -99,6 +108,15 @@ typedef struct
         uint32_t color;
     };
 } rgb_s;
+
+typedef enum
+{
+    INPUT_MODE_SWPRO,
+    INPUT_MODE_XINPUT,
+    INPUT_MODE_GAMECUBE,
+    INPUT_MODE_N64,
+    INPUT_MODE_SNES
+} input_mode_t;
 
 typedef enum
 {

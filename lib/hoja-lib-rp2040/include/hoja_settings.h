@@ -4,8 +4,14 @@
 #include "hoja_includes.h"
 
 // Corresponds to version number in web app.
-#define FIRMWARE_VERSION 0x0A01
-#define SETTINGS_VERSION 0xB003
+#define FIRMWARE_VERSION 0x0A03
+#define SETTINGS_VERSION 0xA000
+
+typedef struct
+{
+    button_remap_s  remap;
+    buttons_unset_s disabled;
+} remap_profile_s;
 
 typedef struct
 {
@@ -14,9 +20,6 @@ typedef struct
     uint16_t    settings_version;
     uint8_t     comms_mode;
     uint8_t     usb_mode;
-    bool        performance_mode;
-    uint64_t    remap_profile;
-    uint16_t    remap_unset;
 
     uint8_t     switch_mac_address[6];
 
@@ -34,11 +37,6 @@ typedef struct
     float l_angle_distances[8];
     float r_angle_distances[8];
 
-    uint8_t lx_snapback;
-    uint8_t ly_snapback;
-    uint8_t rx_snapback;
-    uint8_t ry_snapback;
-
     // IMU Calibration
     uint8_t imu_calibration[26];
 
@@ -48,7 +46,13 @@ typedef struct
     // RGB Color Store
     uint32_t rgb_colors[12];
 
-} __attribute__ ((packed)) hoja_settings_s;
+    remap_profile_s remap_switch;
+    remap_profile_s remap_xinput;
+    remap_profile_s remap_gamecube;
+    remap_profile_s remap_n64;
+    remap_profile_s remap_snes;
+
+} hoja_settings_s;
 
 extern hoja_settings_s global_loaded_settings;
 

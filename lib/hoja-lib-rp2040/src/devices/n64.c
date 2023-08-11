@@ -3,6 +3,8 @@
 
 #define CLAMP_0_255(value) ((value) < 0 ? 0 : ((value) > 255 ? 255 : (value)))
 #define ALIGNED_JOYBUS_8(val) ((val) << 24)
+#define N64_RANGE 90
+#define N64_RANGE_MULTIPLIER (N64_RANGE*2)/4095
 
 uint _n64_irq;
 uint _n64_irq_tx;
@@ -175,8 +177,8 @@ void n64_comms_task(uint32_t timestamp, button_data_s *buttons, a_data_s *analog
       _out_buffer.button_r = buttons->trigger_zr;
       _out_buffer.button_z = buttons->trigger_zl;
 
-      float lx = (analog->lx*0.041514f) - 85;
-      float ly = (analog->ly*0.041514f) - 85;
+      float lx = (analog->lx*N64_RANGE_MULTIPLIER) - N64_RANGE;
+      float ly = (analog->ly*N64_RANGE_MULTIPLIER) - N64_RANGE;
 
       _out_buffer.stick_x = (int8_t) lx;
       _out_buffer.stick_y = (int8_t) ly;

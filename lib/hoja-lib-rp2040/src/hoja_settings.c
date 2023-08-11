@@ -41,7 +41,6 @@ void settings_reset_to_default()
     .settings_version = SETTINGS_VERSION,
     .comms_mode = COMM_MODE_USB,
     .usb_mode = PUSB_MODE_XI,
-    .performance_mode = false,
     .lx_center = 2048,
     .ly_center = 2048,
     .rx_center = 2048,
@@ -54,11 +53,6 @@ void settings_reset_to_default()
     .r_angle_distances = {
       600, 600, 600, 600, 600, 600, 600, 600,
     },
-    .lx_snapback = 0,
-    .ly_snapback = 0,
-    .rx_snapback = 0,
-    .ry_snapback = 0,
-
     .rgb_colors = {
       COLOR_RED.color,
       COLOR_ORANGE.color,
@@ -78,7 +72,11 @@ void settings_reset_to_default()
     },
   };
   memcpy(&global_loaded_settings, &set, sizeof(hoja_settings_s));
-  remap_reset_default();
+  remap_reset_default(INPUT_MODE_SWPRO);
+  remap_reset_default(INPUT_MODE_XINPUT);
+  remap_reset_default(INPUT_MODE_GAMECUBE);
+  remap_reset_default(INPUT_MODE_N64);
+  remap_reset_default(INPUT_MODE_SNES);
   for(uint16_t i = 0; i < 26; i++)
   {
     global_loaded_settings.imu_calibration[i] = 0xFF;
@@ -167,21 +165,5 @@ void settings_set_mode(uint8_t comms_mode, uint8_t usb_mode)
 
 void settings_set_snapback(uint8_t axis, uint8_t level)
 {
-  if (level > 7) level = 7;
-  switch(axis)
-  {
-    default:
-    case 0:
-      global_loaded_settings.lx_snapback = level;
-      break;
-    case 1:
-      global_loaded_settings.ly_snapback = level;
-      break;
-    case 2:
-      global_loaded_settings.rx_snapback = level;
-      break;
-    case 3:
-      global_loaded_settings.ry_snapback = level;
-      break;
-  }
+  
 }

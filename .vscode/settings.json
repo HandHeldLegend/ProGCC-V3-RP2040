@@ -24,6 +24,7 @@
         "gamecube.h": "c",
         "hoja_comms.h": "c",
         "type_traits": "c",
-        "n64.h": "c"
+        "n64.h": "c",
+        "hoja_usb.h": "c"
     }
 }
