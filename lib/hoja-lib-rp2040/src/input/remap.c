@@ -255,6 +255,7 @@ void remap_init(input_mode_t mode, button_data_s *in, button_data_s *out)
 void remap_listen_stop()
 {
   _button_remap_listen = false;
+  _remap_unpack_remap(_remap_arr, _remap_struct);
 }
 
 void remap_listen_enable(input_mode_t mode, mapcode_t mapcode)
