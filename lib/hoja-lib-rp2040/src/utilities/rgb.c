@@ -7,9 +7,9 @@
 uint8_t _rgb_anim_steps = 0;
 bool _rgb_out_dirty = false;
 
-rgb_s _rgb_next[NUM_PIXELS]     = {0};
-rgb_s _rgb_current[NUM_PIXELS]  = {0};
-rgb_s _rgb_last[NUM_PIXELS]     = {0};
+rgb_s _rgb_next[HOJA_RGB_COUNT]     = {0};
+rgb_s _rgb_current[HOJA_RGB_COUNT]  = {0};
+rgb_s _rgb_last[HOJA_RGB_COUNT]     = {0};
 
 static inline uint32_t urgb_u32(uint8_t r, uint8_t g, uint8_t b) {
     return
@@ -20,7 +20,7 @@ static inline uint32_t urgb_u32(uint8_t r, uint8_t g, uint8_t b) {
 
 void _rgb_update_all()
 {
-    for(uint8_t i = 0; i < NUM_PIXELS; i++)
+    for(uint8_t i = 0; i < HOJA_RGB_COUNT; i++)
     {
         pio_sm_put_blocking(RGB_PIO, RGB_SM, _rgb_current[i].color);
     }
@@ -63,7 +63,7 @@ void _rgb_animate_step()
     {
         float blender = blend_step * (float) steps;
         // Blend between old and next colors appropriately
-        for(uint8_t i = 0; i < NUM_PIXELS; i++)
+        for(uint8_t i = 0; i < HOJA_RGB_COUNT; i++)
         {
             _rgb_current[i].color = _rgb_blend(&_rgb_last[i], &_rgb_next[i], blender);
         }
@@ -87,7 +87,7 @@ void rgb_set_dirty()
 // Set all RGBs to one color
 void rgb_set_all(uint32_t color)
 {
-    for(uint8_t i = 0; i < NUM_PIXELS; i++)
+    for(uint8_t i = 0; i < HOJA_RGB_COUNT; i++)
     {
         _rgb_next[i].color = color;
     }
@@ -165,7 +165,7 @@ void rgb_set_group(rgb_group_t group, uint32_t color)
 void rgb_init()
 {
     uint offset = pio_add_program(RGB_PIO, &ws2812_program);
-    ws2812_program_init(RGB_PIO, RGB_SM, offset, WS2812_PIN, IS_RGBW);
+    ws2812_program_init(RGB_PIO, RGB_SM, offset, HOJA_RGB_PIN, HOJA_RGBW_EN);
 }
 
 const uint32_t _rgb_interval = 16666;

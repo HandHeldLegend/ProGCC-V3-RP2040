@@ -196,14 +196,12 @@ void swpro_hid_report(button_data_s *button_data, a_data_s *analog_data)
   switch_commands_process(&data);
 }
 
-#define PROGCC_URL "handheldlegend.github.io/progcc_config"
-
 const tusb_desc_webusb_url_t desc_url =
     {
-        .bLength = 3 + sizeof(PROGCC_URL) - 1,
+        .bLength = 3 + sizeof(HOJA_WEBUSB_URL) - 1,
         .bDescriptorType = 3, // WEBUSB URL type
         .bScheme = 1,         // 0: http, 1: https
-        .url = PROGCC_URL};
+        .url = HOJA_WEBUSB_URL};
 
 //--------------------------------------------------------------------+
 // WebUSB use vendor class

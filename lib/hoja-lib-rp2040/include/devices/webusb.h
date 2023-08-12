@@ -9,6 +9,9 @@ typedef enum
   WEBUSB_CMD_FW_SET = 0x0F,
   // Get firmware version
   WEBUSB_CMD_FW_GET = 0xAF,
+
+  // Get Device ID
+  WEBUSB_CMD_ID_GET = 0xBF,
   
 
   WEBUSB_CMD_RGB_SET = 0x01,

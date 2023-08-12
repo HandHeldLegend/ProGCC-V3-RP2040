@@ -249,6 +249,8 @@ typedef struct
     int ly;
     int rx;
     int ry;
+    int lt;
+    int rt;
 } a_data_s;
 
 // IMU data structure

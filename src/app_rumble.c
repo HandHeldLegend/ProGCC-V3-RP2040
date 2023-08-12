@@ -1,5 +1,6 @@
 #include "hoja_includes.h"
 #include "interval.h"
+#include "main.h"
 
 bool rumble_on = false;
 bool ramp_up = false;

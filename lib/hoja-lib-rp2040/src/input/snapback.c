@@ -17,53 +17,53 @@ float _snapback_lut[8] = {SB_0, SB_1, SB_2, SB_3, SB_4, SB_5, SB_6, SB_7};
 
 uint32_t _timestamp_delta(uint32_t new, uint32_t old)
 {
-    if(new>=old)
+    if (new >= old)
     {
-        return new-old;
+        return new - old;
     }
-    else if (new<old)
+    else if (new < old)
     {
         uint32_t d = 0xFFFFFFFF - old;
         return d + new;
     }
-    
+
     return 0;
 }
 
 #define ARC_MAX_WIDTH 32
 #define ARC_MIN_WIDTH 6
-#define ARC_MAX_LOOP ARC_MAX_WIDTH-1
+#define ARC_MAX_LOOP (ARC_MAX_WIDTH - 1)
 #define CENTERVAL 2048
 #define MAXVAL 4095
 #define ARC_MAX_HEIGHT 355
+#define BUFFER_MAX 17
+
+#define OUTBUFFER_SIZE 64
 
 typedef struct
 {
-    int points[ARC_MAX_WIDTH];
-    uint8_t width;
-    int height;
-    uint8_t timer;
-    int direction;
-    uint8_t start_idx;
-} arc_s;
-
-typedef struct
-{
-    int buffer[ARC_MAX_WIDTH];
+    int buffer[BUFFER_MAX];
     int last_pos;
-    uint8_t idx;
-    arc_s arc;
+    int last_distance;
     bool full;
-    bool crossed;
+    bool rising;
+    bool falling;
+    uint8_t arc_width;
+    uint8_t fall_timer;
+    // Scaler that gets used until
+    // next arc detection begins
+    float   arc_scaler;
+    uint8_t idx;
+    uint8_t arc_start_idx;
 } axis_s;
 
 inline bool _is_between(int A, int B, int C)
 {
-    if (B < C) 
+    if (B < C)
     {
         return (B < A) && (A <= C);
-    } 
-    else 
+    }
+    else
     {
         return (C < A) && (A <= B);
     }
@@ -73,100 +73,102 @@ inline bool _is_between(int A, int B, int C)
 
 /**
  * Adds value to axis_s and returns the latest value
-*/
-int _add_axis(int v, axis_s *a)
+ */
+int _add_axis(int pos, axis_s *a)
 {
     int ret = CENTERVAL;
+    int hold = CENTERVAL;
+    float ret_scaler = 1;
 
     if (a->full)
     {
         ret = a->buffer[a->idx];
     }
 
-    a->buffer[a->idx] = v;
-
-    if (a->arc.timer < ARC_MAX_WIDTH)
+    if (a->rising)
     {
-        a->arc.points[a->arc.timer] = v;
-    }
-
-    // First, check if we crossed once
-    if(_is_between(CENTERVAL, v, a->last_pos))
-    {
-
-        if(!a->crossed)
+        // If we are arcing
+        // and we have a scaler
+        // scale the inputs
+        if (a->arc_width >= BUFFER_MAX)
         {
-            a->crossed = true;
+            a->rising = false;
         }
-        // If we get here
-        // our arc is complete and within the width(time) limit
-        else if(a->arc.timer >= ARC_MIN_WIDTH)
+        else
         {
-            
-            // Determine max height along the arc
-            int height = 0;
-            for(uint8_t h = 0; h <= a->arc.timer; h++)
-            {   
-                int hc = abs(a->arc.points[h] - CENTERVAL);
-                if( hc > height) height = hc;
-            }
+            int this_distance = abs(pos - CENTERVAL); // Get distance to center
 
-            if (height >= ARC_MAX_HEIGHT)
+            // Check if we are decending
+            if ((a->last_distance > this_distance) && (a->last_distance > ARC_MAX_HEIGHT))
             {
-                //printf("ARC: %i\n", height);
-                // Calculate scaler for this arc
-                float height_scale = ARC_MAX_HEIGHT/(float) height;
-                //printf("SCALE: %f\n", height_scale);
-                //printf("TIME: %d\n", a->arc.timer);
+                float scaler = ARC_MAX_HEIGHT / (float)a->last_distance;
+                int si = a->arc_start_idx;
 
-                // Scale all the values directly into the output buffer
-                // This essentially overwrites what would be values that are
-                // snapping back.
-                //printf("OWI: %d\n", a->arc.start_idx);
-                uint8_t si = a->arc.start_idx;
-                for(uint8_t i = 0; i < a->arc.timer; i++)
+                // We are snapping back
+                for (uint8_t i = 0; i < a->arc_width; i++)
                 {
-                    int new_h = abs(a->arc.points[i] - CENTERVAL);
-                    float new_val = ((float) new_h * height_scale * (int) a->arc.direction);
-                    //printf("nf: %d, ", (int) new_val);
-
-                    a->buffer[si] = (int) new_val + CENTERVAL;
-                    //printf("nb %d, ", (int) a->buffer[si]); 
- 
-                    si = (si + 1) % ARC_MAX_WIDTH; // Add and wrap if needed
+                    int cp = abs(a->buffer[si] - CENTERVAL);
+                    int dir = (a->buffer[si] < CENTERVAL) ? -1 : 1;
+                    float nv = (float)cp * scaler;
+                    a->buffer[si] = ((int)nv*dir) + CENTERVAL;
+                    si = (si+1) % BUFFER_MAX;
                 }
-                //printf("\n");
+                a->arc_scaler = scaler;
+                a->arc_width = 0;
+                a->last_distance = 0;
+                a->rising = false;
+                a->falling = true;
+                a->fall_timer = a->arc_width;
+            }
+            else
+            {
+                a->arc_width += 1;
+                a->last_distance = this_distance;
             }
         }
-        
-        // Now that we have written all of the values,
-        // we should reset our arc
-        a->arc.start_idx = a->idx;
-        a->arc.points[0] = v;
-        a->arc.timer = 0;
-        if(v < a->last_pos)
-        {
-            a->arc.direction = -1;
-        }
-        else 
-        {
-            a->arc.direction = 1;
-        }
     }
-    
-    a->arc.timer++;
-    if (a->arc.timer >= ARC_MAX_WIDTH)
+
+    if(a->falling)
     {
-        a->crossed = false;
-        a->arc.timer = 0;
+        a->fall_timer--;
+        
+        int cp = abs(pos - CENTERVAL);
+        int dir = (pos < CENTERVAL) ? -1 : 1;
+        float nv = (float)cp * a->arc_scaler;
+        a->buffer[a->idx] = ((int)nv*dir) + CENTERVAL;
+
+        if(!a->fall_timer)
+        {
+            a->falling = false;
+        }
+    }
+    else
+    {
+        // Set normally when not arcing
+        a->buffer[a->idx] = pos;
     }
 
-    a->idx = (a->idx + 1) % ARC_MAX_WIDTH;
-    if(a->idx == 0) a->full = true;
+    if (_is_between(CENTERVAL, pos, a->last_pos))
+    {
+        // We are starting a new arc
+        a->rising = true;
+        a->falling = false;
+        a->fall_timer = 0;
+        a->arc_width = 0;
+        a->arc_width += 1;
+        a->last_distance = 0;
+        a->arc_start_idx = a->idx;
+    }
 
-    // Update last pos
-    a->last_pos = v;
-    // Return the first in value
+    a->last_pos = pos;
+
+    a->idx = (a->idx + 1) % BUFFER_MAX;
+
+    if (!a->idx)
+    {
+        a->full = true;
+    }
+
     return ret;
 }
 
@@ -208,7 +210,8 @@ bool _snapback_add_value(int val)
 
 void snapback_webcapture_task(uint32_t timestamp, a_data_s *data)
 {
-    if (!tud_vendor_n_mounted(0)) return;
+    if (!tud_vendor_n_mounted(0))
+        return;
 
     if (interval_run(timestamp, CAP_INTERVAL))
     {
@@ -260,7 +263,7 @@ void snapback_webcapture_task(uint32_t timestamp, a_data_s *data)
         }
         else if (_got_selection)
         {
-            if (*selection<UPPER_CAP && *selection>LOWER_CAP)
+            if (*selection<UPPER_CAP && * selection> LOWER_CAP)
             {
                 _capturing = true;
             }

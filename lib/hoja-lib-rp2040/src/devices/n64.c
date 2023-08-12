@@ -68,7 +68,7 @@ void __time_critical_func(_n64_command_handler)()
             _byteCount = 0;
             while (c--)
                 asm("nop");
-            joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, PGPIO_NS_SERIAL);
+            joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, HOJA_SERIAL_PIN);
             _n64_send_pak_write();
         }
     }
@@ -90,7 +90,7 @@ void __time_critical_func(_n64_command_handler)()
         case 0x00:
             while (c--)
                 asm("nop");
-            joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, PGPIO_NS_SERIAL);
+            joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, HOJA_SERIAL_PIN);
             _n64_send_probe();
             break;
 
@@ -98,7 +98,7 @@ void __time_critical_func(_n64_command_handler)()
         case 0x01:
             while (c--)
                 asm("nop");
-            joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, PGPIO_NS_SERIAL);
+            joybus_set_in(false, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, HOJA_SERIAL_PIN);
             _n64_send_poll();
             break;
         }
@@ -122,13 +122,13 @@ static void _n64_isr_txdone(void)
   if (pio_interrupt_get(GAMEPAD_PIO, 1))
   {
     pio_interrupt_clear(GAMEPAD_PIO, 1);
-    joybus_set_in(true, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, PGPIO_NS_SERIAL);
+    joybus_set_in(true, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, HOJA_SERIAL_PIN);
   }
 }
 
 void _n64_reset_state()
 {
-  joybus_set_in(true, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, PGPIO_NS_SERIAL);
+  joybus_set_in(true, GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, &_n64_c, HOJA_SERIAL_PIN);
 }
 
 void n64_comms_task(uint32_t timestamp, button_data_s *buttons, a_data_s *analog)
@@ -145,7 +145,7 @@ void n64_comms_task(uint32_t timestamp, button_data_s *buttons, a_data_s *analog
 
     irq_set_exclusive_handler(_n64_irq, _n64_isr_handler);
     irq_set_exclusive_handler(_n64_irq_tx, _n64_isr_txdone);
-    joybus_program_init(GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, PGPIO_NS_SERIAL, &_n64_c);
+    joybus_program_init(GAMEPAD_PIO, GAMEPAD_SM, _n64_offset, HOJA_SERIAL_PIN, &_n64_c);
     irq_set_enabled(_n64_irq, true);
     irq_set_enabled(_n64_irq_tx, true);
     _n64_running = true;
