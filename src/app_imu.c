@@ -1,5 +1,6 @@
 #include "interval.h"
 #include "hoja_includes.h"
+#include "main.h"
 
 // LSM6DSR REGISTERS
 #define FUNC_CFG_ACCESS 0x01

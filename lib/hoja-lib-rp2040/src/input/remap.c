@@ -210,6 +210,7 @@ void remap_send_data_webusb(input_mode_t mode)
   b[17] = _tmp_remap_struct->button_stick_right;
   b[18] = (_tmp_unset_struct->val & 0xFF00) >> 8;
   b[19] = (_tmp_unset_struct->val & 0xFF);
+  b[20] = global_loaded_settings.gc_sp_mode;
   
   tud_vendor_n_flush(0);
   tud_vendor_n_write(0, b, 64);
@@ -250,6 +251,11 @@ void remap_init(input_mode_t mode, button_data_s *in, button_data_s *out)
   _remap_mode = mode;
   _remap_load_remap(mode, &_remap_struct, &_unset_struct);
   _remap_unpack_remap(_remap_arr, _remap_struct);
+}
+
+void remap_set_gc_sp(gc_sp_mode_t sp_mode)
+{
+  global_loaded_settings.gc_sp_mode = sp_mode;
 }
 
 void remap_listen_stop()

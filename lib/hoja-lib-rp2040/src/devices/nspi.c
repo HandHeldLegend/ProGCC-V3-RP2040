@@ -14,7 +14,7 @@ void nspi_load_buffer()
 
 void nspi_isr_handler(uint gpio, uint32_t events)
 {
-  gpio_acknowledge_irq(PGPIO_NS_LATCH, IO_IRQ_BANK0);
+  gpio_acknowledge_irq(HOJA_LATCH_PIN, IO_IRQ_BANK0);
   nspi_load_buffer();
   nserial_latch_jump(_nspi_pio, _nspi_sm);
 }
@@ -23,13 +23,13 @@ void nspi_init()
 {
   // Set up GPIO for NSPI latch interrupt
   _nspi_irq = IO_IRQ_BANK0;
-  gpio_init(PGPIO_NS_LATCH);
-  gpio_set_dir(PGPIO_NS_LATCH, GPIO_IN);
-  gpio_pull_up(PGPIO_NS_LATCH);
+  gpio_init(HOJA_LATCH_PIN);
+  gpio_set_dir(HOJA_LATCH_PIN, GPIO_IN);
+  gpio_pull_up(HOJA_LATCH_PIN);
 
   irq_set_exclusive_handler(_nspi_irq, (void*) nspi_isr_handler);
   // Enable GPIO ISR
-  gpio_set_irq_enabled(PGPIO_NS_LATCH, GPIO_IRQ_EDGE_FALL, true);
+  gpio_set_irq_enabled(HOJA_LATCH_PIN, GPIO_IRQ_EDGE_FALL, true);
 
   // Set up PIO for NSPI
   _nspi_pio = pio0;

@@ -1,10 +1,8 @@
 #include "hoja_includes.h"
 #include "app_rumble.h"
 #include "app_imu.h"
+#include "main.h"
 
-#define X_AXIS_CONFIG 0xD0
-#define Y_AXIS_CONFIG 0xF0
-#define BUFFER_TO_UINT16(buffer) (uint16_t)(((buffer[0] & 0x07) << 9) | buffer[1] << 1 | buffer[2] >> 7)
 
 button_remap_s user_map = {
     .dpad_up = MAPCODE_DUP,

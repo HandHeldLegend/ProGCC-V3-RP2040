@@ -3,10 +3,6 @@
 
 #include "hoja_includes.h"
 
-// Corresponds to version number in web app.
-#define FIRMWARE_VERSION 0x0A03
-#define SETTINGS_VERSION 0xA000
-
 typedef struct
 {
     button_remap_s  remap;
@@ -18,9 +14,7 @@ typedef struct
     // We use a settings version to
     // keep settings between updates
     uint16_t    settings_version;
-    uint8_t     comms_mode;
-    uint8_t     usb_mode;
-
+    input_mode_t input_mode;
     uint8_t     switch_mac_address[6];
 
     int lx_center;
@@ -52,6 +46,8 @@ typedef struct
     remap_profile_s remap_n64;
     remap_profile_s remap_snes;
 
+    gc_sp_mode_t gc_sp_mode;
+
 } hoja_settings_s;
 
 extern hoja_settings_s global_loaded_settings;
@@ -64,7 +60,8 @@ void settings_reset_to_default();
 void settings_set_centers(int lx, int ly, int rx, int ry);
 void settings_set_distances(float *l_angle_distances, float *r_angle_distances);
 void settings_set_angles(float *l_angles, float *r_angles);
-void settings_set_mode(uint8_t comms_mode, uint8_t usb_mode);
+void settings_set_mode(input_mode_t mode);
+void settings_set_gc_sp(gc_sp_mode_t sp_mode);
 void settings_set_snapback(uint8_t axis, uint8_t level);
 
 #endif

@@ -9,7 +9,7 @@
 #include "hoja_usb.h"
 #include "interval.h"
 
-usb_mode_t _usb_mode    = INPUT_MODE_XINPUT;
+input_mode_t _usb_mode    = INPUT_MODE_XINPUT;
 bool _usb_clear = false;
 
 // Default 8ms (8000us)

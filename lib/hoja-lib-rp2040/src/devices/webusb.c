@@ -28,8 +28,8 @@ void webusb_command_processor(uint8_t *data)
         case WEBUSB_CMD_FW_GET:
             {
                 _webusb_out_buffer[0] = WEBUSB_CMD_FW_GET;
-                _webusb_out_buffer[1] = (FIRMWARE_VERSION & 0xFF00)>>8;
-                _webusb_out_buffer[2] = FIRMWARE_VERSION & 0xFF;
+                _webusb_out_buffer[1] = (HOJA_FW_VERSION & 0xFF00)>>8;
+                _webusb_out_buffer[2] = HOJA_FW_VERSION & 0xFF;
                 tud_vendor_n_write(0, _webusb_out_buffer, 64);
                 tud_vendor_n_flush(0);
             }
@@ -130,6 +130,13 @@ void webusb_command_processor(uint8_t *data)
             {
                 printf("WebUSB: Got Remap GET command.\n");
                 remap_send_data_webusb(data[1]);
+            }
+            break;
+
+        case WEBUSB_CMD_GCSP_SET:
+            {
+                printf("WebUSB: Got GCSP SET command.\n");
+                remap_set_gc_sp(data[1]);
             }
             break;
 

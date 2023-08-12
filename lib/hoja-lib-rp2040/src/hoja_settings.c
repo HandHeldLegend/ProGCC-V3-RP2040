@@ -24,7 +24,7 @@ bool settings_load()
   memcpy(&global_loaded_settings, target_read, sizeof(hoja_settings_s));
 
   // Check that the version matches, otherwise reset to default and save.
-  if(global_loaded_settings.settings_version != SETTINGS_VERSION)
+  if(global_loaded_settings.settings_version != HOJA_SETTINGS_VERSION)
   {
     printf("Settings version does not match. Resetting... \n");
     settings_reset_to_default();
@@ -38,9 +38,8 @@ bool settings_load()
 void settings_reset_to_default()
 {
   const hoja_settings_s set = {
-    .settings_version = SETTINGS_VERSION,
-    .comms_mode = COMM_MODE_USB,
-    .usb_mode = PUSB_MODE_XI,
+    .settings_version = HOJA_SETTINGS_VERSION,
+    .input_mode = INPUT_MODE_SWPRO,
     .lx_center = 2048,
     .ly_center = 2048,
     .rx_center = 2048,
@@ -157,10 +156,9 @@ void settings_set_angles(float *l_angles, float *r_angles)
   memcpy(global_loaded_settings.r_angles, r_angles, sizeof(float)*8);
 }
 
-void settings_set_mode(uint8_t comms_mode, uint8_t usb_mode)
+void settings_set_mode(input_mode_t mode)
 {
-  global_loaded_settings.comms_mode   = comms_mode;
-  global_loaded_settings.usb_mode     = usb_mode;
+  global_loaded_settings.input_mode = mode;
 }
 
 void settings_set_snapback(uint8_t axis, uint8_t level)
