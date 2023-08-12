@@ -9,14 +9,6 @@ typedef struct
     buttons_unset_s disabled;
 } remap_profile_s;
 
-typedef enum
-{
-    GC_SP_MODE_NONE = 0, // No function. LT and RT are output full according to digital button.
-    GC_SP_MODE_LT   = 1, // SP buttton inputs light trigger left
-    GC_SP_MODE_RT   = 2, // SP buttton inputs light trigger right
-    GC_SP_MODE_ADC  = 3, // Controlled fully by analog, SP button is unused
-} gc_sp_mode_t;
-
 typedef struct
 {
     // We use a settings version to

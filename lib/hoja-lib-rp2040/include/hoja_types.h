@@ -94,6 +94,14 @@ typedef struct
     };
 } buttons_unset_s;
 
+typedef enum
+{
+    GC_SP_MODE_NONE = 0, // No function. LT and RT are output full according to digital button.
+    GC_SP_MODE_LT   = 1, // SP buttton inputs light trigger left
+    GC_SP_MODE_RT   = 2, // SP buttton inputs light trigger right
+    GC_SP_MODE_ADC  = 3, // Controlled fully by analog, SP button is unused
+} gc_sp_mode_t;
+
 typedef struct
 {
     union
@@ -117,26 +125,6 @@ typedef enum
     INPUT_MODE_N64,
     INPUT_MODE_SNES
 } input_mode_t;
-
-typedef enum
-{
-    COMM_MODE_USB,
-    COMM_MODE_GC,
-    COMM_MODE_N64,
-    COMM_MODE_SNES,
-    COMM_MODE_DEBUG,
-} comm_mode_t;
-
-typedef enum
-{
-    PUSB_MODE_NS,
-    PUSB_MODE_GC,
-    PUSB_MODE_XI,
-    PUSB_MODE_DI,
-    PUSB_MODE_SW,
-    PUSB_MODE_WEB,
-    PUSB_MODE_MAX,
-} usb_mode_t;
 
 typedef enum
 {

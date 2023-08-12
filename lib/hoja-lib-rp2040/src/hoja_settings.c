@@ -161,11 +161,6 @@ void settings_set_mode(input_mode_t mode)
   global_loaded_settings.input_mode = mode;
 }
 
-void settings_set_gc_sp(gc_sp_mode_t sp_mode)
-{
-  global_loaded_settings.gc_sp_mode = sp_mode;
-}
-
 void settings_set_snapback(uint8_t axis, uint8_t level)
 {
   

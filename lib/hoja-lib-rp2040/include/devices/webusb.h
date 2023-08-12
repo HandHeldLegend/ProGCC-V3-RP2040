@@ -42,6 +42,9 @@ typedef enum
   // Reset all remap to default
   WEBUSB_CMD_REMAP_DEFAULT = 0x07,
 
+  // Set gamecube Special Command function
+  WEBUSB_CMD_GCSP_SET = 0x08,
+
   WEBUSB_CMD_SAVEALL = 0xF1,
 } webusb_cmd_t;
 

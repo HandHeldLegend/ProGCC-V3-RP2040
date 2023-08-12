@@ -133,6 +133,13 @@ void webusb_command_processor(uint8_t *data)
             }
             break;
 
+        case WEBUSB_CMD_GCSP_SET:
+            {
+                printf("WebUSB: Got GCSP SET command.\n");
+                remap_set_gc_sp(data[1]);
+            }
+            break;
+
         case WEBUSB_CMD_REMAP_DEFAULT:
             {
                 printf("WebUSB: Got Remap SET default command.\n");

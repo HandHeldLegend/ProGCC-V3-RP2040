@@ -32,8 +32,8 @@ void _gamecube_send_origin()
   pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, ALIGNED_JOYBUS_8(0x80));
   pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, ALIGNED_JOYBUS_8(0x80));
 
-  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, ALIGNED_JOYBUS_8(0x1));
-  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, ALIGNED_JOYBUS_8(0x1));
+  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, ALIGNED_JOYBUS_8(0x0)); // LT
+  pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, ALIGNED_JOYBUS_8(0x0)); // RT
   pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0);
   pio_sm_put_blocking(GAMEPAD_PIO, GAMEPAD_SM, 0);
 }
@@ -192,11 +192,13 @@ void gamecube_comms_task(uint32_t timestamp, button_data_s *buttons, a_data_s *a
         case GC_SP_MODE_LT:
           outl = buttons->trigger_l ? (HOJA_ANALOG_LIGHT) : 0;
           _out_buffer.analog_trigger_l = buttons->trigger_zl ? 255 : outl;
+          _out_buffer.analog_trigger_r = buttons->trigger_zr ? 255 : 0;
           break;
 
         case GC_SP_MODE_RT:
           outr = buttons->trigger_l ? (HOJA_ANALOG_LIGHT) : 0;
           _out_buffer.analog_trigger_r = buttons->trigger_zr ? 255 : outr;
+          _out_buffer.analog_trigger_l = buttons->trigger_zl ? 255 : 0;
           break;
 
         case GC_SP_MODE_ADC:
