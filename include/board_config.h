@@ -3,7 +3,7 @@
 
 // Device stuff
 #define HOJA_DEVICE_ID  0xA001
-#define HOJA_FW_VERSION 0x0A05
+#define HOJA_FW_VERSION 0x0A06
 #define HOJA_SETTINGS_VERSION 0xA000
 
 // RGB Stuff
@@ -19,6 +19,8 @@
 // If we do not have native analog triggers
 // set this to zero
 #define HOJA_ANALOG_TRIGGERS 0
+
+// Sets the analog light trigger level for SP function
 #define HOJA_ANALOG_LIGHT 50
 
 // URL that will display to open a config tool
