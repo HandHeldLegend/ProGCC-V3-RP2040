@@ -6,6 +6,10 @@ bool rumble_on = false;
 bool ramp_up = false;
 bool ramp_down = false;
 const uint32_t _rumble_interval = 8000;
+#define RUMBLE_MAX 110
+#define HOLD_WAIT 8
+
+static bool _rumble = false;
 
 void app_rumble_task(uint32_t timestamp)
 {
@@ -13,12 +17,12 @@ void app_rumble_task(uint32_t timestamp)
 
     if(interval_run(timestamp, _rumble_interval))
     {
-        if (rumble_on)
+        if (_rumble)
         {
             lvl += 10;
-            if (lvl >= 110)
+            if (lvl >= RUMBLE_MAX)
             {
-                lvl = 110;
+                lvl = RUMBLE_MAX;
             }
             pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
             pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, lvl);
@@ -40,7 +44,7 @@ void app_rumble_task(uint32_t timestamp)
     }
 }
 
-void cb_hoja_rumble_enable(bool enable)
+void cb_hoja_rumble_enable(bool rumble)
 {
-    rumble_on = enable;
+    _rumble = rumble;
 }
