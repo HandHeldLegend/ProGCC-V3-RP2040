@@ -26,6 +26,7 @@
         "type_traits": "c",
         "n64.h": "c",
         "hoja_usb.h": "c",
-        "hoja_defines.h": "c"
+        "hoja_defines.h": "c",
+        "hoja_settings.h": "c"
     }
 }
