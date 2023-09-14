@@ -5,7 +5,7 @@
 const uint32_t _rumble_interval = 8000;
 int _rumble_intensity = 0;
 int _rumble_current = 0;
-#define RUMBLE_MAX 110
+#define RUMBLE_MAX 100
 
 static bool _rumble = false;
 static bool _declining = false;
