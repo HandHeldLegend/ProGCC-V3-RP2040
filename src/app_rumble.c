@@ -2,14 +2,13 @@
 #include "interval.h"
 #include "main.h"
 
-bool rumble_on = false;
-bool ramp_up = false;
-bool ramp_down = false;
 const uint32_t _rumble_interval = 8000;
+int _rumble_intensity = 0;
+int _rumble_current = 0;
 #define RUMBLE_MAX 110
-#define HOLD_WAIT 8
 
 static bool _rumble = false;
+static bool _declining = false;
 
 void app_rumble_task(uint32_t timestamp)
 {
@@ -17,17 +16,18 @@ void app_rumble_task(uint32_t timestamp)
 
     if(interval_run(timestamp, _rumble_interval))
     {
-        if (_rumble)
+        if ( (lvl < _rumble_intensity) && !_declining)
         {
             lvl += 10;
-            if (lvl >= RUMBLE_MAX)
+            if (lvl >= _rumble_intensity)
             {
-                lvl = RUMBLE_MAX;
+                lvl = _rumble_intensity;
+                _declining = true;
             }
             pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 0);
             pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, lvl);
         }
-        else
+        else if (_declining && (lvl > _rumble_current))
         {
             lvl -= 20;
             if (lvl <= 0)
@@ -39,12 +39,28 @@ void app_rumble_task(uint32_t timestamp)
             else
             {
                 pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, lvl);
-            } 
+            }
+            _rumble_intensity = lvl;
         }
     }
 }
 
-void cb_hoja_rumble_enable(bool rumble)
+void cb_hoja_rumble_enable(float intensity)
 {
-    _rumble = rumble;
+    if(intensity > 1.0f) intensity = 1.0f;
+    
+    float p = RUMBLE_MAX * intensity;
+    uint16_t tmp = (uint16_t) p;
+    if(tmp>_rumble_intensity)
+    {
+        _rumble_intensity = tmp;
+        _declining = false;
+    }
+
+    if(!intensity) 
+    {
+        _rumble_current = 0;
+    }
+    else _rumble_current = tmp;
+
 }

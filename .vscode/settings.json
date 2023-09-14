@@ -27,6 +27,7 @@
         "n64.h": "c",
         "hoja_usb.h": "c",
         "hoja_defines.h": "c",
-        "hoja_settings.h": "c"
+        "hoja_settings.h": "c",
+        "switch_commands.h": "c"
     }
 }
