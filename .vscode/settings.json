@@ -28,6 +28,10 @@
         "hoja_usb.h": "c",
         "hoja_defines.h": "c",
         "hoja_settings.h": "c",
-        "switch_commands.h": "c"
+        "switch_commands.h": "c",
+        "gcinput.h": "c",
+        "gc_device.h": "c",
+        "usbd_pvt.h": "c",
+        "ginput_device.h": "c"
     }
 }

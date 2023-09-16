@@ -3,7 +3,6 @@
 #include "app_imu.h"
 #include "main.h"
 
-
 button_remap_s user_map = {
     .dpad_up = MAPCODE_DUP,
     .dpad_down = MAPCODE_DDOWN,

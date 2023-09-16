@@ -5,7 +5,9 @@
 const uint32_t _rumble_interval = 8000;
 int _rumble_intensity = 0;
 int _rumble_current = 0;
+
 #define RUMBLE_MAX 100
+static uint8_t _rumble_max = RUMBLE_MAX;
 
 static bool _rumble = false;
 static bool _declining = false;
@@ -49,7 +51,7 @@ void cb_hoja_rumble_enable(float intensity)
 {
     if(intensity > 1.0f) intensity = 1.0f;
     
-    float p = RUMBLE_MAX * intensity;
+    float p = _rumble_max * intensity;
     uint16_t tmp = (uint16_t) p;
     if(tmp>_rumble_intensity)
     {
@@ -63,4 +65,12 @@ void cb_hoja_rumble_enable(float intensity)
     }
     else _rumble_current = tmp;
 
+}
+
+void cb_hoja_set_rumble_intensity(uint8_t intensity)
+{   
+    _rumble_max = intensity;
+    cb_hoja_rumble_enable(1);
+    sleep_ms(200);
+    cb_hoja_rumble_enable(0);
 }
