@@ -3,7 +3,7 @@
 
 // Device stuff
 #define HOJA_DEVICE_ID  0xA001
-#define HOJA_FW_VERSION 0x0A0D
+#define HOJA_FW_VERSION 0x0A0E
 #define HOJA_SETTINGS_VERSION 0xA000
 
 // RGB Stuff
@@ -42,7 +42,7 @@
 
 #define HOJA_CAPABILITY_RUMBLE 1
 
-#define HOJA_RGB_GROUP_RS       {0}
+#define HOJA_RGB_GROUP_RS       {0, 1, 2, 3}
 #define HOJA_RGB_GROUP_LS       {4, 5, 6, 7}
 #define HOJA_RGB_GROUP_DPAD     {8, 9, 10, 11}
 #define HOJA_RGB_GROUP_MINUS    {12}
