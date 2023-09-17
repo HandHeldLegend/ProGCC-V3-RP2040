@@ -3,7 +3,7 @@
 
 // Device stuff
 #define HOJA_DEVICE_ID  0xA001
-#define HOJA_FW_VERSION 0x0A0C
+#define HOJA_FW_VERSION 0x0A0D
 #define HOJA_SETTINGS_VERSION 0xA000
 
 // RGB Stuff
@@ -27,5 +27,31 @@
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/progcc_config"
 #define HOJA_MANUFACTURER   "HHL"
 #define HOJA_PRODUCT        "ProGCC 3"
+
+#define HOJA_CAPABILITY_ANALOG_STICK_L 1
+#define HOJA_CAPABILITY_ANALOG_STICK_R 1
+#define HOJA_CAPABILITY_ANALOG_TRIGGER_L 0
+#define HOJA_CAPABILITY_ANALOG_TRIGGER_R 0
+
+#define HOJA_CAPABILITY_BLUETOOTH 0
+#define HOJA_CAPABILITY_RGB 1
+#define HOJA_CAPABILITY_GYRO 1
+
+#define HOJA_CAPABILITY_NINTENDO_SERIAL 0
+#define HOJA_CAPABILITY_NINTENDO_JOYBUS 1
+
+#define HOJA_CAPABILITY_RUMBLE 1
+
+#define HOJA_RGB_GROUP_RS       {0}
+#define HOJA_RGB_GROUP_LS       {4, 5, 6, 7}
+#define HOJA_RGB_GROUP_DPAD     {8, 9, 10, 11}
+#define HOJA_RGB_GROUP_MINUS    {12}
+#define HOJA_RGB_GROUP_CAPTURE  {13}
+#define HOJA_RGB_GROUP_HOME     {14}
+#define HOJA_RGB_GROUP_PLUS     {15}
+#define HOJA_RGB_GROUP_Y        {16}
+#define HOJA_RGB_GROUP_X        {17}
+#define HOJA_RGB_GROUP_A        {18}
+#define HOJA_RGB_GROUP_B        {19}
 
 #endif
