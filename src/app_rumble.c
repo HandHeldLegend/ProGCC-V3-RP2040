@@ -71,6 +71,6 @@ void cb_hoja_set_rumble_intensity(uint8_t intensity)
 {   
     _rumble_max = intensity;
     cb_hoja_rumble_enable(1);
-    sleep_ms(200);
+    sleep_ms(350);
     cb_hoja_rumble_enable(0);
 }
