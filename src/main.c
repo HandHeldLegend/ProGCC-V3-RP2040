@@ -101,37 +101,12 @@ void cb_hoja_hardware_setup()
     app_imu_init();
 }
 
-bool set = false;
-bool unset = true;
-
 void cb_hoja_read_buttons(button_data_s *data)
 {
     // Keypad version
     gpio_put(PGPIO_SCAN_A, false);
     sleep_us(5);
     data->button_a  = !gpio_get(PGPIO_PUSH_C);
-
-    /* DEBUG LATENCY TEST
-    if (data->button_a && !set)
-    {
-        rgb_set_group(RGB_GROUP_A, COLOR_RED.color);
-        rgb_set_instant();
-        set = true;
-        unset = true;
-    }
-    else if (!data->button_a && set)
-    {
-        set = false;
-    }
-
-    if (!data->button_a && unset)
-    {
-        unset = false;
-        rgb_set_group(RGB_GROUP_A, 0x00);
-        rgb_set_instant();
-    }
-    // DEBUG LATENCY TEST */
-
     data->button_b  = !gpio_get(PGPIO_PUSH_D);
     data->button_x  = !gpio_get(PGPIO_PUSH_A);
     data->button_y  = !gpio_get(PGPIO_PUSH_B);
@@ -152,16 +127,6 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->button_capture    = !gpio_get(PGPIO_PUSH_D);
     data->button_minus      = !gpio_get(PGPIO_PUSH_C);
     gpio_put(PGPIO_SCAN_C, true);
-
-    /*
-    if (data->button_capture)
-    {
-        reset_usb_boot(0, 0);
-    }
-    if (data->button_home)
-    {
-        watchdog_reboot(0, 0, 0);
-    }*/
 
     gpio_put(PGPIO_SCAN_D, false);
     sleep_us(5);
