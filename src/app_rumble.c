@@ -43,7 +43,6 @@ void app_rumble_task(uint32_t timestamp)
         
         pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, (!_rumble_current) ? 255 : 0);
         pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, (_rumble_current > 0) ? _rumble_current : 0);
-
     }
 }
 
@@ -62,15 +61,18 @@ void cb_hoja_rumble_enable(float intensity)
 
 }
 
-void cb_hoja_set_rumble_intensity(uint8_t intensity)
+void cb_hoja_set_rumble_intensity(uint8_t floor, uint8_t intensity)
 {   
+    floor       = (floor > 50)      ? 50 : floor;
+    intensity   = (intensity > 50)  ? 50 : intensity;
+
     if(!intensity)
     {
         _rumble_max = 0;
     }
     else
     {
-        _rumble_max = 50 + (intensity/2);
+        _rumble_max = floor + intensity;
     }
     
     cb_hoja_rumble_enable(1);
