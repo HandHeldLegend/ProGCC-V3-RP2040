@@ -3,7 +3,7 @@
 
 // Device stuff
 #define HOJA_DEVICE_ID  0xA001
-#define HOJA_FW_VERSION 0x0A16
+#define HOJA_FW_VERSION 0x0A17
 #define HOJA_SETTINGS_VERSION 0xA000
 
 // RGB Stuff
@@ -16,15 +16,8 @@
 #define HOJA_CLOCK_PIN 8
 #define HOJA_LATCH_PIN 9
 
-// If we do not have native analog triggers
-// set this to zero
-#define HOJA_ANALOG_TRIGGERS 0
-
-// Sets the analog light trigger level for SP function
-#define HOJA_ANALOG_LIGHT 50
-
 // URL that will display to open a config tool
-#define HOJA_WEBUSB_URL     "handheldlegend.github.io/progcc_config"
+#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja_config"
 #define HOJA_MANUFACTURER   "HHL"
 #define HOJA_PRODUCT        "ProGCC 3"
 
@@ -34,10 +27,11 @@
 #define HOJA_CAPABILITY_ANALOG_TRIGGER_R 0
 
 #define HOJA_CAPABILITY_BLUETOOTH 0
+#define HOJA_CAPABILITY_BATTERY 0
 #define HOJA_CAPABILITY_RGB 1
 #define HOJA_CAPABILITY_GYRO 1
 
-#define HOJA_CAPABILITY_NINTENDO_SERIAL 0
+#define HOJA_CAPABILITY_NINTENDO_SERIAL 1
 #define HOJA_CAPABILITY_NINTENDO_JOYBUS 1
 
 #define HOJA_CAPABILITY_RUMBLE 1

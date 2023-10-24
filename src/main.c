@@ -203,5 +203,7 @@ int main()
         reset_usb_boot(0, 0);
     }
 
-    hoja_init();
+    hoja_config_t config = {.input_method = INPUT_METHOD_USB, .input_mode = INPUT_MODE_LOAD};
+
+    hoja_init(&config);
 }
