@@ -9,6 +9,7 @@ int _rumble_cap = 0;
 
 int _rumble_floor = 0;
 
+int _rumble_min = 0;
 int _rumble_current = 0;
 
 #define RUMBLE_MAX 100
@@ -33,9 +34,9 @@ void app_rumble_task(uint32_t timestamp)
         {
             _rumble_current -= 10;
             
-            if (_rumble_current <= _rumble_floor)
+            if (_rumble_current <= _rumble_min)
             {
-                _rumble_current = _rumble_floor; 
+                _rumble_current = _rumble_min; 
             }
 
             _rumble_cap = _rumble_current;
@@ -50,29 +51,41 @@ void cb_hoja_rumble_enable(float intensity)
 {
     if(intensity > 1.0f) intensity = 1.0f;
 
-    float p = _rumble_max * intensity;
+    float p = (_rumble_max * intensity);
     uint16_t tmp = (uint16_t) p;
 
-    _rumble_floor = tmp;
+
+    if(intensity > 0)
+    {
+        tmp += _rumble_floor;
+    }
+
+    _rumble_min = tmp;
+
     if(tmp>_rumble_cap)
     {
         _rumble_cap = tmp;
     }
-
 }
 
 void cb_hoja_set_rumble_intensity(uint8_t floor, uint8_t intensity)
 {   
     floor       = (floor > 50)      ? 50 : floor;
+    
+    // Add 25 as a test
+    if(floor>0) floor+=25;
+
     intensity   = (intensity > 50)  ? 50 : intensity;
 
     if(!intensity)
     {
+        _rumble_floor = 0;
         _rumble_max = 0;
     }
     else
     {
-        _rumble_max = floor + intensity;
+        _rumble_floor = floor;
+        _rumble_max = intensity;
     }
     
     cb_hoja_rumble_enable(1);

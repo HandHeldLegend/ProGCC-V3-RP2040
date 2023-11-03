@@ -69,8 +69,6 @@ void cb_hoja_hardware_setup()
     pwm_set_gpio_level(PGPIO_RUMBLE_BRAKE, 255);
     pwm_set_gpio_level(PGPIO_RUMBLE_MAIN, 0);
 
-    sleep_us(150); // Stabilize voltages
-
     // initialize SPI at 1 MHz
     // initialize SPI at 3 MHz just to test
     spi_init(spi0, 3000 * 1000);
@@ -192,7 +190,6 @@ void cb_hoja_task_1_hook(uint32_t timestamp)
 int main()
 {
     stdio_init_all();
-    sleep_ms(100);
 
     printf("ProGCC Started.\n");
 
