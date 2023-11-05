@@ -70,10 +70,7 @@ void cb_hoja_rumble_enable(float intensity)
 
 void cb_hoja_set_rumble_intensity(uint8_t floor, uint8_t intensity)
 {   
-    floor       = (floor > 50)      ? 50 : floor;
-    
-    // Add 25 as a test
-    if(floor>0) floor+=25;
+    floor       = (floor > 75)      ? 75 : floor;
 
     intensity   = (intensity > 50)  ? 50 : intensity;
 
