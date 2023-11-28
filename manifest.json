@@ -1,4 +1,4 @@
 {
-    "changelog": "11.10.2023<br>- Fix safe mode macro.",
-    "fw_version": 2595
+    "changelog": "11.28.2023<br>- Fix Trigger remaps.<br>- Update analog stick output direction tracking for more accurate flicks.",
+    "fw_version": 2597
 }
