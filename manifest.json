@@ -1,4 +1,4 @@
 {
-    "changelog": "11.28.2023<br>- Fix Trigger remaps.<br>- Update analog stick output direction tracking for more accurate flicks.",
-    "fw_version": 2597
+    "changelog": "12.5.2023<br>-THIS UPDATE WILL WIPE ALL SETTINGS.<br>- Add sub-notch adjustments. <br>- Pause analog output during config use.",
+    "fw_version": 2598
 }
