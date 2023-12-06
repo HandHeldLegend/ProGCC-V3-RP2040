@@ -1,4 +1,4 @@
 {
-    "changelog": "12.5.2023r1<br>-THIS UPDATE WILL WIPE ALL SETTINGS.<br>- Add sub-notch adjustments. <br>- Pause analog output during config use. <br>- Add cardinal fine-tuning advanced option. <br>- Reset sub-cardinal setting when re-calibrating.",
-    "fw_version": 2600
+    "changelog": "12.5.2023r2<br>-THIS UPDATE WILL WIPE ALL SETTINGS.<br>- Add sub-notch adjustments. <br>- Pause analog output during config use. <br>- Add cardinal fine-tuning advanced option. <br>- Reset sub-cardinal setting when re-calibrating. <br>- Fix sub-notch setting to zero.",
+    "fw_version": 2601
 }
