@@ -1,4 +1,4 @@
 {
-    "changelog": "12.5.2023r2<br>-THIS UPDATE WILL WIPE ALL SETTINGS.<br>- Add sub-notch adjustments. <br>- Pause analog output during config use. <br>- Add cardinal fine-tuning advanced option. <br>- Reset sub-cardinal setting when re-calibrating. <br>- Fix sub-notch setting to zero.",
+    "changelog": "12.12.2023<br>- Adds HW test feature for troubleshooting and board verification.",
     "fw_version": 2601
 }
