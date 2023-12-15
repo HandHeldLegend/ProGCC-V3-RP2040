@@ -77,6 +77,9 @@ void cb_hoja_read_imu(imu_data_s *data_a, imu_data_s *data_b)
     data_b->ax = _app_imu_concat_16(i[6], i[7]);
     data_b->ay = -_app_imu_concat_16(i[8], i[9]);
     data_b->az = _app_imu_concat_16(i[10], i[11]);
+
+    data_a->retrieved = true;
+    data_b->retrieved = true;
 }
 
 void app_imu_init()
