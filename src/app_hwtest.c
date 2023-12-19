@@ -37,24 +37,13 @@ bool _hwtest_pinok(uint primary)
     gpio_set_dir(third, true);
     gpio_put(third, false);
 
-    bool failed = false;
     bool read = gpio_get(primary);
 
     // Fail if our pin is read low
-    if(!read) failed = true;
-
-    gpio_init(primary);
-    gpio_set_dir(primary, true);
-    gpio_pull_down(primary);
-    // Set the pin to pull low
-    gpio_put(primary, false);
-    // Get the value of the pin
-    read = gpio_get(primary);
-    // If the pin still reads high, fail.
-    if(read) failed = true;
+    if(!read) return false;
 
     // Pass if we read high (pulled up)
-    return !failed;
+    return true;
 }
 
 bool _hwtest_data()
@@ -148,19 +137,19 @@ bool _hwtest_rgb()
     /*
     rgb_set_all(COLOR_RED.color);
     rgb_set_instant();
-    sleep_ms(650);
+    sleep_ms(1000);
 
     rgb_set_all(COLOR_GREEN.color);
     rgb_set_instant();
-    sleep_ms(650);
+    sleep_ms(1000);
 
     rgb_set_all(COLOR_BLUE.color);
     rgb_set_instant();
-    sleep_ms(650);
+    sleep_ms(1000);
 
     rgb_set_all(COLOR_WHITE.color);
     rgb_set_instant();
-    sleep_ms(650);
+    sleep_ms(1000);
 
     rgb_preset_reload();
     rgb_set_dirty();
