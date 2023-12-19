@@ -1,4 +1,4 @@
 {
-    "changelog": "12.15.2023<br>- Update gyro enable function to turn on for Steam.<br>- Update HW Test methodology for GPIO.",
+    "changelog": "12.19.2023<br>- Add RGB animation features and new boot colors.",
     "fw_version": 2605
 }

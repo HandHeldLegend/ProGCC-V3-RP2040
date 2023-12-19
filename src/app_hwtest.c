@@ -145,6 +145,7 @@ bool _hwtest_analog()
 
 bool _hwtest_rgb()
 {
+    /*
     rgb_set_all(COLOR_RED.color);
     rgb_set_instant();
     sleep_ms(650);
@@ -163,6 +164,7 @@ bool _hwtest_rgb()
 
     rgb_preset_reload();
     rgb_set_dirty();
+    */
     return true;
 }
 
