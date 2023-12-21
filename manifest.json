@@ -1,4 +1,4 @@
 {
-    "changelog": "12.19.2023<br>- Add new RGB modes and boot animation.",
-    "fw_version": 2606
+    "changelog": "12.20.2023<br>- Resolve stop bit timing for adapter compatibility.<br>- Add new RGB modes and boot animation.",
+    "fw_version": 2607
 }
