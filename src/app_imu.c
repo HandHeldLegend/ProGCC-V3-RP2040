@@ -4,7 +4,7 @@
 
 // LSM6DSR REGISTERS
 #define FUNC_CFG_ACCESS 0x01
-#define CTRL1_XL        0x10
+#define CTRL1_XL        0x10  // Accelerometer Activation Register - Write 0x60 to enable 416hz
 #define CTRL2_G         0x11  // Gyro Activation Register - Write 0x60 to enable 416hz
 #define CTRL3_C         0x12  // Used to set BDU
 #define CTRL4_C         0x13
@@ -14,8 +14,31 @@
 #define CTRL10_C        0x19
 
 #define FUNC_MASK   (0b10000000) // Enable FUNC CFG access
-#define CTRL1_MASK  (0b10101110) // 1.66kHz, 8G, output first stage filtering
-#define CTRL2_MASK  (0b01011100) // 208Hz, 2000dps
+
+// 1010 00 00 6.66KHz, 2g
+#define XL_2G_6KHZ  (0b10100000)
+
+// 1010 01 00 6.66KHz, 16g
+#define XL_16G_6KHZ (0b10100100)
+
+// 1010 10 00 6.66KHz, 4g
+#define XL_4G_6KHZ  (0b10101000)
+
+// 1010 11 00 6.66KHz, 8g
+#define XL_8G_6KHZ  (0b10101100)
+
+// 1010 11 00 6.66KHz, 2000dps
+#define G_2000DPS_6KHZ  (0b10101100)
+
+// 1010 10 00 6.66KHz, 1000dps
+#define G_1000DPS_6KHZ  (0b10101000)
+
+// 1011 01 00 6.66KHz, 500dps
+#define G_500DPS_6KHZ   (0b10100100)
+
+
+#define CTRL1_MASK  (XL_4G_6KHZ) 
+#define CTRL2_MASK  (G_2000DPS_6KHZ)
 #define CTRL3_MASK  (0b00000100) // BDU enabled and Interrupt out active low
 #define CTRL4_MASK  (0b00000100) // I2C disable (Check later for LPF for gyro)
 #define CTRL6_MASK  (0b00000000) // 12.2 LPF gyro
