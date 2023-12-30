@@ -27,6 +27,11 @@
 // 4G
 #define XL_SENS_4G  (0b00001000)
 
+// 8G
+#define XL_SENS_8G  (0b00001100)
+
+// 4000dps
+#define G_SENS_4000DPS  (0b00000001)
 
 // 2000dps
 #define G_SENS_2000DPS  (0b00001100)
@@ -38,8 +43,8 @@
 #define G_SENS_500DPS   (0b00000100)
 
 
-#define CTRL1_MASK  (XL_SENS_4G | PERF_416HZ) 
-#define CTRL2_MASK  (G_SENS_1000DPS | PERF_416HZ)
+#define CTRL1_MASK  (XL_SENS_8G | PERF_416HZ) 
+#define CTRL2_MASK  (G_SENS_4000DPS | PERF_416HZ)
 #define CTRL3_MASK  (0b00000100) // BDU enabled and Interrupt out active low
 #define CTRL4_MASK  (0b00000100) // I2C disable (Check later for LPF for gyro)
 #define CTRL6_MASK  (0b00000000) // 12.2 LPF gyro
