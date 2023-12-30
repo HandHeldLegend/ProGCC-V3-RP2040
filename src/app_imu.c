@@ -87,8 +87,8 @@ void cb_hoja_read_imu(imu_data_s *data_a, imu_data_s *data_b)
     gpio_put(PGPIO_IMU0_CS, true);
 
     data_a->gx = -_app_imu_concat_16(i[0], i[1]);
-    data_a->gy = _app_imu_concat_16(i[2], i[3]);
-    data_a->gz = _app_imu_concat_16(i[4], i[5]);
+    data_a->gy = _app_imu_concat_16(i[2], i[3])*2;
+    data_a->gz = _app_imu_concat_16(i[4], i[5])*2;
 
     data_a->ax = -_app_imu_concat_16(i[6], i[7]);
     data_a->ay = _app_imu_concat_16(i[8], i[9]);
@@ -100,8 +100,8 @@ void cb_hoja_read_imu(imu_data_s *data_a, imu_data_s *data_b)
     gpio_put(PGPIO_IMU1_CS, true);
 
     data_b->gx = _app_imu_concat_16(i[0], i[1]);
-    data_b->gy = -_app_imu_concat_16(i[2], i[3]);
-    data_b->gz = _app_imu_concat_16(i[4], i[5]);
+    data_b->gy = -_app_imu_concat_16(i[2], i[3])*2;
+    data_b->gz = _app_imu_concat_16(i[4], i[5])*2;
 
     data_b->ax = _app_imu_concat_16(i[6], i[7]);
     data_b->ay = -_app_imu_concat_16(i[8], i[9]);
