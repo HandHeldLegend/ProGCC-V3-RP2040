@@ -15,30 +15,31 @@
 
 #define FUNC_MASK   (0b10000000) // Enable FUNC CFG access
 
-// 1010 00 00 6.66KHz, 2g
-#define XL_2G_6KHZ  (0b10100000)
+#define PERF_6KHZ   (0b10100000) // 6.66KHz
+#define PERF_416HZ  (0b01100000) // 416Hz
 
-// 1010 01 00 6.66KHz, 16g
-#define XL_16G_6KHZ (0b10100100)
+// 2G
+#define XL_SENS_2G  (0b00000000)
 
-// 1010 10 00 6.66KHz, 4g
-#define XL_4G_6KHZ  (0b10101000)
+// 16G
+#define XL_SENS_16G (0b00001000)
 
-// 1010 11 00 6.66KHz, 8g
-#define XL_8G_6KHZ  (0b10101100)
-
-// 1010 11 00 6.66KHz, 2000dps
-#define G_2000DPS_6KHZ  (0b10101100)
-
-// 1010 10 00 6.66KHz, 1000dps
-#define G_1000DPS_6KHZ  (0b10101000)
-
-// 1011 01 00 6.66KHz, 500dps
-#define G_500DPS_6KHZ   (0b10100100)
+// 4G
+#define XL_SENS_4G  (0b00001000)
 
 
-#define CTRL1_MASK  (XL_4G_6KHZ) 
-#define CTRL2_MASK  (G_2000DPS_6KHZ)
+// 2000dps
+#define G_SENS_2000DPS  (0b00001100)
+
+// 1000dps
+#define G_SENS_1000DPS  (0b00001000)
+
+// 500dps
+#define G_SENS_500DPS   (0b00000100)
+
+
+#define CTRL1_MASK  (XL_SENS_4G | PERF_416HZ) 
+#define CTRL2_MASK  (G_SENS_1000DPS | PERF_416HZ)
 #define CTRL3_MASK  (0b00000100) // BDU enabled and Interrupt out active low
 #define CTRL4_MASK  (0b00000100) // I2C disable (Check later for LPF for gyro)
 #define CTRL6_MASK  (0b00000000) // 12.2 LPF gyro
