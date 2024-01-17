@@ -1,4 +1,4 @@
 {
-    "changelog": "12.29.2023<br>- Adjust IMU sensitivities.",
-    "fw_version": 2611
+    "changelog": "1.17.2024<br>- Adjust IMU sensitivities.<br>- Resolve LED bug.<br>- Adjust rumble output on GC Mode.",
+    "fw_version": 2612
 }

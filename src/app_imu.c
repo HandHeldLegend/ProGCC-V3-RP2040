@@ -16,7 +16,10 @@
 #define FUNC_MASK   (0b10000000) // Enable FUNC CFG access
 
 #define PERF_6KHZ   (0b10100000) // 6.66KHz
+#define PERF_1KHZ   (0b10000000) // 1.66KHz
 #define PERF_416HZ  (0b01100000) // 416Hz
+
+#define XL_LOWPASS (0b00000001)
 
 // 2G
 #define XL_SENS_2G  (0b00000000)
@@ -43,11 +46,12 @@
 #define G_SENS_500DPS   (0b00000100)
 
 
-#define CTRL1_MASK  (XL_SENS_8G | PERF_416HZ) 
-#define CTRL2_MASK  (G_SENS_4000DPS | PERF_416HZ)
+#define CTRL1_MASK  (XL_SENS_8G | PERF_1KHZ) 
+#define CTRL2_MASK  (G_SENS_2000DPS | PERF_1KHZ)
 #define CTRL3_MASK  (0b00000100) // BDU enabled and Interrupt out active low
 #define CTRL4_MASK  (0b00000100) // I2C disable (Check later for LPF for gyro)
-#define CTRL6_MASK  (0b00000000) // 12.2 LPF gyro
+#define CTRL4_LPF1_SEL_G (0b00000010)
+#define CTRL6_MASK  (0b00000110) // 12.2 LPF gyro
 #define CTRL8_MASK  (0b11100000) //H P_SLOPE_XL_EN
 #define CTRL9_MASK  (0x38)
 #define CTRL10_MASK (0x38 | 0x4)
@@ -87,8 +91,8 @@ void cb_hoja_read_imu(imu_data_s *data_a, imu_data_s *data_b)
     gpio_put(PGPIO_IMU0_CS, true);
 
     data_a->gx = -_app_imu_concat_16(i[0], i[1]);
-    data_a->gy = _app_imu_concat_16(i[2], i[3])*2;
-    data_a->gz = _app_imu_concat_16(i[4], i[5])*2;
+    data_a->gy = _app_imu_concat_16(i[2], i[3]);
+    data_a->gz = _app_imu_concat_16(i[4], i[5]);
 
     data_a->ax = -_app_imu_concat_16(i[6], i[7]);
     data_a->ay = _app_imu_concat_16(i[8], i[9]);
@@ -100,8 +104,8 @@ void cb_hoja_read_imu(imu_data_s *data_a, imu_data_s *data_b)
     gpio_put(PGPIO_IMU1_CS, true);
 
     data_b->gx = _app_imu_concat_16(i[0], i[1]);
-    data_b->gy = -_app_imu_concat_16(i[2], i[3])*2;
-    data_b->gz = _app_imu_concat_16(i[4], i[5])*2;
+    data_b->gy = -_app_imu_concat_16(i[2], i[3]);
+    data_b->gz = _app_imu_concat_16(i[4], i[5]);
 
     data_b->ax = _app_imu_concat_16(i[6], i[7]);
     data_b->ay = -_app_imu_concat_16(i[8], i[9]);
@@ -116,7 +120,7 @@ void app_imu_init()
   _app_imu_write_register(CTRL1_XL, CTRL1_MASK);
   _app_imu_write_register(CTRL2_G, CTRL2_MASK);
   _app_imu_write_register(CTRL3_C, CTRL3_MASK);
-  _app_imu_write_register(CTRL4_C, CTRL4_MASK);
+  _app_imu_write_register(CTRL4_C, CTRL4_MASK | CTRL4_LPF1_SEL_G);
   _app_imu_write_register(CTRL6_C, CTRL6_MASK);
   _app_imu_write_register(CTRL8_XL, CTRL8_MASK);
 }
