@@ -1,4 +1,4 @@
 {
-    "changelog": "1.17.2024<br>- Adjust IMU sensitivities.<br>- Resolve LED bug.<br>- Adjust rumble output on GC Mode.",
-    "fw_version": 2612
+    "changelog": "1.28.2024<br>- Resolve RGB issue for indicator flashes.<br>- Adjust USB poll timings for consistency.<br>- Disable Dpad in safe mode.",
+    "fw_version": 2613
 }

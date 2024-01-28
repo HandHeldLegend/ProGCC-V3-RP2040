@@ -18,7 +18,7 @@ include_directories(
 
 add_executable(${PROJECT_NAME}
 	src/main.c
-	src/app_rumble.c 
+	src/app_rumble_cell.c 
 	src/app_imu.c
 	src/app_hwtest.c
 )

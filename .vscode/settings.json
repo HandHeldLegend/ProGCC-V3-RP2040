@@ -33,6 +33,8 @@
         "gc_device.h": "c",
         "usbd_pvt.h": "c",
         "ginput_device.h": "c",
-        "stick_scaling.h": "c"
+        "stick_scaling.h": "c",
+        "main.h": "c",
+        "swpro.h": "c"
     }
 }
