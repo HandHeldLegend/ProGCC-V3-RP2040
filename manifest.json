@@ -1,4 +1,4 @@
 {
     "changelog": "2.8.2024<br>- Improve snapback filter delay time<br>- Snapback filter is smoother after implementing new deadzone.",
-    "fw_version": 2613
+    "fw_version": 2614
 }
