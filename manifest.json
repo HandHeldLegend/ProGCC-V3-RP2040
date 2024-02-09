@@ -1,4 +1,4 @@
 {
-    "changelog": "1.28.2024<br>- Resolve RGB issue for indicator flashes.<br>- Adjust USB poll timings for consistency.<br>- Disable Dpad in safe mode.",
+    "changelog": "2.8.2024<br>- Improve snapback filter delay time<br>- Snapback filter is smoother after implementing new deadzone.",
     "fw_version": 2613
 }
