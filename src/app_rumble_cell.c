@@ -54,6 +54,9 @@ void app_rumble_task(uint32_t timestamp)
 
 void cb_hoja_rumble_set(rumble_data_s *data)
 {
+    if(!_rumble_floor)
+    return;
+    
     float amp1 = (data->amplitude_high > data->amplitude_low) ? data->amplitude_high : data->amplitude_low;
 
     if(amp1 > 1.0f) amp1 = 1.0f;
