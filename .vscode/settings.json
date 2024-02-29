@@ -35,6 +35,7 @@
         "ginput_device.h": "c",
         "stick_scaling.h": "c",
         "main.h": "c",
-        "swpro.h": "c"
+        "swpro.h": "c",
+        "hoja_types.h": "c"
     }
 }

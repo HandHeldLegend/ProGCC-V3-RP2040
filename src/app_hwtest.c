@@ -250,11 +250,7 @@ uint16_t cb_hoja_hardware_test()
     _t.latch_pin = _hwtest_latch();
     _t.rgb_pin = _hwtest_rgb();
     _t.imu = _hwtest_imu();
-    cb_hoja_rumble_set(100, 1);
-
-    sleep_ms(500);
-
-    cb_hoja_rumble_set(0, 0);
+    cb_hoja_rumble_test();
     _t.rumble = true;
 
     return _t.val;
