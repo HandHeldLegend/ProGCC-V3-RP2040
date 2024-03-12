@@ -1,4 +1,4 @@
 {
-    "changelog": "2.28.2024r1<br>- Improve snapback filter (Thanks kensen and co for the feedback and suggestions)<br>- New options to adjust deadzones.<br>- Adjust default mode from app.",
-    "fw_version": 2618
+    "changelog": "3.11.2024<br>- Patch outer deadzone to apply post-snapback.",
+    "fw_version": 2619
 }
