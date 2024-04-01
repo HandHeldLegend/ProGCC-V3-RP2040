@@ -1,4 +1,4 @@
 {
-    "changelog": "3.11.2024<br>- Patch outer deadzone to apply post-snapback.",
-    "fw_version": 2619
+    "changelog": "4.1.2024<br>- Patch GC mode rumble to not apply during brake.",
+    "fw_version": 2620
 }
