@@ -1,4 +1,4 @@
 {
-    "changelog": "4.1.2024<br>- Patch GC mode rumble to not apply during brake.",
-    "fw_version": 2620
+    "changelog": "4.7.2024<br>- Patch Snapback velocity detection.",
+    "fw_version": 2621
 }
