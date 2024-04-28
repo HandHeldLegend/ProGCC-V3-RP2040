@@ -1,4 +1,4 @@
 {
-    "changelog": "4.12.2024<br>- Patch Snapback velocity detection (again).",
-    "fw_version": 2622
+    "changelog": "4.28.2024<br>- Increase Snapback Release Window.<br>-Implement FramePerfect for Switch Mode.",
+    "fw_version": 2623
 }

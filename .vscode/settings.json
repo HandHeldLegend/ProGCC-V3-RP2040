@@ -36,6 +36,8 @@
         "stick_scaling.h": "c",
         "main.h": "c",
         "swpro.h": "c",
-        "hoja_types.h": "c"
+        "hoja_types.h": "c",
+        "interval.h": "c",
+        "switch_analog.h": "c"
     }
 }
