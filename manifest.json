@@ -1,4 +1,4 @@
 {
-    "changelog": "4.28.2024<br>- Increase Snapback Release Window.<br>-Implement FramePerfect for Switch Mode.",
-    "fw_version": 2623
+    "changelog": "5.1.2024<br>- Gyro Mode 0x02 Implemented<br>-Fix rumble edgecase (rumble wouldn't stop)",
+    "fw_version": 2624
 }
