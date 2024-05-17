@@ -1,4 +1,4 @@
 {
-    "changelog": "5.1.2024<br>- Gyro Mode 0x02 Implemented<br>-Fix rumble edgecase (rumble wouldn't stop)",
-    "fw_version": 2624
+    "changelog": "5.16.2024<br>-Fix N64 Pak Reading response",
+    "fw_version": 2625
 }
