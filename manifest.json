@@ -1,4 +1,4 @@
 {
-    "changelog": "5.16.2024<br>-Fix N64 Pak Reading response",
-    "fw_version": 2625
+    "changelog": "5.31.2024<br>-Fix XInput analog scaling",
+    "fw_version": 2626
 }
