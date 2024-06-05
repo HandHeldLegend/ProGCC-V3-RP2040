@@ -4,7 +4,7 @@
 // Device stuff
 #define HOJA_DEVICE_ID  0xA001 // DO NOT CHANGE FOR PROGCC 3
 
-#define HOJA_FW_VERSION 0x0A42
+#define HOJA_FW_VERSION 0x0A43
 
 // RGB Stuff
 #define HOJA_RGB_PIN 15
