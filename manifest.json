@@ -1,4 +1,4 @@
 {
-    "changelog": "7.11.2024<br>-Update Gyro Sensitivy",
-    "fw_version": 2628
+    "changelog": "7.14.2024<br>-Update Gyro Sensitivy<br>-Fix GC Mode Rumble",
+    "fw_version": 2629
 }
