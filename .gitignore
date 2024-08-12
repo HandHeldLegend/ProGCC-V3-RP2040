@@ -1,3 +1,4 @@
 
 build/*
+!build/PROGCC_RP2040.bin
 !build/PROGCC_RP2040.uf2
