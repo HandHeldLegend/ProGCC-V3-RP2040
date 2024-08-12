@@ -38,6 +38,7 @@
         "swpro.h": "c",
         "hoja_types.h": "c",
         "interval.h": "c",
-        "switch_analog.h": "c"
+        "switch_analog.h": "c",
+        "triggers.h": "c"
     }
 }
