@@ -4,11 +4,11 @@
 // Device stuff
 #define HOJA_DEVICE_ID  0xA001 // DO NOT CHANGE FOR PROGCC 3
 
-#define HOJA_FW_VERSION 0x0A47
+#define HOJA_FW_VERSION 0x0A48
 
 // RGB Stuff
 #define HOJA_RGB_PIN 15
-#define HOJA_RGB_COUNT 20
+#define HOJA_RGB_COUNT 24
 #define HOJA_RGBW_EN 0
 
 // GPIO definitions
@@ -48,11 +48,11 @@
 #define HOJA_RGB_GROUP_X        {17}
 #define HOJA_RGB_GROUP_A        {18}
 #define HOJA_RGB_GROUP_B        {19}
+#define HOJA_RGB_GROUP_PLAYER   {-1}
 
-#define HOJA_RGB_GROUP_L {-1}
-#define HOJA_RGB_GROUP_ZL {-1}
-#define HOJA_RGB_GROUP_R {-1}
-#define HOJA_RGB_GROUP_ZR {-1}
-#define HOJA_RGB_GROUP_PLAYER {-1}
+#define HOJA_RGB_GROUP_L        {20}
+#define HOJA_RGB_GROUP_ZL       {21}
+#define HOJA_RGB_GROUP_R        {22}
+#define HOJA_RGB_GROUP_ZR       {23}
 
 #endif
